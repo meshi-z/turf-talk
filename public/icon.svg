@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="turfGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#008a47" />
+      <stop offset="65%" stop-color="#34a835" />
+      <stop offset="100%" stop-color="#76c429" />
+    </linearGradient>
+  </defs>
+
+  <!-- Full Bleed Background -->
+  <rect width="512" height="512" fill="url(#turfGrad)" />
+
+  <!-- Horse Silhouette (Vector Strokes) -->
+  <g fill="none" stroke="#ffffff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Mane / Back Arch -->
+    <path d="M 235 75 Q 355 105 415 185 Q 448 230 450 275" />
+    
+    <!-- Ear -->
+    <path d="M 225 118 L 225 45 L 290 102" />
+    
+    <!-- Forehead to Muzzle -->
+    <path d="M 225 118 L 175 145 L 68 268 L 92 312 L 132 332 L 195 285 Q 240 280 270 242 Q 298 215 298 185" />
+    
+    <!-- Neck Diagonal Line -->
+    <line x1="228" y1="290" x2="165" y2="450" />
+  </g>
+
+  <!-- Speech Bubble (Solid White) -->
+  <g fill="#ffffff">
+    <!-- Bubble Body -->
+    <rect x="270" y="300" width="180" height="148" rx="36" />
+    <!-- Bubble Tail -->
+    <path d="M 305 440 L 305 482 L 342 440 Z" />
+  </g>
+
+  <!-- Letter 'A' (Turf Gradient Cutout) -->
+  <text x="360" y="408" 
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+        font-weight="900" 
+        font-size="108" 
+        fill="url(#turfGrad)" 
+        text-anchor="middle">A</text>
+</svg>
