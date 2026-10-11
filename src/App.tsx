@@ -1,122 +1,103 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { Header } from './components/Header';
+import { HomeScreen } from './components/HomeScreen';
+import { QuizScreen } from './components/QuizScreen';
+import { ResultScreen } from './components/ResultScreen';
+import { useTrainingProgress } from './hooks/useTrainingProgress';
+import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 
-function App() {
-  const [count, setCount] = useState(0)
+type Screen = 'home' | 'quiz' | 'result';
+
+export function App() {
+  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const { progress, markTrainingCompleted, resetProgressForDemo } = useTrainingProgress();
+
+  // 今日の調教セッション用（初期サンプルから3問抽出）
+  const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => INITIAL_PHRASES.slice(0, 3));
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [answeredHistory, setAnsweredHistory] = useState<{
+    phrase: PhraseItem;
+    selectedOptionId: string;
+    isCorrect: boolean;
+  }[]>([]);
+
+  const handleStartTraining = () => {
+    // 毎回解き直せるようにリセット（本日の3問）
+    setSessionQuestions(INITIAL_PHRASES.slice(0, 3));
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setAnsweredHistory([]);
+    setCurrentScreen('quiz');
+  };
+
+  const handleAnswerQuestion = (optionId: string, isCorrect: boolean) => {
+    const currentItem = sessionQuestions[currentQuestionIndex];
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+    }
+    setAnsweredHistory((prev) => [
+      ...prev,
+      { phrase: currentItem, selectedOptionId: optionId, isCorrect },
+    ]);
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex + 1 < sessionQuestions.length) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      // 3問終了 -> 調教完了処理
+      const finalScore = score + (answeredHistory[answeredHistory.length - 1]?.isCorrect ? 0 : 0);
+      markTrainingCompleted(finalScore);
+      setCurrentScreen('result');
+    }
+  };
+
+  const handleCancelQuiz = () => {
+    setCurrentScreen('home');
+  };
+
+  const handleGoHome = () => {
+    setCurrentScreen('home');
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-zinc-100 flex flex-col justify-start items-center text-zinc-900 selection:bg-emerald-200">
+      <div className="w-full max-w-md bg-zinc-50 min-h-screen flex flex-col border-x border-zinc-200/60 shadow-lg">
+        <Header streakDays={progress.streakDays} />
 
-      <div className="ticks"></div>
+        <main className="flex-1 flex flex-col">
+          {currentScreen === 'home' && (
+            <HomeScreen
+              progress={progress}
+              onStartTraining={handleStartTraining}
+              onResetForDemo={resetProgressForDemo}
+            />
+          )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          {currentScreen === 'quiz' && (
+            <QuizScreen
+              questions={sessionQuestions}
+              currentIndex={currentQuestionIndex}
+              onAnswer={handleAnswerQuestion}
+              onNext={handleNextQuestion}
+              onCancel={handleCancelQuiz}
+            />
+          )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+          {currentScreen === 'result' && (
+            <ResultScreen
+              score={score}
+              totalQuestions={sessionQuestions.length}
+              progress={progress}
+              answeredHistory={answeredHistory}
+              onGoHome={handleGoHome}
+            />
+          )}
+        </main>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
