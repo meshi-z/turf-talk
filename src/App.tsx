@@ -31,9 +31,14 @@ export function App() {
     debugWeekdayDays,
     setDebugWeekdayDays,
     effectiveWeekdayDays,
+    debugCarrotCount,
+    setDebugCarrotCount,
     conditionTier,
     markRaceCompleted,
   } = useTrainingProgress();
+
+  const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
+  const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);
 
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
   const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
@@ -119,6 +124,8 @@ export function App() {
     setRaceCurrentIndex(0);
     setRaceScore(0);
     setRaceAnsweredHistory([]);
+    setRaceRemainingReserves(conditionTier.hintCount);
+    setRaceCarrotReward(0);
     setCurrentScreen('race');
   };
 
@@ -137,8 +144,9 @@ export function App() {
     if (raceCurrentIndex + 1 < raceQuestions.length) {
       setRaceCurrentIndex((prev) => prev + 1);
     } else {
-      // 5問終了 -> レース完了ステータス更新 & レース結果画面へ
-      markRaceCompleted(raceScore);
+      // 5問終了 -> レース完了ステータス更新 & 余力温存にんじん獲得 & レース結果画面へ
+      const result = markRaceCompleted(raceScore, raceRemainingReserves);
+      setRaceCarrotReward(result.carrotBonus.addedCarrots);
       setCurrentScreen('race-result');
     }
   };
@@ -154,7 +162,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-zinc-100 flex flex-col justify-start items-center text-zinc-900 selection:bg-emerald-200">
       <div className="w-full max-w-md bg-zinc-50 min-h-screen flex flex-col border-x border-zinc-200/60 shadow-lg">
-        <Header streakDays={progress.streakDays} />
+        <Header streakDays={progress.streakDays} carrotCount={progress.carrotCount} />
 
         <main className="flex-1 flex flex-col">
           {currentScreen === 'home' && (
@@ -172,6 +180,8 @@ export function App() {
               debugWeekdayDays={debugWeekdayDays}
               onSetDebugWeekdayDays={setDebugWeekdayDays}
               effectiveWeekdayDays={effectiveWeekdayDays}
+              debugCarrotCount={debugCarrotCount}
+              onSetDebugCarrotCount={setDebugCarrotCount}
             />
           )}
 
@@ -203,6 +213,7 @@ export function App() {
               onAnswer={handleAnswerRaceQuestion}
               onNext={handleNextRaceQuestion}
               onCancel={handleCancelQuiz}
+              onHintsRemainingChange={setRaceRemainingReserves}
             />
           )}
 
@@ -212,6 +223,7 @@ export function App() {
               totalQuestions={raceQuestions.length}
               progress={progress}
               answeredHistory={raceAnsweredHistory}
+              addedCarrots={raceCarrotReward}
               onGoHome={handleGoHome}
               onRetryRace={handleStartRace}
             />

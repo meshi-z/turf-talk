@@ -15,6 +15,7 @@ interface RaceResultScreenProps {
     selectedOptionId: string;
     isCorrect: boolean;
   }[];
+  addedCarrots?: number;
   onGoHome: () => void;
   onRetryRace: () => void;
 }
@@ -24,6 +25,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   totalQuestions,
   progress,
   answeredHistory,
+  addedCarrots = 0,
   onGoHome,
   onRetryRace,
 }) => {
@@ -35,6 +37,9 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   // 画面マウント時にファンファーレ等のSEを再生
   useEffect(() => {
     const timer = setTimeout(() => {
+      if (addedCarrots > 0) {
+        soundManager.playCarrot();
+      }
       if (isWinner || isSecond) {
         soundManager.playFanfare();
       } else {
@@ -42,7 +47,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
       }
     }, 200);
     return () => clearTimeout(timer);
-  }, [isWinner, isSecond]);
+  }, [isWinner, isSecond, addedCarrots]);
 
   const conditionMap = {
     heavy: '太め残り ↘',
@@ -103,6 +108,31 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 余力温存ボーナスカード（にんじん獲得） */}
+      {addedCarrots > 0 && (
+        <div className="bg-linear-to-r from-orange-50 via-amber-50 to-orange-100 border-2 border-orange-300 rounded-2xl p-4 shadow-sm flex items-center gap-3 animate-in fade-in zoom-in-95 duration-300">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-300 flex items-center justify-center text-3xl shrink-0">
+            🥕
+          </div>
+          <div className="flex-1 text-left">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-800 bg-orange-200/60 px-2 py-0.5 rounded-full">
+                余力温存ボーナス！
+              </span>
+              <span className="text-xs font-black text-orange-950">
+                所持: {progress.carrotCount} / 3個
+              </span>
+            </div>
+            <h4 className="text-sm font-bold text-orange-950 mt-1">
+              にんじん 🥕 +{addedCarrots}個 を獲得！
+            </h4>
+            <p className="text-[11px] text-orange-900/80 leading-tight mt-0.5">
+              余力を残してゴールした愛馬へのご褒美！万が一の未受講日を自動補填します。
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* レース後フィードバックカード（馬体重・調子変動） */}
       <div className="bg-linear-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-2xl p-4 shadow-xs">

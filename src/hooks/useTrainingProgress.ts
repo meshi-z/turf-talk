@@ -15,9 +15,12 @@ import {
 } from '../lib/conditionBonus';
 import {
   getLogicalDateString,
-  evaluateCurrentStreak,
   calculateNextStreakOnCompletion,
 } from '../lib/logicalDate';
+import {
+  evaluateStreakWithCarrotRescue,
+  calculateCarrotsFromRemainingReserves,
+} from '../lib/carrotBonus';
 import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
@@ -33,6 +36,8 @@ const DEFAULT_PROGRESS: UserProgress = {
   lapCount: 1,
   todayPhraseIds: [],
   weekdayTrainingDays: 3, // 初期値3日（好調）
+  carrotCount: 1, // 初期所持数1個（お試し・安心設計）
+  lastCarrotUsedDate: null,
 };
 
 export function useTrainingProgress() {
@@ -44,12 +49,22 @@ export function useTrainingProgress() {
         const today = getLogicalDateString();
         const isSameDay = parsed.lastTrainingDate === today;
         const savedStreak = typeof parsed.streakDays === 'number' ? parsed.streakDays : 0;
-        const activeStreak = evaluateCurrentStreak(savedStreak, parsed.lastTrainingDate ?? null, today);
+        const savedCarrots = typeof parsed.carrotCount === 'number' ? parsed.carrotCount : 1;
+
+        // にんじんストリーク救済ロジックを実行
+        const evalResult = evaluateStreakWithCarrotRescue(
+          savedStreak,
+          parsed.lastTrainingDate ?? null,
+          today,
+          savedCarrots
+        );
 
         return {
           ...DEFAULT_PROGRESS,
           ...parsed,
-          streakDays: activeStreak,
+          streakDays: evalResult.streakDays,
+          carrotCount: evalResult.carrotCount,
+          lastCarrotUsedDate: evalResult.rescuedByCarrot ? today : parsed.lastCarrotUsedDate ?? null,
           learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
@@ -133,20 +148,27 @@ export function useTrainingProgress() {
   };
 
   /**
-   * レース完了時のステータス変動
+   * レース完了時のステータス変動および余力温存にんじんボーナス
    */
-  const markRaceCompleted = (score: number) => {
+  const markRaceCompleted = (score: number, remainingReserves: number = 0) => {
     const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
+    const carrotBonus = calculateCarrotsFromRemainingReserves(progress.carrotCount, remainingReserves);
+
     setProgress((prev) => ({
       ...prev,
       horseWeight: feedback.nextWeight,
       condition: feedback.nextCondition,
+      carrotCount: carrotBonus.nextCarrots,
     }));
-    return feedback;
+    return {
+      feedback,
+      carrotBonus,
+    };
   };
 
   const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
   const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
+  const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
 
   const resetProgressForDemo = () => {
     setProgress({
@@ -174,12 +196,16 @@ export function useTrainingProgress() {
     debugWeekdayDays !== null ? debugWeekdayDays : progress.weekdayTrainingDays;
   const conditionTier = getConditionFromDays(effectiveWeekdayDays);
 
+  const effectiveCarrots =
+    debugCarrotCount !== null ? debugCarrotCount : progress.carrotCount;
+
   return {
     progress: {
       ...progress,
       condition: conditionTier.condition,
       horseWeight: conditionTier.baseWeight,
       weekdayTrainingDays: effectiveWeekdayDays,
+      carrotCount: effectiveCarrots,
     },
     conditionTier,
     recordTodayPhrases,
@@ -197,5 +223,7 @@ export function useTrainingProgress() {
     debugWeekdayDays,
     setDebugWeekdayDays,
     effectiveWeekdayDays,
+    debugCarrotCount,
+    setDebugCarrotCount,
   };
 }

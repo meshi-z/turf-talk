@@ -29,6 +29,8 @@ interface HomeScreenProps {
   debugWeekdayDays: number | null;
   onSetDebugWeekdayDays: (days: number | null) => void;
   effectiveWeekdayDays: number;
+  debugCarrotCount?: number | null;
+  onSetDebugCarrotCount?: (count: number | null) => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -47,6 +49,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   debugWeekdayDays,
   onSetDebugWeekdayDays,
   effectiveWeekdayDays,
+  debugCarrotCount = null,
+  onSetDebugCarrotCount,
 }) => {
   const conditionLabel = {
     heavy: { text: '太め残り ↘', color: 'text-purple-700 bg-purple-50 border-purple-200' },
@@ -103,22 +107,46 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </span>
           {progress.weekdayTrainingDays >= 4 && (
             <span className="text-amber-300 font-extrabold flex items-center gap-0.5">
-              <span>⚡</span> レースヒント2回付与
+              <span>⚡</span> 愛馬の余力2回付与
             </span>
           )}
           {progress.weekdayTrainingDays === 3 && (
             <span className="text-emerald-200 font-bold flex items-center gap-0.5">
-              <span>⚡</span> レースヒント1回付与
+              <span>⚡</span> 愛馬の余力1回付与
             </span>
           )}
           {progress.weekdayTrainingDays > 0 && progress.weekdayTrainingDays < 3 && (
-            <span className="text-emerald-300/80">ヒントなし (要3日以上)</span>
+            <span className="text-emerald-300/80">余力なし (要3日以上)</span>
           )}
           {progress.weekdayTrainingDays === 0 && (
             <span className="text-purple-300 font-bold">⚠️ 太め残り注意</span>
           )}
         </div>
+
+        {/* にんじんストック状況 */}
+        <div className="mt-2 pt-2 border-t border-emerald-700/30 text-[11px] text-emerald-100 flex items-center justify-between">
+          <span className="flex items-center gap-1">
+            <span>🥕 にんじんストック:</span>
+            <strong className="text-amber-200 font-bold">{progress.carrotCount} / 3個</strong>
+          </span>
+          <span className="text-[10px] text-emerald-300">
+            {progress.carrotCount > 0 ? '未受講日を自動救済' : 'レースで余力を温存して獲得'}
+          </span>
+        </div>
       </div>
+
+      {/* にんじん救済発動バナー（直近で救済された場合） */}
+      {progress.lastCarrotUsedDate && (
+        <div className="bg-orange-50 border border-orange-200 text-orange-950 rounded-2xl p-3 shadow-xs flex items-center gap-2.5 text-xs">
+          <span className="text-xl">🥕</span>
+          <div className="flex-1 leading-snug">
+            <strong className="block font-bold text-orange-900">ストリーク救済発動！</strong>
+            <span className="text-orange-800 text-[11px]">
+              愛馬がにんじんを食べて調教記録を維持しました（連続{progress.streakDays}日継続中）。
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 週末レース出走バナー（土日限定でメイン表示） */}
       {isWeekendMode ? (
@@ -343,6 +371,41 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               ))}
             </div>
           </div>
+
+          {/* にんじん所持数 (0〜3個) シミュレート */}
+          {onSetDebugCarrotCount && (
+            <div className="mt-3 pt-2 border-t border-zinc-200/60">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
+                  <span>🥕</span> にんじん所持数切替 (0〜3個)
+                </span>
+                {debugCarrotCount !== null && (
+                  <button
+                    onClick={() => onSetDebugCarrotCount(null)}
+                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                  >
+                    実数に戻す
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-4 gap-1">
+                {[0, 1, 2, 3].map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => onSetDebugCarrotCount(c)}
+                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                      progress.carrotCount === c
+                        ? 'bg-orange-600 text-white shadow-xs ring-2 ring-orange-400'
+                        : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                    }`}
+                    title={`にんじん${c}個に切り替え`}
+                  >
+                    🥕 {c}個
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* デモ用データリセットボタン */}
