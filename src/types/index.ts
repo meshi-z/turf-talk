@@ -13,6 +13,8 @@ export interface UserProgress {
   lapCount: number; // 周回数
   todayPhraseIds: string[]; // 本日の調教対象フレーズID
   weekdayTrainingDays: number; // 今週の平日調教消化日数 (0〜5)
+  carrotCount: number; // にんじん所持数 (0〜3)
+  lastCarrotUsedDate?: string | null; // 直近ににんじんを消費して救済した論理日付
 }
 
 export interface QuizSessionState {

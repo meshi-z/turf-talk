@@ -1,13 +1,13 @@
 {
   "name": "turf-talk",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "node --experimental-strip-types --test tests/verify_phrases.test.ts tests/daily_rotation.test.ts tests/sound.test.ts tests/version.test.ts tests/day_mode.test.ts tests/race_mode.test.ts tests/condition_bonus.test.ts tests/streak_logical_date.test.ts",
+    "test": "node --experimental-strip-types --test tests/verify_phrases.test.ts tests/daily_rotation.test.ts tests/sound.test.ts tests/version.test.ts tests/day_mode.test.ts tests/race_mode.test.ts tests/condition_bonus.test.ts tests/streak_logical_date.test.ts tests/carrot_streak_bonus.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

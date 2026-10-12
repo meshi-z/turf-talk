@@ -22,6 +22,7 @@ interface RaceScreenProps {
   onAnswer: (optionId: string, isCorrect: boolean) => void;
   onNext: () => void;
   onCancel: () => void;
+  onHintsRemainingChange?: (remaining: number) => void;
 }
 
 export const RaceScreen: React.FC<RaceScreenProps> = ({
@@ -31,6 +32,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
   onAnswer,
   onNext,
   onCancel,
+  onHintsRemainingChange,
 }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [hintsRemaining, setHintsRemaining] = useState<number>(initialHints);
@@ -61,7 +63,9 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
 
     soundManager.playHint();
     setEliminatedOptionIds((prev) => [...prev, toEliminate]);
-    setHintsRemaining((prev) => prev - 1);
+    const nextRemaining = hintsRemaining - 1;
+    setHintsRemaining(nextRemaining);
+    onHintsRemainingChange?.(nextRemaining);
   };
 
   const handleNextClick = () => {
@@ -161,10 +165,10 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
                 ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 shadow-2xs active:scale-[0.96]'
                 : 'bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60'
             }`}
-            title="平日の調教成果！不正解の選択肢を1つ除外します"
+            title="平日の調教成果！不正解の選択肢を1つ除外します（温存してゴールするとにんじん🥕を獲得できます）"
           >
             <Zap className={`w-3 h-3 ${hintsRemaining > 0 ? 'text-amber-600 fill-amber-500' : 'text-zinc-400'}`} />
-            <span>調教ヒント (残{hintsRemaining}回)</span>
+            <span>愛馬の余力 (残{hintsRemaining}回)</span>
           </button>
         )}
       </div>
