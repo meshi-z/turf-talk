@@ -5,6 +5,17 @@
 
 ---
 
+## [0.1.1] - 2026-10-12
+
+### 変更 (Changed)
+- **CI/CDワークフローの更新**:
+  - GitHub Pagesデプロイワークフローのアクションを最新メジャーバージョンへ更新（`actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`）
+- **開発依存パッケージの更新**:
+  - `typescript` を 7.0.2 に更新
+  - `@types/node` を 26.6.4 に更新
+
+---
+
 ## [0.1.0] - 2026-10-12
 
 ### Phase 1: MVP（最小検証版）初期リリース
