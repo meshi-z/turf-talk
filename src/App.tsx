@@ -12,7 +12,19 @@ type Screen = 'home' | 'quiz' | 'result';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-  const { progress, recordTodayPhrases, markTrainingCompleted, resetProgressForDemo, todayString } = useTrainingProgress();
+  const {
+    progress,
+    recordTodayPhrases,
+    markTrainingCompleted,
+    resetProgressForDemo,
+    todayString,
+    appMode,
+    effectiveDayOfWeek,
+    actualDayOfWeek,
+    daysUntilWeekend,
+    debugDayOfWeek,
+    setDebugDayOfWeek,
+  } = useTrainingProgress();
 
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
   const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
@@ -100,6 +112,12 @@ export function App() {
               progress={progress}
               onStartTraining={handleStartTraining}
               onResetForDemo={resetProgressForDemo}
+              appMode={appMode}
+              effectiveDayOfWeek={effectiveDayOfWeek}
+              actualDayOfWeek={actualDayOfWeek}
+              daysUntilWeekend={daysUntilWeekend}
+              debugDayOfWeek={debugDayOfWeek}
+              onSetDebugDayOfWeek={setDebugDayOfWeek}
             />
           )}
 
