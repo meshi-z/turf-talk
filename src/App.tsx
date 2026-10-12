@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Header } from './components/Header';
+import { Footer } from './components/Footer';
 import { HomeScreen } from './components/HomeScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
@@ -122,6 +123,8 @@ export function App() {
             />
           )}
         </main>
+
+        <Footer />
       </div>
     </div>
   );
