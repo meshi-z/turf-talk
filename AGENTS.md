@@ -12,6 +12,7 @@
 | **プロダクトビジョン・要求定義** | **`docs/VISION_AND_REQUIREMENTS.md`** | プロダクト概要、ビジョン、ペルソナ、ユーザーストーリー、コア機能要件 |
 | **ロードマップ・フェーズ計画** | **`docs/ROADMAP.md`** | Phase 1 (MVP) 〜 Phase 3 (Official Release) のスコープおよび完了判定基準 |
 | **クイズ・フレーズ仕様** | **`docs/specs/phrase-schema.md`** | フレーズマスターデータ構造、型定義、データ作成原則 |
+| **競走馬キャリアサイクル仕様** | **`docs/specs/horse-career-cycle.md`** | 4週間キャリアプラン、引退式・殿堂入り、世代継承、データ構造 |
 | **画面ワイヤーフレーム・UI設計** | **`docs/specs/wireframe.md`** | 画面一覧、ユーザーフロー、各画面のワイヤーフレーム |
 | **非機能要件・品質基準** | **`docs/non-functional-requirements.md`** | 性能指標（FCP/LCP/INP、バンドルサイズ）、レスポンシブ・オフライン動作要件 |
 | **変更履歴・開発実績** | **`docs/CHANGELOG.md`** | 各フェーズ・バージョンのリリースノートおよび変更履歴 |
