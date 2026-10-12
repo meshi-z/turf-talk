@@ -24,7 +24,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   // ==========================================
   {
     id: 'phrase-001',
-    situation: 'G1勝利騎手インタビュー（直線に入る前の手応えを聞かれて）',
+    situation: 'レース後の騎手インタビュー（直線に入る前の手応えを聞かれて）',
     phrase: 'He had plenty in the tank coming into the straight.',
     literalTranslation: '直線に入った時点でタンクに十分な余力があった',
     options: [
@@ -39,7 +39,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-002',
-    situation: '逃げ・先行馬の道中のリズムについて',
+    situation: 'レース実況・解説（逃げ・先行馬の道中の様子）',
     phrase: 'He was travelling very sweetly on the bridle.',
     literalTranslation: 'ハミの上でとても気持ちよく走っていた',
     options: [
@@ -54,7 +54,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-003',
-    situation: '中団待機策をとった馬の道中の様子',
+    situation: 'レース実況・解説（最終コーナーでの様子）',
     phrase: 'He was full of running round the home turn.',
     literalTranslation: '最終コーナーを回る時、走る力に満ちていた',
     options: [
@@ -69,7 +69,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-004',
-    situation: '勝負どころ（3〜4コーナー）で苦しくなった馬について',
+    situation: '勝負どころ（3〜4コーナー）の手応えについてのコメント',
     phrase: 'He was off the bridle turning for home.',
     literalTranslation: '直線に向くところでハミから外れていた',
     options: [
@@ -84,7 +84,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-005',
-    situation: '楽な手応えで外から前を飲み込みにいく瞬間',
+    situation: 'レース実況（3〜4コーナーで外から進出する馬について）',
     phrase: 'He was just cruising three wide.',
     literalTranslation: '外3頭目をただクルージングしていた',
     options: [
@@ -99,7 +99,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-006',
-    situation: '先行して直線で失速した馬の敗戦コメント',
+    situation: '直線での脚色についてのレース後コメント',
     phrase: 'He was completely empty at the furlong pole.',
     literalTranslation: '残り1ハロン標識で完全に空っぽだった',
     options: [
@@ -114,7 +114,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-007',
-    situation: '道中で引っかかってスタミナをロスした馬について',
+    situation: 'レース序盤の追走ぶりについての騎手コメント',
     phrase: 'He was very keen and pulling hard in the early stages.',
     literalTranslation: '序盤にとても熱狂的で激しく引っ張っていた',
     options: [
@@ -129,7 +129,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-008',
-    situation: '差し馬が好位の直後で理想的なリズムで追走したとき',
+    situation: '道中で好位の直後を追走する馬についてのコメント',
     phrase: 'He dropped the bridle nicely and relaxed.',
     literalTranslation: '上手にハミを落としてリラックスした',
     options: [
@@ -148,7 +148,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   // ==========================================
   {
     id: 'phrase-009',
-    situation: '直線で満を持してスパートをかけた瞬間',
+    situation: '直線での仕掛けのタイミングについての騎手コメント',
     phrase: 'I pushed the button at the two-furlong pole.',
     literalTranslation: '残り2ハロン標識でボタンを押した',
     options: [
@@ -163,7 +163,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-010',
-    situation: '単騎逃げの作戦をとった騎手のレース後コメント',
+    situation: 'レースの戦術プランについての騎手コメント',
     phrase: 'The plan was always to set our own pace.',
     literalTranslation: '計画は常に自分たちのペースを作ることだった',
     options: [
@@ -178,7 +178,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-011',
-    situation: '直線入り口で後続を引き離しにかかる合図',
+    situation: '直線入り口での先頭馬の仕掛けについて',
     phrase: 'He kicked on nicely when we turned into the straight.',
     literalTranslation: '直線に向いた時、上手に蹴り進めた',
     options: [
@@ -193,7 +193,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-012',
-    situation: '直線の勝負どころで進路を失った敗戦コメント',
+    situation: '直線の勝負どころについてのレース後コメント',
     phrase: 'We got completely boxed in with nowhere to go.',
     literalTranslation: '完全に箱に詰められ、行く場所がどこにもなかった',
     options: [
@@ -208,7 +208,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-013',
-    situation: '好位追走からの抜け出しを図った騎手のプラン',
+    situation: 'レース前の位置取りプランについての騎手コメント',
     phrase: 'I wanted to track the leader in a handy position.',
     literalTranslation: '手頃なポジションで先頭馬を追跡したかった',
     options: [
@@ -223,7 +223,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-014',
-    situation: 'ハナを切って逃げ切った馬の実況・短評',
+    situation: '先頭でレースを進めた馬の短評・レース後評',
     phrase: 'He made all and was never challenged.',
     literalTranslation: '彼はすべてを作り、決して挑まれなかった',
     options: [
@@ -238,7 +238,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-015',
-    situation: '追い込み馬の騎手が後方で仕掛けを待つ心境',
+    situation: '後方待機策をとった騎手のレース後コメント',
     phrase: 'I was happy to sit chilly and wait for the gaps.',
     literalTranslation: '寒く座って隙間を待つことに満足していた',
     options: [
@@ -253,7 +253,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-016',
-    situation: '早仕掛けになってしまったことの反省コメント',
+    situation: '直線の追い出しのタイミングに関するレース後コメント',
     phrase: 'I committed too early and was caught near the line.',
     literalTranslation: '早すぎる関与をしてしまい、ゴールの近くで捕まった',
     options: [
@@ -272,7 +272,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   // ==========================================
   {
     id: 'phrase-017',
-    situation: '直線での激しい追い比べ・接戦を制した後のコメント',
+    situation: '直線での激しい追い比べについてのレース後コメント',
     phrase: 'When they challenged us, he dug deep.',
     literalTranslation: '他馬が挑みかかってきた時、深く掘り下げた',
     options: [
@@ -287,7 +287,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-018',
-    situation: '直線で追い出してからの馬の鋭い反応について',
+    situation: '直線で追い出した際の手応えについての騎手コメント',
     phrase: 'Every time I asked him, he found more.',
     literalTranslation: '彼に求めるたびに、彼はもっと見つけた',
     options: [
@@ -302,7 +302,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-019',
-    situation: '圧倒的な瞬発力で一瞬にして突き放した勝ち馬のレース後評',
+    situation: '直線で抜け出した馬に対するメディアの短評',
     phrase: 'He put the race to bed in a matter of strides.',
     literalTranslation: 'ほんの数完歩でレースをベッドに寝かせた',
     options: [
@@ -317,7 +317,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-020',
-    situation: '若馬や従順な馬の初重賞制覇について',
+    situation: '重賞レース後の騎手コメント（合図への反応について）',
     phrase: 'He responded generously to the whip.',
     literalTranslation: '鞭に対して寛大に応えた',
     options: [
@@ -332,7 +332,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-021',
-    situation: '苦しくなった馬の直線での癖・斜行について',
+    situation: '直線の攻防における馬の走りについてのコメント',
     phrase: 'He hung badly left under pressure in the closing stages.',
     literalTranslation: '終盤のプレッシャー下でひどく左にぶら下がった',
     options: [
@@ -347,7 +347,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-022',
-    situation: '先頭に立ってフワッとして差された馬について',
+    situation: '直線で先頭に立った馬の挙動についてのレース後コメント',
     phrase: 'He hit the front too soon and pricked his ears.',
     literalTranslation: 'あまりに早く先頭を打ち、耳を立てた',
     options: [
@@ -362,7 +362,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-023',
-    situation: '人気馬が直線で追われて全く伸びなかったとき',
+    situation: '直線で追い出した際の反応についてのレース後コメント',
     phrase: 'I went for him, but he found nothing.',
     literalTranslation: '彼のために行ったが、彼は何も見つけなかった',
     options: [
@@ -381,7 +381,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   // ==========================================
   {
     id: 'phrase-024',
-    situation: '敗戦後、重馬場やタフな芝が合わなかった馬の振り返り',
+    situation: '当日の芝コンディションについてのレース後コメント',
     phrase: 'He just didn’t handle the ground today.',
     literalTranslation: '彼は今日、地面をうまく扱えなかっただけだ',
     options: [
@@ -396,7 +396,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-025',
-    situation: '大差勝ちを収めた歴史的名馬に対する調教師の絶賛',
+    situation: '管理馬の能力について語る調教師のコメント',
     phrase: 'He is an absolute freak, unlike any horse I’ve trained.',
     literalTranslation: '彼は私が調教してきたどんな馬とも違う、完全な化け物だ',
     options: [
@@ -411,7 +411,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-026',
-    situation: '相手馬の圧倒的な強さに完敗した騎手のコメント',
+    situation: '勝ち馬との力関係を振り返るレース後コメント',
     phrase: 'We were simply blown away by a superior horse.',
     literalTranslation: '私たちはより優れた馬によって単純に吹き飛ばされた',
     options: [
@@ -426,7 +426,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-027',
-    situation: '長期休養明けで4着に敗れた後の陣営コメント',
+    situation: '休み明けのレースを終えた陣営のコメント',
     phrase: 'He just needed the run, he will come on a lot for this.',
     literalTranslation: '彼は単に走りを必要としていた、これによって大いに来るだろう',
     options: [
@@ -441,7 +441,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-028',
-    situation: '距離延長の不安を囁かれていた馬が見事に勝ったとき',
+    situation: '距離適性についてのレース後コメント',
     phrase: 'He stayed every yard of the trip.',
     literalTranslation: '彼はその旅のすべてのヤードを持ち堪えた',
     options: [
@@ -456,7 +456,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-029',
-    situation: '直線で致命的な不利を受けて人気を裏切った騎手の弁明',
+    situation: '直線での進路・レース展開についての騎手コメント',
     phrase: 'She was very unlucky in running and never got a clear shot.',
     literalTranslation: '彼女は走りにおいて非常に不運で、クリアな射撃を一度も得られなかった',
     options: [
@@ -471,7 +471,7 @@ export const INITIAL_PHRASES: PhraseItem[] = [
   },
   {
     id: 'phrase-030',
-    situation: '前走惨敗から見事に巻き返して勝利したとき',
+    situation: 'レース後の陣営インタビュー（近走との比較を聞かれて）',
     phrase: 'She proved all the doubters wrong and bounced back brilliantly.',
     literalTranslation: '彼女はすべての疑い深き人々が間違っていると証明し、見事に跳ね返った',
     options: [
