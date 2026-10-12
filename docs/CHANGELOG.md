@@ -7,10 +7,15 @@
 
 ## [Unreleased]
 
-### Fixed
-- **復習モード出題対象の修正および正答フレーズのみ習得カウント対応 ([#25](https://github.com/meshi-z/turf-talk/issues/25)):**
-  - 当日の調教完了後に「本日のフレーズを復習する」を選択した際、未履修フレーズが選出されてしまう不具合を修正し、当日出題された3問（`todayPhraseIds`）から復習出題されるよう改善。
-  - クイズ完了時に誤答したフレーズまで習得済みとしてカウントされていた判定ロジックを修正し、正答（`isCorrect: true`）したフレーズのみを習得済みフレーズ（`learnedPhraseIds`）に記録するよう改修。
+### Added
+- **アプリ画面フッターへのバージョン情報表示の実装 ([#27](https://github.com/meshi-z/turf-talk/issues/27)):**
+  - `package.json` のバージョン情報を Vite の `define` 経由でフロントエンドへ注入する仕組みを導入（`vite.config.ts`, `src/version.ts`）。
+  - アプリ最下部に控えめなトーンでアプリ名とバージョン（例: `TurfTalk • v0.1.5`）を表示する `Footer` コンポーネント（`src/components/Footer.tsx`）を実装。
+  - セマンティックバージョニング形式およびバージョン同期を検証する単体テスト（`tests/version.test.ts`）を追加。
+
+---
+
+## [v0.1.4] - 2026-10-12
 
 ### Added
 - **クイズUIと調教完了演出のブラッシュアップ ([#11](https://github.com/meshi-z/turf-talk/issues/11)):**
@@ -19,6 +24,21 @@
   - ヘッダーへのサウンド消音（ミュート）トグルボタンの追加および LocalStorage 永続化。
   - 「💮 調教済」スタンプの押印アニメーション（振り下ろし・バウンス `animate-stamp-drop`）および波紋エフェクト（`animate-stamp-ripple`）の強化。
   - モバイル端末におけるタップ領域（最小高さ 58px）および垂直余白バランスの最適化。
+
+---
+
+## [v0.1.3] - 2026-10-12
+
+### Fixed
+- **復習モード出題対象の修正および正答フレーズのみ習得カウント対応 ([#25](https://github.com/meshi-z/turf-talk/issues/25)):**
+  - 当日の調教完了後に「本日のフレーズを復習する」を選択した際、未履修フレーズが選出されてしまう不具合を修正し、当日出題された3問（`todayPhraseIds`）から復習出題されるよう改善。
+  - クイズ完了時に誤答したフレーズまで習得済みとしてカウントされていた判定ロジックを修正し、正答（`isCorrect: true`）したフレーズのみを習得済みフレーズ（`learnedPhraseIds`）に記録するよう改修。
+
+---
+
+## [v0.1.2] - 2026-10-12
+
+### Added
 - **デイリー出題・ローテーションエンジン (`src/lib/dailyRotation.ts`) ([#10](https://github.com/meshi-z/turf-talk/issues/10)):**
   - 日付文字列（`YYYY-MM-DD`）と周回数から32bitハッシュシードを生成し、決定論的に日替わり3問を選出するPRNGエンジン（Mulberry32）を実装。
   - 未履修フレーズを優先して出題し、不足時は既習フレーズから補填するローテーション制御。
