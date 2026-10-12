@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+### Added
+- **フレーズマスターの拡充（全60問規模への倍増） ([#15](https://github.com/meshi-z/turf-talk/issues/15)):**
+  - 海外競馬中継・勝利騎手インタビュー・調教師コメントから厳選した実戦的競馬英語フレーズ30問を新規追加（`phrase-031`〜`phrase-060`、合計60問へ拡充）。
+  - レース実況（`under pressure`, `quickened in an instant`, `went wire-to-wire` 等）、パドック評価（`looked an absolute picture` 等）、馬場適性（`testing conditions`, `sounder surface` 等）、戦術・進路選択（`stole a march`, `brave man’s route` 等）の多彩な競馬表現を網羅。
+  - 各設問にリアルなダミー3肢、競馬ファン向けワンポイント解説、難易度（初級・中級）を付与。
+  - 設問シチュエーション（`situation`）のネタバレ防止・中立的文脈提示原則を徹底。
+  - `tests/verify_phrases.test.ts` を60問（feel:15, tactics:16, reaction:15, comment:14）の属性・一意性・選択肢仕様検証に更新。
+
 ---
 
 ## [v0.5.1] - 2026-10-12

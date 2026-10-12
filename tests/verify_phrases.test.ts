@@ -2,9 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { INITIAL_PHRASES } from '../src/data/phrases.ts';
 
-test('phrases dataset verification (30 items)', () => {
-  // 1. 件数確認（30件）
-  assert.equal(INITIAL_PHRASES.length, 30, 'Total phrases must be exactly 30');
+test('phrases dataset verification (60 items)', () => {
+  // 1. 件数確認（60件）
+  assert.equal(INITIAL_PHRASES.length, 60, 'Total phrases must be exactly 60');
 
   // 2. IDの一意性・必須属性確認
   const idSet = new Set<string>();
@@ -44,8 +44,8 @@ test('phrases dataset verification (30 items)', () => {
   const reactionCount = INITIAL_PHRASES.filter((p) => p.category === 'reaction').length;
   const commentCount = INITIAL_PHRASES.filter((p) => p.category === 'comment').length;
 
-  assert.equal(feelCount, 8, 'feel count must be 8');
-  assert.equal(tacticsCount, 8, 'tactics count must be 8');
-  assert.equal(reactionCount, 7, 'reaction count must be 7');
-  assert.equal(commentCount, 7, 'comment count must be 7');
+  assert.equal(feelCount, 15, 'feel count must be 15');
+  assert.equal(tacticsCount, 16, 'tactics count must be 16');
+  assert.equal(reactionCount, 15, 'reaction count must be 15');
+  assert.equal(commentCount, 14, 'comment count must be 14');
 });

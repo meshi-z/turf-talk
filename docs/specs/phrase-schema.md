@@ -30,14 +30,14 @@ export interface PhraseItem {
 
 ---
 
-## 2. カテゴリ定義 & 収録数（Phase 1: 全30問）
+## 2. カテゴリ定義 & 収録数（Phase 2: 全60問）
 
 | カテゴリ | キー | 収録数 | 概要・主な収録フレーズ例 |
 | :--- | :--- | :---: | :--- |
-| **手応え・感触** | `feel` | 8問 | `plenty in the tank`（手応え抜群・余力十分）、`on the bridle`（ハミ受け良好）、`travelling sweetly`（リズム抜群）、`full of running`（余力満点）、`off the bridle`（手が動く）、`cruising`（持ったまま）、`empty`（ガス欠）、`keen / pulling hard`（折り合い欠く） |
-| **仕掛け・展開** | `tactics` | 8問 | `pushed the button`（ゴーサインを出す）、`set the pace`（ペースを作る・逃げる）、`kicked on`（再加速・突き放す）、`boxed in`（前が壁）、`in a handy position`（好位）、`made all`（逃げ切り勝ち）、`sat chilly`（じっくり我慢）、`committed too early`（早仕掛け） |
-| **勝負根性・反応** | `reaction` | 7問 | `dug deep`（勝負根性を発揮）、`found more`（もうひと伸び）、`put the race to bed`（一瞬で勝負を決める）、`responded generously`（素直に応える）、`hung left`（モタれる・ササる）、`hit the front too soon`（ソラを使う）、`found nothing`（反応なし） |
-| **コメント・総括** | `comment` | 7問 | `didn’t handle the ground`（馬場が合わなかった）、`special horse / freak`（桁違いの怪物）、`blown away`（完敗）、`needed the run`（叩きが必要）、`stayed every yard`（距離克服）、`unlucky in running`（不利で不完全燃焼）、`bounced back`（巻き返し） |
+| **手応え・感触** | `feel` | 15問 | `plenty in the tank`（手応え抜群・余力十分）、`on the bridle`（ハミ受け良好）、`travelling sweetly`（リズム抜群）、`full of running`（余力満点）、`off the bridle`（手が動く）、`cruising`（持ったまま）、`empty`（ガス欠）、`keen / pulling hard`（折り合い欠く）、`under pressure`（手元が激しく動く）、`bridle horse`（調教駆けタイプ）、`travel on the rail`（ラチ沿い好追走）、`drop the bridle`（折り合いがつく）、`on the bit`（気合乗り十分）、`run green`（若さを見せる）、`not travelling`（ズブい・進まない） |
+| **仕掛け・展開** | `tactics` | 16問 | `pushed the button`（ゴーサインを出す）、`set the pace`（ペースを作る・逃げる）、`kicked on`（再加速・突き放す）、`boxed in`（前が壁）、`in a handy position`（好位）、`made all`（逃げ切り勝ち）、`sat chilly`（じっくり我慢）、`committed too early`（早仕掛け）、`stumble at the break`（出遅れ・躓き）、`steal a march`（出し抜け奇襲）、`track the leaders`（好位マーク）、`brave man’s route`（内ラチ突入）、`switch outside`（外へ切り替え）、`wire-to-wire`（完全逃げ切り）、`sit in slipstream`（風除け追走）、`stalk the pace`（番手マーク） |
+| **勝負根性・反応** | `reaction` | 15問 | `dug deep`（勝負根性を発揮）、`found more`（もうひと伸び）、`put the race to bed`（一瞬で勝負を決める）、`responded generously`（素直に応える）、`hung left`（モタれる・ササる）、`hit the front too soon`（ソラを使う）、`found nothing`（反応なし）、`quicken in an instant`（一瞬のギアチェンジ）、`battle back`（差し返す根性）、`headed on the line`（ゴール寸前ハナ差惜敗）、`pin ears back`（耳を絞って全力力走）、`fade away`（直線で脚が上がる）、`find an extra gear`（トップギア突入）、`drift under the whip`（ステッキにヨレる）、`answer every call`（騎手の合図に完ぺきに応答） |
+| **コメント・総括** | `comment` | 14問 | `didn’t handle the ground`（馬場が合わなかった）、`special horse / freak`（桁違いの怪物）、`blown away`（完敗）、`needed the run`（叩きが必要）、`stayed every yard`（距離克服）、`unlucky in running`（不利で不完全燃焼）、`bounced back`（巻き返し）、`testing conditions`（過酷なタフ重馬場）、`drop in trip`（距離短縮）、`look a picture`（パドック最高の仕上がり）、`sounder surface`（良馬場・速い馬場）、`caught flat-footed`（瞬発戦で置かれる）、`one for the notebook`（次走特注馬）、`weight told`（斤量差が響いた） |
 
 ---
 
