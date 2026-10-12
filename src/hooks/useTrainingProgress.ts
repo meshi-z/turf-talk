@@ -9,6 +9,10 @@ import {
   type DayOfWeek,
   type AppMode,
 } from '../lib/dayMode';
+import {
+  getConditionFromDays,
+  calculateRaceFeedback,
+} from '../lib/conditionBonus';
 import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
@@ -26,11 +30,12 @@ const DEFAULT_PROGRESS: UserProgress = {
   streakDays: 3, // デモ用に初期値3日
   condition: 'up',
   horseName: 'ターフスター',
-  horseWeight: 482,
+  horseWeight: 484,
   completedToday: false,
   learnedPhraseIds: [],
   lapCount: 1,
   todayPhraseIds: [],
+  weekdayTrainingDays: 3, // 初期値3日（好調）
 };
 
 export function useTrainingProgress() {
@@ -48,6 +53,10 @@ export function useTrainingProgress() {
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
           completedToday: isSameDay,
+          weekdayTrainingDays:
+            typeof parsed.weekdayTrainingDays === 'number'
+              ? Math.max(0, Math.min(5, parsed.weekdayTrainingDays))
+              : 3,
         };
       }
     } catch {
@@ -77,7 +86,7 @@ export function useTrainingProgress() {
   };
 
   const markTrainingCompleted = (
-    score: number,
+    _score: number,
     correctPhraseIds: string[] = [],
     sessionPhraseIds: string[] = []
   ) => {
@@ -85,10 +94,12 @@ export function useTrainingProgress() {
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
       const nextStreak = isAlreadyCompletedToday ? prev.streakDays : prev.streakDays + 1;
-      
-      // スコアに応じて調子変動
-      const nextCondition = score >= 3 ? 'peak' : 'up';
-      const weightChange = score >= 2 ? -2 : 2;
+      const nextWeekdayDays = isAlreadyCompletedToday
+        ? prev.weekdayTrainingDays
+        : Math.min(5, prev.weekdayTrainingDays + 1);
+
+      // 調教日数に応じたコンディションを算出
+      const tier = getConditionFromDays(nextWeekdayDays);
 
       const { nextLearnedIds, nextLapCount } = calculateNextProgressAfterCompletion(
         prev.learnedPhraseIds,
@@ -106,17 +117,32 @@ export function useTrainingProgress() {
         ...prev,
         lastTrainingDate: today,
         streakDays: nextStreak,
-        condition: nextCondition,
-        horseWeight: Math.max(460, Math.min(520, prev.horseWeight + weightChange)),
+        condition: tier.condition,
+        horseWeight: tier.baseWeight,
         completedToday: true,
         learnedPhraseIds: nextLearnedIds,
         lapCount: nextLapCount,
         todayPhraseIds: nextTodayPhraseIds,
+        weekdayTrainingDays: nextWeekdayDays,
       };
     });
   };
 
+  /**
+   * レース完了時のステータス変動
+   */
+  const markRaceCompleted = (score: number) => {
+    const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
+    setProgress((prev) => ({
+      ...prev,
+      horseWeight: feedback.nextWeight,
+      condition: feedback.nextCondition,
+    }));
+    return feedback;
+  };
+
   const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
+  const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
 
   const resetProgressForDemo = () => {
     setProgress({
@@ -126,8 +152,10 @@ export function useTrainingProgress() {
       learnedPhraseIds: [],
       lapCount: 1,
       todayPhraseIds: [],
+      weekdayTrainingDays: 3,
     });
     setDebugDayOfWeek(null);
+    setDebugWeekdayDays(null);
   };
 
   const todayStr = getTodayString();
@@ -137,10 +165,22 @@ export function useTrainingProgress() {
   const daysUntilWeekend: number = getDaysUntilWeekend(effectiveDayOfWeek);
   const isWeekendDay: boolean = isWeekend(effectiveDayOfWeek);
 
+  // 平日調教日数の実効値と、それに基づくコンディション・馬体重・ヒント数
+  const effectiveWeekdayDays =
+    debugWeekdayDays !== null ? debugWeekdayDays : progress.weekdayTrainingDays;
+  const conditionTier = getConditionFromDays(effectiveWeekdayDays);
+
   return {
-    progress,
+    progress: {
+      ...progress,
+      condition: conditionTier.condition,
+      horseWeight: conditionTier.baseWeight,
+      weekdayTrainingDays: effectiveWeekdayDays,
+    },
+    conditionTier,
     recordTodayPhrases,
     markTrainingCompleted,
+    markRaceCompleted,
     resetProgressForDemo,
     todayString: todayStr,
     debugDayOfWeek,
@@ -150,5 +190,8 @@ export function useTrainingProgress() {
     appMode,
     daysUntilWeekend,
     isWeekendDay,
+    debugWeekdayDays,
+    setDebugWeekdayDays,
+    effectiveWeekdayDays,
   };
 }

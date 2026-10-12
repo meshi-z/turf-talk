@@ -5,4 +5,4 @@ declare const __APP_VERSION__: string | undefined;
  * Vite ビルド時に package.json から注入されます。
  */
 export const APP_VERSION: string =
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.3.0';
+  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.4.0';

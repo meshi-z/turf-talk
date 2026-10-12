@@ -4,6 +4,7 @@ import type { UserProgress } from '../types';
 import { Trophy, Home, RotateCcw, Check, X, Sparkles, Award } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { calculateRacePlacement, type RacePlacement } from '../lib/raceMode';
+import { calculateRaceFeedback, type RaceFeedback } from '../lib/conditionBonus';
 
 interface RaceResultScreenProps {
   score: number;
@@ -27,6 +28,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   onRetryRace,
 }) => {
   const placement: RacePlacement = calculateRacePlacement(score);
+  const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
   const isWinner = placement.type === '1st';
   const isSecond = placement.type === '2nd';
 
@@ -41,6 +43,13 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
     }, 200);
     return () => clearTimeout(timer);
   }, [isWinner, isSecond]);
+
+  const conditionMap = {
+    heavy: '太め残り ↘',
+    flat: '普通 ➡',
+    up: '好調 ↗',
+    peak: '絶好調 ⤴',
+  };
 
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full space-y-4">
@@ -93,6 +102,41 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
             </span>
           </div>
         </div>
+      </div>
+
+      {/* レース後フィードバックカード（馬体重・調子変動） */}
+      <div className="bg-linear-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+            <span>🐴</span>
+            <span>レース後フィードバック（愛馬の仕上がり）</span>
+          </h3>
+          <span className="text-[10px] font-bold bg-emerald-200/70 text-emerald-900 px-2 py-0.5 rounded-full">
+            激闘の成果
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 my-2 text-xs">
+          <div className="bg-white/80 rounded-xl p-2.5 border border-emerald-100">
+            <span className="text-[10px] text-zinc-500 block">馬体重変動</span>
+            <div className="font-extrabold text-zinc-800 flex items-baseline gap-1 mt-0.5">
+              <span>{feedback.nextWeight} kg</span>
+              <span className="text-[10px] text-emerald-700 font-bold">
+                ({feedback.weightChange}kg 絞れました)
+              </span>
+            </div>
+          </div>
+          <div className="bg-white/80 rounded-xl p-2.5 border border-emerald-100">
+            <span className="text-[10px] text-zinc-500 block">次走へ向けた調子</span>
+            <div className="font-extrabold text-emerald-900 flex items-baseline gap-1 mt-0.5">
+              <span>{conditionMap[feedback.nextCondition]}</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-emerald-900/90 leading-relaxed mt-1">
+          💡 {feedback.comment}
+        </p>
       </div>
 
       {/* レース出走フレーズ振り返り */}
