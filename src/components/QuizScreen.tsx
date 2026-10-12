@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { PhraseItem, QuizOption } from '../data/phrases';
 import { Check, X, ArrowRight, Lightbulb, ChevronLeft } from 'lucide-react';
+import { soundManager } from '../lib/sound';
 
 interface QuizScreenProps {
   questions: PhraseItem[];
@@ -25,6 +26,13 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
     if (isAnswered) return;
     setSelectedOptionId(option.id);
     onAnswer(option.id, option.isCorrect);
+
+    // SE再生 (Web Audio API)
+    if (option.isCorrect) {
+      soundManager.playCorrect();
+    } else {
+      soundManager.playIncorrect();
+    }
   };
 
   const handleNextClick = () => {
@@ -39,7 +47,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full">
       {/* 上部ヘッダー & プログレス */}
-      <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex items-center justify-between gap-3 mb-2.5">
         <button
           onClick={onCancel}
           className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
@@ -53,7 +61,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
             <span className="text-[11px] text-zinc-500 font-medium">坂路調教</span>
             <span>{currentIndex + 1} / {questions.length} 問</span>
           </div>
-          <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
+          <div className="w-full bg-zinc-200/70 h-2 rounded-full overflow-hidden">
             <div
               className="bg-emerald-600 h-full rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
@@ -64,15 +72,15 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
       {/* シチュエーションバッジ */}
       <div className="mb-2">
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-1 rounded-full">
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
           <span>🎙️</span>
           <span>{currentItem.situation}</span>
         </span>
       </div>
 
       {/* 英文フレーズカード */}
-      <div className="bg-white border-2 border-emerald-700/20 rounded-2xl p-4 shadow-xs mb-4">
-        <p className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase mb-1">
+      <div className="bg-white border-2 border-emerald-700/20 rounded-2xl p-4 shadow-2xs mb-3">
+        <p className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase mb-1">
           Target Phrase
         </p>
         <blockquote className="text-xl font-extrabold text-zinc-900 leading-snug tracking-tight">
@@ -81,26 +89,29 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
       </div>
 
       {/* 問いかけ */}
-      <p className="text-xs font-bold text-zinc-600 mb-2.5 px-1">
+      <p className="text-xs font-bold text-zinc-600 mb-2 px-1">
         最もふさわしい日本語の意味を選んでください：
       </p>
 
       {/* 4択選択肢リスト */}
-      <div className="space-y-2.5 mb-4">
+      <div className="space-y-2 mb-3">
         {currentItem.options.map((option, index) => {
           const isCurrentSelected = option.id === selectedOptionId;
           const isTargetCorrect = option.isCorrect;
 
-          let buttonStyle = 'bg-white border-zinc-200 hover:border-emerald-500 hover:bg-emerald-50/30 text-zinc-800 shadow-xs';
+          let buttonStyle = 'bg-white border-zinc-200 hover:border-emerald-500 hover:bg-emerald-50/30 text-zinc-800 shadow-2xs active:scale-[0.98] transition-transform duration-100';
           let badgeStyle = 'bg-zinc-100 text-zinc-600';
+          let animationStyle = '';
 
           if (isAnswered) {
             if (isTargetCorrect) {
-              buttonStyle = 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20';
+              buttonStyle = 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 scale-[1.01]';
               badgeStyle = 'bg-emerald-600 text-white';
+              animationStyle = 'animate-pop';
             } else if (isCurrentSelected && !isTargetCorrect) {
               buttonStyle = 'bg-rose-50 border-rose-400 text-rose-950 ring-2 ring-rose-400/20';
               badgeStyle = 'bg-rose-500 text-white';
+              animationStyle = 'animate-shake';
             } else {
               buttonStyle = 'bg-zinc-50 border-zinc-200 text-zinc-400 opacity-60';
               badgeStyle = 'bg-zinc-100 text-zinc-400';
@@ -114,12 +125,12 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
               key={option.id}
               onClick={() => handleSelectOption(option)}
               disabled={isAnswered}
-              className={`w-full min-h-[56px] text-left p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 cursor-pointer ${buttonStyle}`}
+              className={`w-full min-h-[58px] text-left p-3.5 rounded-xl border-2 transition-all flex items-start gap-3 cursor-pointer ${buttonStyle} ${animationStyle}`}
             >
               <span className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 transition-colors ${badgeStyle}`}>
                 {optionLabels[index]}
               </span>
-              <span className="text-sm font-semibold leading-relaxed flex-1">
+              <span className="text-sm font-semibold leading-relaxed flex-1 select-none">
                 {option.text}
               </span>
               {isAnswered && isTargetCorrect && (
@@ -135,8 +146,8 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
       {/* 解答後フィードバック・解説カード */}
       {isAnswered && (
-        <div className={`mt-auto rounded-2xl p-4 border shadow-sm animate-in fade-in-50 slide-in-from-bottom-3 duration-200 ${
-          isCorrect ? 'bg-emerald-50/90 border-emerald-200' : 'bg-rose-50/90 border-rose-200'
+        <div className={`mt-auto rounded-2xl p-3.5 border shadow-xs animate-in fade-in-50 slide-in-from-bottom-3 duration-200 ${
+          isCorrect ? 'bg-emerald-50/95 border-emerald-200' : 'bg-rose-50/95 border-rose-200'
         }`}>
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
@@ -150,7 +161,7 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
             )}
           </div>
 
-          <div className="bg-white/80 rounded-xl p-3 border border-zinc-200/60 mb-3">
+          <div className="bg-white/90 rounded-xl p-3 border border-zinc-200/60 mb-2.5">
             <div className="flex items-start gap-1.5 text-xs text-zinc-800 leading-relaxed">
               <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <div>

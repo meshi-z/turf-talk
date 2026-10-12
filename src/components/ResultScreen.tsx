@@ -1,7 +1,8 @@
-import type { FC } from 'react';
+import { useEffect, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
 import { TrendingUp, Home, Sparkles } from 'lucide-react';
+import { soundManager } from '../lib/sound';
 
 interface ResultScreenProps {
   score: number;
@@ -29,6 +30,14 @@ export const ResultScreen: FC<ResultScreenProps> = ({
     day: '2-digit',
   });
 
+  // 画面マウント時にスタンプ押印音を再生（着地タイミングに同期）
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      soundManager.playStamp();
+    }, 180);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full space-y-4">
       {/* 完了ヘッダーカード & スタンプ演出 */}
@@ -41,20 +50,23 @@ export const ResultScreen: FC<ResultScreenProps> = ({
         <h2 className="text-2xl font-black text-emerald-950 mb-1">
           {isPerfect ? '素晴らしい手応え！' : 'しっかり負荷をかけました！'}
         </h2>
-        <p className="text-xs text-zinc-600 mb-6">
+        <p className="text-xs text-zinc-600 mb-5">
           愛馬「{progress.horseName}」の息遣いも良く、海外挑戦へ前進しています。
         </p>
 
-        {/* 💮 調教済ハンコ風スタンプ */}
-        <div className="inline-block relative">
-          <div className="w-32 h-32 rounded-full border-4 border-red-600 flex flex-col items-center justify-center p-2 text-red-600 transform -rotate-12 select-none shadow-sm animate-in zoom-in-75 duration-300">
-            <div className="text-[10px] font-black tracking-widest border-b border-red-500 pb-0.5">
+        {/* 💮 調教済ハンコ風スタンプ（アニメーション & 波紋演出） */}
+        <div className="inline-block relative py-2">
+          {/* 着地時の波紋リング */}
+          <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border-2 border-red-500/40 pointer-events-none animate-stamp-ripple" />
+          
+          <div className="relative w-32 h-32 rounded-full border-4 border-double border-red-600 flex flex-col items-center justify-center p-2 text-red-600 select-none shadow-md animate-stamp-drop bg-white/40 backdrop-blur-2xs">
+            <div className="text-[10px] font-black tracking-widest border-b-2 border-red-500/80 pb-0.5 px-2">
               美浦・栗東 坂路
             </div>
-            <div className="text-2xl font-black my-0.5 tracking-wider">
+            <div className="text-2xl font-black my-0.5 tracking-widest drop-shadow-2xs">
               調教済
             </div>
-            <div className="text-[10px] font-bold border-t border-red-500 pt-0.5">
+            <div className="text-[10px] font-bold border-t-2 border-red-500/80 pt-0.5 px-1 font-mono">
               {todayDateString}
             </div>
           </div>
