@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { FC } from 'react';
 import type { UserProgress } from '../types';
 import {
@@ -8,8 +7,6 @@ import {
   RotateCcw,
   Trophy,
   Sparkles,
-  Info,
-  X,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -21,6 +18,7 @@ import {
 interface HomeScreenProps {
   progress: UserProgress;
   onStartTraining: () => void;
+  onStartRace: () => void;
   onResetForDemo: () => void;
   appMode: AppMode;
   effectiveDayOfWeek: DayOfWeek;
@@ -36,6 +34,7 @@ const ORDERED_DAYS: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
 export const HomeScreen: FC<HomeScreenProps> = ({
   progress,
   onStartTraining,
+  onStartRace,
   onResetForDemo,
   appMode,
   effectiveDayOfWeek,
@@ -43,7 +42,6 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   debugDayOfWeek,
   onSetDebugDayOfWeek,
 }) => {
-  const [showRaceModal, setShowRaceModal] = useState(false);
 
   const conditionLabel = {
     flat: { text: '普通 ➡', color: 'text-zinc-600 bg-zinc-100' },
@@ -108,7 +106,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
           <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
             <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
-            <span>週末・海外G1模擬レース</span>
+            <span>週末・海外G1レース</span>
           </h3>
 
           <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
@@ -116,11 +114,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </p>
 
           <button
-            onClick={() => setShowRaceModal(true)}
+            onClick={onStartRace}
             className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
           >
             <Trophy className="w-5 h-5 fill-amber-950" />
-            <span>週末G1模擬レースに出走する（5問）</span>
+            <span>週末G1レースに出走する（5問）</span>
           </button>
         </div>
       ) : null}
@@ -210,7 +208,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5">
               <span className="text-base">🏆</span>
-              <h4 className="font-bold text-zinc-800 text-sm">週末・海外G1模擬レース</h4>
+              <h4 className="font-bold text-zinc-800 text-sm">週末・海外G1レース</h4>
             </div>
             <span className="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
               出走まで あと {daysUntilWeekend} 日
@@ -221,50 +219,6 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </p>
         </div>
       ) : null}
-
-      {/* 模擬レース準備中モーダル (Phase 2先行案内) */}
-      {showRaceModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl border border-amber-200 relative">
-            <button
-              onClick={() => setShowRaceModal(false)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 p-1 rounded-full cursor-pointer"
-              aria-label="閉じる"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mb-3">
-              <Trophy className="w-6 h-6" />
-            </div>
-
-            <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-1.5">
-              <span>🏁 出走ゲート準備中！</span>
-            </h3>
-
-            <p className="text-xs text-zinc-600 mt-2 leading-relaxed">
-              週末限定の「海外G1模擬レース（5問・着順判定演出）」は、次期アップデート（Phase 2 / Issue #13）にて登場予定です！
-            </p>
-
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3 text-xs text-amber-900">
-              <div className="font-semibold flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 text-amber-700" />
-                <span>先行情報</span>
-              </div>
-              <p className="mt-1 text-[11px] text-amber-800 leading-normal">
-                平日の坂路調教で習得したフレーズが実戦レースで出題されます。日々の調教で万全に仕上げておきましょう。
-              </p>
-            </div>
-
-            <button
-              onClick={() => setShowRaceModal(false)}
-              className="mt-5 w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white font-bold py-2.5 px-4 rounded-xl text-sm transition-all cursor-pointer"
-            >
-              了解しました
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* デバッグ・デモ用曜日切り替えコントロール */}
       <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
