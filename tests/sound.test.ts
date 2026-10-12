@@ -25,4 +25,12 @@ test('soundManager: safe method invocation in Node environment without crashing'
   assert.doesNotThrow(() => {
     soundManager.playStamp();
   });
+
+  assert.doesNotThrow(() => {
+    soundManager.playFanfare();
+  });
+
+  assert.doesNotThrow(() => {
+    soundManager.playGateOpen();
+  });
 });

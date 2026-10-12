@@ -4,11 +4,15 @@ import { Footer } from './components/Footer';
 import { HomeScreen } from './components/HomeScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
+import { RaceScreen } from './components/RaceScreen';
+import { RaceResultScreen } from './components/RaceResultScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import { selectDailyPhrases, getPhrasesByIds } from './lib/dailyRotation';
+import { selectRaceQuestions } from './lib/raceMode';
+import { soundManager } from './lib/sound';
 
-type Screen = 'home' | 'quiz' | 'result';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -93,6 +97,46 @@ export function App() {
     }
   };
 
+  // 週末レースセッション用
+  const [raceQuestions, setRaceQuestions] = useState<PhraseItem[]>([]);
+  const [raceCurrentIndex, setRaceCurrentIndex] = useState(0);
+  const [raceScore, setRaceScore] = useState(0);
+  const [raceAnsweredHistory, setRaceAnsweredHistory] = useState<{
+    phrase: PhraseItem;
+    selectedOptionId: string;
+    isCorrect: boolean;
+  }[]>([]);
+
+  const handleStartRace = () => {
+    soundManager.playGateOpen();
+    const questions = selectRaceQuestions(INITIAL_PHRASES, progress.learnedPhraseIds);
+    setRaceQuestions(questions);
+    setRaceCurrentIndex(0);
+    setRaceScore(0);
+    setRaceAnsweredHistory([]);
+    setCurrentScreen('race');
+  };
+
+  const handleAnswerRaceQuestion = (optionId: string, isCorrect: boolean) => {
+    const currentItem = raceQuestions[raceCurrentIndex];
+    if (isCorrect) {
+      setRaceScore((prev) => prev + 1);
+    }
+    setRaceAnsweredHistory((prev) => [
+      ...prev,
+      { phrase: currentItem, selectedOptionId: optionId, isCorrect },
+    ]);
+  };
+
+  const handleNextRaceQuestion = () => {
+    if (raceCurrentIndex + 1 < raceQuestions.length) {
+      setRaceCurrentIndex((prev) => prev + 1);
+    } else {
+      // 5問終了 -> レース結果画面へ
+      setCurrentScreen('race-result');
+    }
+  };
+
   const handleCancelQuiz = () => {
     setCurrentScreen('home');
   };
@@ -111,6 +155,7 @@ export function App() {
             <HomeScreen
               progress={progress}
               onStartTraining={handleStartTraining}
+              onStartRace={handleStartRace}
               onResetForDemo={resetProgressForDemo}
               appMode={appMode}
               effectiveDayOfWeek={effectiveDayOfWeek}
@@ -138,6 +183,27 @@ export function App() {
               progress={progress}
               answeredHistory={answeredHistory}
               onGoHome={handleGoHome}
+            />
+          )}
+
+          {currentScreen === 'race' && (
+            <RaceScreen
+              questions={raceQuestions}
+              currentIndex={raceCurrentIndex}
+              onAnswer={handleAnswerRaceQuestion}
+              onNext={handleNextRaceQuestion}
+              onCancel={handleCancelQuiz}
+            />
+          )}
+
+          {currentScreen === 'race-result' && (
+            <RaceResultScreen
+              score={raceScore}
+              totalQuestions={raceQuestions.length}
+              progress={progress}
+              answeredHistory={raceAnsweredHistory}
+              onGoHome={handleGoHome}
+              onRetryRace={handleStartRace}
             />
           )}
         </main>
