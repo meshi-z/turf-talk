@@ -26,6 +26,9 @@ interface HomeScreenProps {
   daysUntilWeekend: number;
   debugDayOfWeek: DayOfWeek | null;
   onSetDebugDayOfWeek: (day: DayOfWeek | null) => void;
+  debugWeekdayDays: number | null;
+  onSetDebugWeekdayDays: (days: number | null) => void;
+  effectiveWeekdayDays: number;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -41,11 +44,14 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   daysUntilWeekend,
   debugDayOfWeek,
   onSetDebugDayOfWeek,
+  debugWeekdayDays,
+  onSetDebugWeekdayDays,
+  effectiveWeekdayDays,
 }) => {
-
   const conditionLabel = {
-    flat: { text: '普通 ➡', color: 'text-zinc-600 bg-zinc-100' },
-    up: { text: '上昇 ↗', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+    heavy: { text: '太め残り ↘', color: 'text-purple-700 bg-purple-50 border-purple-200' },
+    flat: { text: '普通 ➡', color: 'text-zinc-600 bg-zinc-100 border-zinc-200' },
+    up: { text: '好調 ↗', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
     peak: { text: '絶好調 ⤴', color: 'text-amber-700 bg-amber-50 border-amber-200' },
   }[progress.condition];
 
@@ -87,6 +93,30 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             <span className="text-emerald-300 block text-[10px]">目標レース</span>
             <span className="text-base font-bold text-white">海外G1初制覇</span>
           </div>
+        </div>
+
+        {/* 平日調教仕上がり & レースボーナス状況 */}
+        <div className="mt-3 pt-2.5 border-t border-emerald-700/40 text-[11px] text-emerald-100 flex items-center justify-between">
+          <span className="flex items-center gap-1">
+            <span>🏋️ 調教消化:</span>
+            <strong className="text-white">{progress.weekdayTrainingDays} / 5日</strong>
+          </span>
+          {progress.weekdayTrainingDays >= 4 && (
+            <span className="text-amber-300 font-extrabold flex items-center gap-0.5">
+              <span>⚡</span> レースヒント2回付与
+            </span>
+          )}
+          {progress.weekdayTrainingDays === 3 && (
+            <span className="text-emerald-200 font-bold flex items-center gap-0.5">
+              <span>⚡</span> レースヒント1回付与
+            </span>
+          )}
+          {progress.weekdayTrainingDays > 0 && progress.weekdayTrainingDays < 3 && (
+            <span className="text-emerald-300/80">ヒントなし (要3日以上)</span>
+          )}
+          {progress.weekdayTrainingDays === 0 && (
+            <span className="text-purple-300 font-bold">⚠️ 太め残り注意</span>
+          )}
         </div>
       </div>
 
@@ -279,6 +309,39 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             >
               {isWeekendMode ? '🏆 週末レースモード' : '🌿 平日調教モード'}
             </span>
+          </div>
+
+          {/* 平日調教日数 (0〜5日) シミュレート */}
+          <div className="mt-3 pt-2 border-t border-zinc-200/60">
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
+                <span>🏋️</span> 調教日数切替 (0〜5日)
+              </span>
+              {debugWeekdayDays !== null && (
+                <button
+                  onClick={() => onSetDebugWeekdayDays(null)}
+                  className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                >
+                  実数に戻す
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-6 gap-1">
+              {[0, 1, 2, 3, 4, 5].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => onSetDebugWeekdayDays(d)}
+                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                    effectiveWeekdayDays === d
+                      ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
+                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                  }`}
+                  title={`${d}日消化に切り替え`}
+                >
+                  {d}日
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

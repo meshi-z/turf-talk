@@ -28,6 +28,11 @@ export function App() {
     daysUntilWeekend,
     debugDayOfWeek,
     setDebugDayOfWeek,
+    debugWeekdayDays,
+    setDebugWeekdayDays,
+    effectiveWeekdayDays,
+    conditionTier,
+    markRaceCompleted,
   } = useTrainingProgress();
 
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
@@ -132,7 +137,8 @@ export function App() {
     if (raceCurrentIndex + 1 < raceQuestions.length) {
       setRaceCurrentIndex((prev) => prev + 1);
     } else {
-      // 5問終了 -> レース結果画面へ
+      // 5問終了 -> レース完了ステータス更新 & レース結果画面へ
+      markRaceCompleted(raceScore);
       setCurrentScreen('race-result');
     }
   };
@@ -163,6 +169,9 @@ export function App() {
               daysUntilWeekend={daysUntilWeekend}
               debugDayOfWeek={debugDayOfWeek}
               onSetDebugDayOfWeek={setDebugDayOfWeek}
+              debugWeekdayDays={debugWeekdayDays}
+              onSetDebugWeekdayDays={setDebugWeekdayDays}
+              effectiveWeekdayDays={effectiveWeekdayDays}
             />
           )}
 
@@ -190,6 +199,7 @@ export function App() {
             <RaceScreen
               questions={raceQuestions}
               currentIndex={raceCurrentIndex}
+              initialHints={conditionTier.hintCount}
               onAnswer={handleAnswerRaceQuestion}
               onNext={handleNextRaceQuestion}
               onCancel={handleCancelQuiz}

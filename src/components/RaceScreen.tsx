@@ -9,13 +9,16 @@ import {
   Lightbulb,
   Radio,
   Flag,
+  Zap,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { RACE_PHASES, type RacePhase } from '../lib/raceMode';
+import { eliminateOneWrongOption } from '../lib/conditionBonus';
 
 interface RaceScreenProps {
   questions: PhraseItem[];
   currentIndex: number;
+  initialHints?: number;
   onAnswer: (optionId: string, isCorrect: boolean) => void;
   onNext: () => void;
   onCancel: () => void;
@@ -24,11 +27,15 @@ interface RaceScreenProps {
 export const RaceScreen: React.FC<RaceScreenProps> = ({
   questions,
   currentIndex,
+  initialHints = 0,
   onAnswer,
   onNext,
   onCancel,
 }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [hintsRemaining, setHintsRemaining] = useState<number>(initialHints);
+  const [eliminatedOptionIds, setEliminatedOptionIds] = useState<string[]>([]);
+
   const currentItem = questions[currentIndex];
   const isAnswered = selectedOptionId !== null;
 
@@ -36,7 +43,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
     RACE_PHASES[currentIndex] ?? RACE_PHASES[RACE_PHASES.length - 1];
 
   const handleSelectOption = (option: QuizOption) => {
-    if (isAnswered) return;
+    if (isAnswered || eliminatedOptionIds.includes(option.id)) return;
     setSelectedOptionId(option.id);
     onAnswer(option.id, option.isCorrect);
 
@@ -47,8 +54,19 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
     }
   };
 
+  const handleUseHint = () => {
+    if (isAnswered || hintsRemaining <= 0) return;
+    const toEliminate = eliminateOneWrongOption(currentItem.options, eliminatedOptionIds);
+    if (!toEliminate) return;
+
+    soundManager.playHint();
+    setEliminatedOptionIds((prev) => [...prev, toEliminate]);
+    setHintsRemaining((prev) => prev - 1);
+  };
+
   const handleNextClick = () => {
     setSelectedOptionId(null);
+    setEliminatedOptionIds([]);
     onNext();
   };
 
@@ -129,21 +147,42 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
         </blockquote>
       </div>
 
-      {/* 問いかけ */}
-      <p className="text-xs font-bold text-zinc-600 mb-2 px-1">
-        状況に最も適した日本語の意味を選んでください：
-      </p>
+      {/* 問いかけ & 調教ヒントボタン */}
+      <div className="flex items-center justify-between mb-2 px-1">
+        <p className="text-xs font-bold text-zinc-600">
+          状況に最も適した日本語の意味を選んでください：
+        </p>
+        {initialHints > 0 && (
+          <button
+            onClick={handleUseHint}
+            disabled={isAnswered || hintsRemaining <= 0 || eliminatedOptionIds.length >= 2}
+            className={`inline-flex items-center gap-1 text-[11px] font-extrabold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+              hintsRemaining > 0 && !isAnswered && eliminatedOptionIds.length < 2
+                ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300 shadow-2xs active:scale-[0.96]'
+                : 'bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60'
+            }`}
+            title="平日の調教成果！不正解の選択肢を1つ除外します"
+          >
+            <Zap className={`w-3 h-3 ${hintsRemaining > 0 ? 'text-amber-600 fill-amber-500' : 'text-zinc-400'}`} />
+            <span>調教ヒント (残{hintsRemaining}回)</span>
+          </button>
+        )}
+      </div>
 
       {/* 4択選択肢リスト */}
       <div className="space-y-2 mb-3">
         {currentItem.options.map((option, index) => {
           const isCurrentSelected = option.id === selectedOptionId;
           const isTargetCorrect = option.isCorrect;
+          const isEliminated = eliminatedOptionIds.includes(option.id);
 
           let btnStyle = 'bg-white border-zinc-200/90 text-zinc-800 hover:border-amber-400 hover:bg-amber-50/30';
           let badgeStyle = 'bg-zinc-100 text-zinc-600 group-hover:bg-amber-100 group-hover:text-amber-900';
 
-          if (isAnswered) {
+          if (isEliminated) {
+            btnStyle = 'bg-zinc-100/70 border-zinc-200 text-zinc-400 opacity-35 line-through cursor-not-allowed select-none';
+            badgeStyle = 'bg-zinc-200 text-zinc-400';
+          } else if (isAnswered) {
             if (isTargetCorrect) {
               btnStyle = 'bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold ring-1 ring-emerald-500/30';
               badgeStyle = 'bg-emerald-600 text-white';
@@ -162,7 +201,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
             <button
               key={option.id}
               onClick={() => handleSelectOption(option)}
-              disabled={isAnswered}
+              disabled={isAnswered || isEliminated}
               className={`group w-full min-h-[58px] p-3 rounded-xl border text-left transition-all duration-150 flex items-center justify-between gap-3 text-sm cursor-pointer active:scale-[0.98] ${btnStyle}`}
             >
               <div className="flex items-center gap-3">
@@ -173,6 +212,12 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
                 </span>
                 <span className="leading-snug">{option.text}</span>
               </div>
+
+              {isEliminated && (
+                <span className="text-[10px] font-bold text-zinc-400 border border-zinc-300 rounded px-1.5 py-0.5 shrink-0">
+                  除外
+                </span>
+              )}
 
               {isAnswered && isTargetCorrect && (
                 <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
