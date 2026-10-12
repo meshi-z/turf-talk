@@ -22,6 +22,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   completedToday: false,
   learnedPhraseIds: [],
   lapCount: 1,
+  todayPhraseIds: [],
 };
 
 export function useTrainingProgress() {
@@ -31,12 +32,14 @@ export function useTrainingProgress() {
       if (saved) {
         const parsed = JSON.parse(saved);
         const today = getTodayString();
+        const isSameDay = parsed.lastTrainingDate === today;
         return {
           ...DEFAULT_PROGRESS,
           ...parsed,
           learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
-          completedToday: parsed.lastTrainingDate === today,
+          todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
+          completedToday: isSameDay,
         };
       }
     } catch {
@@ -53,7 +56,23 @@ export function useTrainingProgress() {
     }
   }, [progress]);
 
-  const markTrainingCompleted = (score: number, answeredPhraseIds: string[] = []) => {
+  const recordTodayPhrases = (phraseIds: string[]) => {
+    setProgress((prev) => {
+      if (prev.todayPhraseIds.length > 0 && prev.todayPhraseIds.join(',') === phraseIds.join(',')) {
+        return prev;
+      }
+      return {
+        ...prev,
+        todayPhraseIds: phraseIds,
+      };
+    });
+  };
+
+  const markTrainingCompleted = (
+    score: number,
+    correctPhraseIds: string[] = [],
+    sessionPhraseIds: string[] = []
+  ) => {
     const today = getTodayString();
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
@@ -66,9 +85,14 @@ export function useTrainingProgress() {
       const { nextLearnedIds, nextLapCount } = calculateNextProgressAfterCompletion(
         prev.learnedPhraseIds,
         prev.lapCount,
-        answeredPhraseIds,
+        correctPhraseIds,
         INITIAL_PHRASES.length
       );
+
+      const nextTodayPhraseIds =
+        prev.todayPhraseIds.length > 0
+          ? prev.todayPhraseIds
+          : sessionPhraseIds;
 
       return {
         ...prev,
@@ -79,6 +103,7 @@ export function useTrainingProgress() {
         completedToday: true,
         learnedPhraseIds: nextLearnedIds,
         lapCount: nextLapCount,
+        todayPhraseIds: nextTodayPhraseIds,
       };
     });
   };
@@ -90,11 +115,13 @@ export function useTrainingProgress() {
       completedToday: false,
       learnedPhraseIds: [],
       lapCount: 1,
+      todayPhraseIds: [],
     });
   };
 
   return {
     progress,
+    recordTodayPhrases,
     markTrainingCompleted,
     resetProgressForDemo,
     todayString: getTodayString(),

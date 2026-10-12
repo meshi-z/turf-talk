@@ -5,18 +5,22 @@ import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
-import { selectDailyPhrases } from './lib/dailyRotation';
+import { selectDailyPhrases, getPhrasesByIds } from './lib/dailyRotation';
 
 type Screen = 'home' | 'quiz' | 'result';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-  const { progress, markTrainingCompleted, resetProgressForDemo, todayString } = useTrainingProgress();
+  const { progress, recordTodayPhrases, markTrainingCompleted, resetProgressForDemo, todayString } = useTrainingProgress();
 
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
-  const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => 
-    selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString).questions
-  );
+  const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
+    if (progress.todayPhraseIds.length > 0) {
+      const existing = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
+      if (existing.length > 0) return existing;
+    }
+    return selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString).questions;
+  });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [answeredHistory, setAnsweredHistory] = useState<{
@@ -26,12 +30,24 @@ export function App() {
   }[]>([]);
 
   const handleStartTraining = () => {
-    // 開くたびに日替わり3問を再選出（選択肢の並び順もシャッフル）
-    const { questions } = selectDailyPhrases(
-      INITIAL_PHRASES,
-      progress.learnedPhraseIds,
-      todayString
-    );
+    let questions: PhraseItem[] = [];
+
+    // 本日の調教が完了している場合（復習モード）、または既に本日の出題フレーズが決定している場合
+    if (progress.todayPhraseIds.length > 0) {
+      questions = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
+    }
+
+    // まだ本日の出題セットがない場合は選出して記録
+    if (questions.length === 0) {
+      const selected = selectDailyPhrases(
+        INITIAL_PHRASES,
+        progress.learnedPhraseIds,
+        todayString
+      );
+      questions = selected.questions;
+      recordTodayPhrases(questions.map((q) => q.id));
+    }
+
     setSessionQuestions(questions);
     setCurrentQuestionIndex(0);
     setScore(0);
@@ -54,9 +70,12 @@ export function App() {
     if (currentQuestionIndex + 1 < sessionQuestions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // 3問終了 -> 調教完了処理（出題されたフレーズIDを記録）
-      const answeredPhraseIds = sessionQuestions.map((q) => q.id);
-      markTrainingCompleted(score, answeredPhraseIds);
+      // 3問終了 -> 調教完了処理（正答したフレーズIDのみを習得済みとして記録）
+      const correctPhraseIds = answeredHistory
+        .filter((item) => item.isCorrect)
+        .map((item) => item.phrase.id);
+      const sessionPhraseIds = sessionQuestions.map((q) => q.id);
+      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds);
       setCurrentScreen('result');
     }
   };
