@@ -3,6 +3,7 @@ import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
 import { TrendingUp, Home, Sparkles } from 'lucide-react';
 import { soundManager } from '../lib/sound';
+import { getLogicalDate } from '../lib/logicalDate';
 
 interface ResultScreenProps {
   score: number;
@@ -24,7 +25,7 @@ export const ResultScreen: FC<ResultScreenProps> = ({
   onGoHome,
 }) => {
   const isPerfect = score === totalQuestions;
-  const todayDateString = new Date().toLocaleDateString('ja-JP', {
+  const todayDateString = getLogicalDate().toLocaleDateString('ja-JP', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

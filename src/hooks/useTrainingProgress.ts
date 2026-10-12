@@ -13,21 +13,18 @@ import {
   getConditionFromDays,
   calculateRaceFeedback,
 } from '../lib/conditionBonus';
+import {
+  getLogicalDateString,
+  evaluateCurrentStreak,
+  calculateNextStreakOnCompletion,
+} from '../lib/logicalDate';
 import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
-function getTodayString(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 const DEFAULT_PROGRESS: UserProgress = {
   lastTrainingDate: null,
-  streakDays: 3, // デモ用に初期値3日
+  streakDays: 0, // 新規利用時の初期値0日
   condition: 'up',
   horseName: 'ターフスター',
   horseWeight: 484,
@@ -44,11 +41,15 @@ export function useTrainingProgress() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const today = getTodayString();
+        const today = getLogicalDateString();
         const isSameDay = parsed.lastTrainingDate === today;
+        const savedStreak = typeof parsed.streakDays === 'number' ? parsed.streakDays : 0;
+        const activeStreak = evaluateCurrentStreak(savedStreak, parsed.lastTrainingDate ?? null, today);
+
         return {
           ...DEFAULT_PROGRESS,
           ...parsed,
+          streakDays: activeStreak,
           learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
@@ -90,10 +91,13 @@ export function useTrainingProgress() {
     correctPhraseIds: string[] = [],
     sessionPhraseIds: string[] = []
   ) => {
-    const today = getTodayString();
+    const today = getLogicalDateString();
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
-      const nextStreak = isAlreadyCompletedToday ? prev.streakDays : prev.streakDays + 1;
+      const nextStreak = isAlreadyCompletedToday
+        ? prev.streakDays
+        : calculateNextStreakOnCompletion(prev.streakDays, prev.lastTrainingDate, today);
+
       const nextWeekdayDays = isAlreadyCompletedToday
         ? prev.weekdayTrainingDays
         : Math.min(5, prev.weekdayTrainingDays + 1);
@@ -158,7 +162,7 @@ export function useTrainingProgress() {
     setDebugWeekdayDays(null);
   };
 
-  const todayStr = getTodayString();
+  const todayStr = getLogicalDateString();
   const actualDayOfWeek = getDayOfWeek(todayStr);
   const effectiveDayOfWeek: DayOfWeek = debugDayOfWeek !== null ? debugDayOfWeek : actualDayOfWeek;
   const appMode: AppMode = getAppMode(effectiveDayOfWeek);
