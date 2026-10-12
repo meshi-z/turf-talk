@@ -7,6 +7,10 @@
 
 ## [Unreleased]
 
+---
+
+## [v0.4.0] - 2026-10-12
+
 ### Added
 - **平日調教ボーナスと愛馬コンディション連携の実装 ([#14](https://github.com/meshi-z/turf-talk/issues/14)):**
   - 平日の調教消化日数（0〜5日）と連動した愛馬コンディション（太め残り・平行線・好調・絶好調）および馬体重変動（480kg〜500kg）判定ロジック（`src/lib/conditionBonus.ts`）。
