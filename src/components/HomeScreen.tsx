@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { UserProgress } from '../types';
 import { Play, CheckCircle2, Calendar, RotateCcw } from 'lucide-react';
+import { INITIAL_PHRASES } from '../data/phrases';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -18,6 +19,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
     up: { text: '上昇 ↗', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
     peak: { text: '絶好調 ⤴', color: 'text-amber-700 bg-amber-50 border-amber-200' },
   }[progress.condition];
+
+  const totalPhrases = INITIAL_PHRASES.length;
+  const learnedCount = progress.learnedPhraseIds.length;
+  const progressPercent = Math.min(100, Math.round((learnedCount / totalPhrases) * 100));
 
   return (
     <div className="flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
@@ -64,6 +69,25 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           <span className="text-xs text-zinc-500 font-medium flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" /> 1日3問 (約1分)
           </span>
+        </div>
+
+        {/* フレーズ習得プログレスバー */}
+        <div className="mb-4 bg-emerald-50/60 rounded-xl p-3 border border-emerald-100">
+          <div className="flex justify-between items-center text-xs mb-1.5">
+            <span className="font-semibold text-emerald-950 flex items-center gap-1">
+              <span>📖</span> 習得フレーズ
+            </span>
+            <span className="font-bold text-emerald-800">
+              {learnedCount} / {totalPhrases} 問
+              {progress.lapCount > 1 && <span className="ml-1 text-[11px] text-amber-700 font-semibold">({progress.lapCount}周目)</span>}
+            </span>
+          </div>
+          <div className="w-full bg-emerald-200/50 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
         {progress.completedToday ? (

@@ -7,6 +7,8 @@ export interface UserProgress {
   horseName: string;
   horseWeight: number; // kg
   completedToday: boolean;
+  learnedPhraseIds: string[]; // 履修済みフレーズID
+  lapCount: number; // 周回数
 }
 
 export interface QuizSessionState {
