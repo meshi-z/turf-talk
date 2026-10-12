@@ -13,6 +13,12 @@
   - クイズ完了時に誤答したフレーズまで習得済みとしてカウントされていた判定ロジックを修正し、正答（`isCorrect: true`）したフレーズのみを習得済みフレーズ（`learnedPhraseIds`）に記録するよう改修。
 
 ### Added
+- **クイズUIと調教完了演出のブラッシュアップ ([#11](https://github.com/meshi-z/turf-talk/issues/11)):**
+  - 選択肢タップ時のマイクロインタラクション（`active:scale-[0.98]`）および正誤判定時のポップ（`animate-pop`）・シェイク（`animate-shake`）アニメーションの実装。
+  - Web Audio API によるシンセサイズド効果音（正解アルペジオ、不正解ソフト音、スタンプ打撃音）の実装（`src/lib/sound.ts`）。
+  - ヘッダーへのサウンド消音（ミュート）トグルボタンの追加および LocalStorage 永続化。
+  - 「💮 調教済」スタンプの押印アニメーション（振り下ろし・バウンス `animate-stamp-drop`）および波紋エフェクト（`animate-stamp-ripple`）の強化。
+  - モバイル端末におけるタップ領域（最小高さ 58px）および垂直余白バランスの最適化。
 - **デイリー出題・ローテーションエンジン (`src/lib/dailyRotation.ts`) ([#10](https://github.com/meshi-z/turf-talk/issues/10)):**
   - 日付文字列（`YYYY-MM-DD`）と周回数から32bitハッシュシードを生成し、決定論的に日替わり3問を選出するPRNGエンジン（Mulberry32）を実装。
   - 未履修フレーズを優先して出題し、不足時は既習フレーズから補填するローテーション制御。
