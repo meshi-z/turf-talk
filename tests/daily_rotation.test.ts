@@ -4,6 +4,7 @@ import {
   hashDateString,
   createMulberry32,
   selectDailyPhrases,
+  getPhrasesByIds,
   calculateNextProgressAfterCompletion,
   shufflePhraseOptions,
 } from '../src/lib/dailyRotation.ts';
@@ -130,3 +131,41 @@ test('daily rotation: progress calculation and lap increment on completion', () 
   assert.equal(progressLap.nextLapCount, 2, 'Lap count should increment to 2');
   assert.deepEqual(progressLap.nextLearnedIds, [], 'Learned IDs should reset for next lap');
 });
+
+test('daily rotation: getPhrasesByIds retrieves exact questions for today review with options intact', () => {
+  const targetIds = ['phrase-001', 'phrase-005', 'phrase-010'];
+  const questions = getPhrasesByIds(INITIAL_PHRASES, targetIds);
+
+  assert.equal(questions.length, 3, 'Should retrieve exactly 3 questions');
+  assert.deepEqual(
+    questions.map((q) => q.id),
+    targetIds,
+    'Question IDs must match requested IDs in exact order'
+  );
+
+  for (const q of questions) {
+    const original = INITIAL_PHRASES.find((p) => p.id === q.id);
+    assert.ok(original);
+    assert.equal(q.options.length, original.options.length);
+  }
+});
+
+test('daily rotation: mastery tracking updates only correctly answered phrases', () => {
+  const currentLearned = ['p-001'];
+  // 出題された3問のうち、p-002とp-003は正解、p-004は不正解（除外）
+  const correctOnly = ['p-002', 'p-003'];
+
+  const nextProgress = calculateNextProgressAfterCompletion(currentLearned, 1, correctOnly, 30);
+
+  assert.deepEqual(
+    nextProgress.nextLearnedIds,
+    ['p-001', 'p-002', 'p-003'],
+    'Only correctly answered phrases must be added to learned set'
+  );
+  assert.equal(
+    nextProgress.nextLearnedIds.includes('p-004'),
+    false,
+    'Incorrectly answered phrase p-004 must not be marked as learned'
+  );
+});
+

@@ -63,6 +63,8 @@ export interface PhraseItem {
    - 全問履修完了後は復習モード（`isReview: true`）として全問から日替わり出題を行い、周回数（`lapCount`）を加算して次周回を再循環。
 3. **選択肢シャッフル（動的順序）**:
    - 同一の問題であっても、クイズを開くたびに4つの選択肢（`options`）の並び順をランダムにシャッフルして表示。固定位置での暗記を防止。
-4. **学習進捗の永続化 (`src/hooks/useTrainingProgress.ts`)**:
-   - LocalStorage（`turftalk_user_progress_v1`）に `learnedPhraseIds` および `lapCount` を記録・同期。
+4. **学習進捗の永続化 & 習得判定 (`src/hooks/useTrainingProgress.ts`)**:
+   - LocalStorage（`turftalk_user_progress_v1`）に `learnedPhraseIds`、`todayPhraseIds`、および `lapCount` を記録・同期。
+   - **正答フレーズのみの習得記録**: クイズ完了時、正解（`isCorrect === true`）したフレーズIDのみを `learnedPhraseIds` に追加。誤答したフレーズは未習得のまま維持され、次回以降の出題候補に残る。
+   - **本日のフレーズ復習モード**: 当日調教完了後（`completedToday: true`）に「本日のフレーズを復習する」を実行した場合、当日に出題された3問（`todayPhraseIds`）を対象として復習クイズが出題される（選択肢は開くたびに動的シャッフル）。復習時に正解したフレーズも新たに `learnedPhraseIds` に反映される。
 

@@ -123,15 +123,33 @@ export function selectDailyPhrases(
 }
 
 /**
- * クイズ完了時に履修フレーズリストと周回数を更新する計算関数
+ * 指定されたフレーズIDリストに対応するフレーズを取得し、各問題の選択肢をランダムにシャッフルして返す（復習用）
+ */
+export function getPhrasesByIds(
+  allPhrases: readonly PhraseItem[],
+  phraseIds: readonly string[]
+): PhraseItem[] {
+  const map = new Map(allPhrases.map((p) => [p.id, p]));
+  const results: PhraseItem[] = [];
+  for (const id of phraseIds) {
+    const item = map.get(id);
+    if (item) {
+      results.push(shufflePhraseOptions(item));
+    }
+  }
+  return results;
+}
+
+/**
+ * クイズ完了時に、正解したフレーズIDをもとに履修フレーズリストと周回数を更新する計算関数
  */
 export function calculateNextProgressAfterCompletion(
   currentLearnedIds: readonly string[],
   currentLapCount: number,
-  answeredPhraseIds: readonly string[],
+  correctPhraseIds: readonly string[],
   totalMasterCount: number
 ): { nextLearnedIds: string[]; nextLapCount: number } {
-  const merged = Array.from(new Set([...currentLearnedIds, ...answeredPhraseIds]));
+  const merged = Array.from(new Set([...currentLearnedIds, ...correctPhraseIds]));
 
   if (merged.length >= totalMasterCount) {
     // 全問完走 -> 周回数インクリメントし、次回に向けて新周回開始

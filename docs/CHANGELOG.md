@@ -7,6 +7,11 @@
 
 ## [Unreleased]
 
+### Fixed
+- **復習モード出題対象の修正および正答フレーズのみ習得カウント対応 ([#25](https://github.com/meshi-z/turf-talk/issues/25)):**
+  - 当日の調教完了後に「本日のフレーズを復習する」を選択した際、未履修フレーズが選出されてしまう不具合を修正し、当日出題された3問（`todayPhraseIds`）から復習出題されるよう改善。
+  - クイズ完了時に誤答したフレーズまで習得済みとしてカウントされていた判定ロジックを修正し、正答（`isCorrect: true`）したフレーズのみを習得済みフレーズ（`learnedPhraseIds`）に記録するよう改修。
+
 ### Added
 - **デイリー出題・ローテーションエンジン (`src/lib/dailyRotation.ts`) ([#10](https://github.com/meshi-z/turf-talk/issues/10)):**
   - 日付文字列（`YYYY-MM-DD`）と周回数から32bitハッシュシードを生成し、決定論的に日替わり3問を選出するPRNGエンジン（Mulberry32）を実装。

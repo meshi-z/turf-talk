@@ -9,6 +9,7 @@ export interface UserProgress {
   completedToday: boolean;
   learnedPhraseIds: string[]; // 履修済みフレーズID
   lapCount: number; // 周回数
+  todayPhraseIds: string[]; // 本日の調教対象フレーズID
 }
 
 export interface QuizSessionState {
