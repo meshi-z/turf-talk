@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { UserProgress } from '../types';
 import { calculateNextProgressAfterCompletion } from '../lib/dailyRotation';
+import {
+  getDayOfWeek,
+  getDaysUntilWeekend,
+  getAppMode,
+  isWeekend,
+  type DayOfWeek,
+  type AppMode,
+} from '../lib/dayMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
@@ -108,6 +116,8 @@ export function useTrainingProgress() {
     });
   };
 
+  const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
+
   const resetProgressForDemo = () => {
     setProgress({
       ...DEFAULT_PROGRESS,
@@ -117,13 +127,28 @@ export function useTrainingProgress() {
       lapCount: 1,
       todayPhraseIds: [],
     });
+    setDebugDayOfWeek(null);
   };
+
+  const todayStr = getTodayString();
+  const actualDayOfWeek = getDayOfWeek(todayStr);
+  const effectiveDayOfWeek: DayOfWeek = debugDayOfWeek !== null ? debugDayOfWeek : actualDayOfWeek;
+  const appMode: AppMode = getAppMode(effectiveDayOfWeek);
+  const daysUntilWeekend: number = getDaysUntilWeekend(effectiveDayOfWeek);
+  const isWeekendDay: boolean = isWeekend(effectiveDayOfWeek);
 
   return {
     progress,
     recordTodayPhrases,
     markTrainingCompleted,
     resetProgressForDemo,
-    todayString: getTodayString(),
+    todayString: todayStr,
+    debugDayOfWeek,
+    setDebugDayOfWeek,
+    actualDayOfWeek,
+    effectiveDayOfWeek,
+    appMode,
+    daysUntilWeekend,
+    isWeekendDay,
   };
 }
