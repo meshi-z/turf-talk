@@ -8,6 +8,22 @@
 ## [Unreleased]
 
 ### Added
+- **デイリー出題・ローテーションエンジン (`src/lib/dailyRotation.ts`) ([#10](https://github.com/meshi-z/turf-talk/issues/10)):**
+  - 日付文字列（`YYYY-MM-DD`）と周回数から32bitハッシュシードを生成し、決定論的に日替わり3問を選出するPRNGエンジン（Mulberry32）を実装。
+  - 未履修フレーズを優先して出題し、不足時は既習フレーズから補填するローテーション制御。
+  - 全問履修後の復習出題および周回数（`lapCount`）カウントアップ処理。
+  - 同一の問題であっても開くたびに4択の並び順が変化する選択肢ランダムシャッフル機能。
+  - LocalStorageへの履修済みフレーズIDリスト（`learnedPhraseIds`）および周回数の永続化。
+- **ホーム画面の学習進捗UI (`src/components/HomeScreen.tsx`):**
+  - 習得フレーズ数（例: `12 / 30問`、`2周目`）のインジケーターおよびプログレスバーの表示。
+- **デイリーローテーション・選択肢シャッフル単体テスト (`tests/daily_rotation.test.ts`):**
+  - 決定論的シード動作、日替わり選出、未履修優先、全問履修後の復習モード、選択肢シャッフルの動作検証。
+
+---
+
+## [v0.1.1] - 2026-10-12
+
+### Added
 - **初期フレーズマスターデータ（全30問）の拡充 ([#9](https://github.com/meshi-z/turf-talk/issues/9)):**
   - 手応え・感触 (`feel`): 8問（`plenty in the tank`, `on the bridle`, `travelling sweetly` 等）
   - 仕掛け・展開 (`tactics`): 8問（`pushed the button`, `set the pace`, `kicked on`, `boxed in` 等）
@@ -16,6 +32,7 @@
   - 各問題に競馬ファン向けワンポイント解説（1〜2行）およびリアルな日本語4択選択肢を完備
 - データ整合性検証テスト（件数・ID一意性・選択肢整合性）の追加
 - `docs/specs/phrase-schema.md` のカテゴリ定義および収録データ一覧の更新
+- GitHub Actions 公式アクション最新化および依存パッケージ（typescript, @types/node）の更新 ([#22](https://github.com/meshi-z/turf-talk/pull/22))
 
 ---
 

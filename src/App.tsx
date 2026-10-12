@@ -5,15 +5,18 @@ import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
+import { selectDailyPhrases } from './lib/dailyRotation';
 
 type Screen = 'home' | 'quiz' | 'result';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
-  const { progress, markTrainingCompleted, resetProgressForDemo } = useTrainingProgress();
+  const { progress, markTrainingCompleted, resetProgressForDemo, todayString } = useTrainingProgress();
 
-  // 今日の調教セッション用（初期サンプルから3問抽出）
-  const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => INITIAL_PHRASES.slice(0, 3));
+  // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
+  const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => 
+    selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString).questions
+  );
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [answeredHistory, setAnsweredHistory] = useState<{
@@ -23,8 +26,13 @@ export function App() {
   }[]>([]);
 
   const handleStartTraining = () => {
-    // 毎回解き直せるようにリセット（本日の3問）
-    setSessionQuestions(INITIAL_PHRASES.slice(0, 3));
+    // 開くたびに日替わり3問を再選出（選択肢の並び順もシャッフル）
+    const { questions } = selectDailyPhrases(
+      INITIAL_PHRASES,
+      progress.learnedPhraseIds,
+      todayString
+    );
+    setSessionQuestions(questions);
     setCurrentQuestionIndex(0);
     setScore(0);
     setAnsweredHistory([]);
@@ -46,9 +54,9 @@ export function App() {
     if (currentQuestionIndex + 1 < sessionQuestions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // 3問終了 -> 調教完了処理
-      const finalScore = score + (answeredHistory[answeredHistory.length - 1]?.isCorrect ? 0 : 0);
-      markTrainingCompleted(finalScore);
+      // 3問終了 -> 調教完了処理（出題されたフレーズIDを記録）
+      const answeredPhraseIds = sessionQuestions.map((q) => q.id);
+      markTrainingCompleted(score, answeredPhraseIds);
       setCurrentScreen('result');
     }
   };

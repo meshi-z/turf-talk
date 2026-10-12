@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { UserProgress } from '../types';
+import { calculateNextProgressAfterCompletion } from '../lib/dailyRotation';
+import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
@@ -18,6 +20,8 @@ const DEFAULT_PROGRESS: UserProgress = {
   horseName: 'ターフスター',
   horseWeight: 482,
   completedToday: false,
+  learnedPhraseIds: [],
+  lapCount: 1,
 };
 
 export function useTrainingProgress() {
@@ -28,7 +32,10 @@ export function useTrainingProgress() {
         const parsed = JSON.parse(saved);
         const today = getTodayString();
         return {
+          ...DEFAULT_PROGRESS,
           ...parsed,
+          learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
+          lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           completedToday: parsed.lastTrainingDate === today,
         };
       }
@@ -46,7 +53,7 @@ export function useTrainingProgress() {
     }
   }, [progress]);
 
-  const markTrainingCompleted = (score: number) => {
+  const markTrainingCompleted = (score: number, answeredPhraseIds: string[] = []) => {
     const today = getTodayString();
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
@@ -56,6 +63,13 @@ export function useTrainingProgress() {
       const nextCondition = score >= 3 ? 'peak' : 'up';
       const weightChange = score >= 2 ? -2 : 2;
 
+      const { nextLearnedIds, nextLapCount } = calculateNextProgressAfterCompletion(
+        prev.learnedPhraseIds,
+        prev.lapCount,
+        answeredPhraseIds,
+        INITIAL_PHRASES.length
+      );
+
       return {
         ...prev,
         lastTrainingDate: today,
@@ -63,6 +77,8 @@ export function useTrainingProgress() {
         condition: nextCondition,
         horseWeight: Math.max(460, Math.min(520, prev.horseWeight + weightChange)),
         completedToday: true,
+        learnedPhraseIds: nextLearnedIds,
+        lapCount: nextLapCount,
       };
     });
   };
@@ -72,6 +88,8 @@ export function useTrainingProgress() {
       ...DEFAULT_PROGRESS,
       lastTrainingDate: null,
       completedToday: false,
+      learnedPhraseIds: [],
+      lapCount: 1,
     });
   };
 
