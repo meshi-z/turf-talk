@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+### Changed
+- **設問シチュエーション（situation）の過度なネタバレ・ヒント表現の見直し ([#30](https://github.com/meshi-z/turf-talk/issues/30)):**
+  - 初期マスターデータ（全30問）の `situation` を総点検し、レース結果や馬の具体的な成否・挙動（「逃げ切った」「進路を失った」「理想的なリズムで」など）の過剰開示を是正。
+  - 発言場面・話者の状況の提示に留めた自然で中立的な文脈表現にリライトし、英語フレーズ自体の意味や比喩を解読して回答できる適正な学習体験・クイズ難易度を担保。
+  - `docs/specs/phrase-schema.md` のデータ作成規約に「設問シチュエーション（situation）のネタバレ防止と文脈提示原則」を追記。
+
+---
+
+## [v0.1.5] - 2026-10-12
+
 ### Added
 - **アプリ画面フッターへのバージョン情報表示の実装 ([#27](https://github.com/meshi-z/turf-talk/issues/27)):**
   - `package.json` のバージョン情報を Vite の `define` 経由でフロントエンドへ注入する仕組みを導入（`vite.config.ts`, `src/version.ts`）。
