@@ -83,6 +83,8 @@ export interface HallOfFameHorse {
   raceHistory: CareerRaceRecord[];    // 出走戦績履歴
 }
 
+export type TrainingCourse = 'uphill' | 'woodchip';
+
 export interface UserProgress {
   lastTrainingDate: string | null; // YYYY-MM-DD
   streakDays: number;
@@ -92,7 +94,9 @@ export interface UserProgress {
   completedToday: boolean;
   learnedPhraseIds: string[]; // 履修済みフレーズID
   lapCount: number; // 周回数
-  todayPhraseIds: string[]; // 本日の調教対象フレーズID
+  todayPhraseIds: string[]; // 本日の調教対象フレーズID（坂路調教）
+  todayWoodchipPhraseIds?: string[]; // 本日の調教対象フレーズID（ウッドチップ調教）
+  completedCoursesToday?: TrainingCourse[]; // 本日完了した調教コース一覧
   weekdayTrainingDays: number; // 今週の調教消化日数 (0〜7)
   carrotCount: number; // にんじん所持数 (0〜3)
   lastCarrotUsedDate?: string | null; // 直近ににんじんを消費して救済した論理日付

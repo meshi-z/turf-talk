@@ -64,11 +64,12 @@ test('daily rotation: prioritizes unlearned phrases', () => {
 });
 
 test('daily rotation: fills remainder from learned pool when unlearned is fewer than 3', () => {
-  // 未履修が1問だけ残っているケース（全60問中59問既習、最後1問のみ未履修）
-  const onlyOneUnlearned = INITIAL_PHRASES[INITIAL_PHRASES.length - 1];
-  const learnedIds = INITIAL_PHRASES.slice(0, INITIAL_PHRASES.length - 1).map((p) => p.id);
+  // 未履修が1問だけ残っているケース（坂路調教60問中59問既習、最後1問のみ未履修）
+  const uphillPhrases = INITIAL_PHRASES.filter((p) => p.type !== 'vocabulary');
+  const onlyOneUnlearned = uphillPhrases[uphillPhrases.length - 1];
+  const learnedIds = uphillPhrases.slice(0, uphillPhrases.length - 1).map((p) => p.id);
 
-  const result = selectDailyPhrases(INITIAL_PHRASES, learnedIds, '2026-10-12', 3);
+  const result = selectDailyPhrases(INITIAL_PHRASES, learnedIds, '2026-10-12', 3, 'uphill');
 
   assert.equal(result.questions.length, 3);
   const selectedIds = result.questions.map((q) => q.id);

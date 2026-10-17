@@ -9,6 +9,7 @@ import { RaceResultScreen } from './components/RaceResultScreen';
 import { RetirementScreen } from './components/RetirementScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
+import type { TrainingCourse } from './types';
 import {
   selectDailyPhrases,
   selectExtraTrainingPhrases,
@@ -22,6 +23,7 @@ type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement'
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [activeCourse, setActiveCourse] = useState<TrainingCourse>('uphill');
   const {
     progress,
     recordTodayPhrases,
@@ -62,7 +64,7 @@ export function App() {
       const existing = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
       if (existing.length > 0) return existing;
     }
-    return selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString).questions;
+    return selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString, 3, 'uphill').questions;
   });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -72,12 +74,16 @@ export function App() {
     isCorrect: boolean;
   }[]>([]);
 
-  const handleStartTraining = () => {
+  const handleStartTraining = (course: TrainingCourse = 'uphill') => {
+    setActiveCourse(course);
     let questions: PhraseItem[] = [];
 
+    const targetTodayIds =
+      course === 'woodchip' ? (progress.todayWoodchipPhraseIds ?? []) : progress.todayPhraseIds;
+
     // 本日の調教が完了している場合（復習モード）、または既に本日の出題フレーズが決定している場合
-    if (progress.todayPhraseIds.length > 0) {
-      questions = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
+    if (targetTodayIds.length > 0) {
+      questions = getPhrasesByIds(INITIAL_PHRASES, targetTodayIds);
     }
 
     // まだ本日の出題セットがない場合は選出して記録
@@ -85,10 +91,15 @@ export function App() {
       const selected = selectDailyPhrases(
         INITIAL_PHRASES,
         progress.learnedPhraseIds,
-        todayString
+        todayString,
+        3,
+        course
       );
       questions = selected.questions;
-      recordTodayPhrases(questions.map((q) => q.id));
+      recordTodayPhrases(
+        questions.map((q) => q.id),
+        course
+      );
     }
 
     setSessionQuestions(questions);
@@ -98,10 +109,13 @@ export function App() {
     setCurrentScreen('quiz');
   };
 
-  const handleStartExtraTraining = () => {
+  const handleStartExtraTraining = (course: TrainingCourse = 'uphill') => {
+    setActiveCourse(course);
     const selected = selectExtraTrainingPhrases(
       INITIAL_PHRASES,
-      progress.learnedPhraseIds
+      progress.learnedPhraseIds,
+      3,
+      course
     );
     setSessionQuestions(selected.questions);
     setCurrentQuestionIndex(0);
@@ -130,7 +144,7 @@ export function App() {
         .filter((item) => item.isCorrect)
         .map((item) => item.phrase.id);
       const sessionPhraseIds = sessionQuestions.map((q) => q.id);
-      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds);
+      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds, activeCourse);
       setCurrentScreen('result');
     }
   };

@@ -1,4 +1,5 @@
 import type { PhraseItem } from '../data/phrases';
+import type { TrainingCourse } from '../types';
 
 /**
  * 日付文字列（YYYY-MM-DD等）から決定論的な32bit数値ハッシュを算出
@@ -71,27 +72,44 @@ export interface DailySelectionResult {
 }
 
 /**
+ * コース種別に応じて対象フレーズをフィルタリングする
+ */
+export function filterPhrasesByCourse(
+  allPhrases: readonly PhraseItem[],
+  course: TrainingCourse = 'uphill'
+): PhraseItem[] {
+  if (course === 'woodchip') {
+    return allPhrases.filter((p) => p.type === 'vocabulary');
+  }
+  return allPhrases.filter((p) => p.type !== 'vocabulary');
+}
+
+/**
  * 日付シードと履修状況に基づき、日替わり3問を選出する
  * 
  * - 未履修フレーズを優先して選出
  * - 同一日・同一の履修状況であれば決定論的に同じ問題セットを返す
+ * - コース（uphill / woodchip）ごとに独立した候補プールと日付シードで選出
  * - 各問題の選択肢は開くたびにランダムにシャッフルされる
  */
 export function selectDailyPhrases(
   allPhrases: readonly PhraseItem[],
   learnedIds: readonly string[],
   todayStr: string,
-  count = 3
+  count = 3,
+  course: TrainingCourse = 'uphill'
 ): DailySelectionResult {
-  if (allPhrases.length === 0) {
+  const coursePhrases = filterPhrasesByCourse(allPhrases, course);
+  if (coursePhrases.length === 0) {
     return { questions: [], isReview: false };
   }
 
   const learnedSet = new Set(learnedIds);
-  const unlearned = allPhrases.filter((p) => !learnedSet.has(p.id));
-  const learned = allPhrases.filter((p) => learnedSet.has(p.id));
+  const unlearned = coursePhrases.filter((p) => !learnedSet.has(p.id));
+  const learned = coursePhrases.filter((p) => learnedSet.has(p.id));
 
-  const seed = hashDateString(todayStr);
+  // コースごとに異なるシード値を生成
+  const seed = hashDateString(`${todayStr}_${course}`);
   const rng = createMulberry32(seed);
 
   let selected: PhraseItem[] = [];
@@ -107,9 +125,9 @@ export function selectDailyPhrases(
     const shuffledLearned = seededShuffle(learned, rng);
     selected = [...unlearned, ...shuffledLearned.slice(0, remainingCount)];
   } else {
-    // 全問履修済みの場合: 全フレーズから日付シードで選出（復習出題）
+    // 全問履修済みの場合: コース全フレーズから日付シードで選出（復習出題）
     isReview = true;
-    const shuffledAll = seededShuffle(allPhrases, rng);
+    const shuffledAll = seededShuffle(coursePhrases, rng);
     selected = shuffledAll.slice(0, count);
   }
 
@@ -143,6 +161,7 @@ export function getPhrasesByIds(
 /**
  * 当日調教完了後の追加トレーニング（未習得フレーズの継続学習）用フレーズを選出する
  * 
+ * - コース（uphill / woodchip）ごとのプールから選出
  * - 原則「未習得プールから2問 ＋ 習得済みプールから1問」の計3問を選出
  * - 未習得プールが2問以下の場合は習得済みプールから補充して計3問を維持
  * - 全問習得済みの場合は全フレーズからランダムに3問選出（全問復習モード）
@@ -152,15 +171,17 @@ export function getPhrasesByIds(
 export function selectExtraTrainingPhrases(
   allPhrases: readonly PhraseItem[],
   learnedIds: readonly string[],
-  count = 3
+  count = 3,
+  course: TrainingCourse = 'uphill'
 ): DailySelectionResult {
-  if (allPhrases.length === 0) {
+  const coursePhrases = filterPhrasesByCourse(allPhrases, course);
+  if (coursePhrases.length === 0) {
     return { questions: [], isReview: false };
   }
 
   const learnedSet = new Set(learnedIds);
-  const unlearned = allPhrases.filter((p) => !learnedSet.has(p.id));
-  const learned = allPhrases.filter((p) => learnedSet.has(p.id));
+  const unlearned = coursePhrases.filter((p) => !learnedSet.has(p.id));
+  const learned = coursePhrases.filter((p) => learnedSet.has(p.id));
 
   let selected: PhraseItem[] = [];
   let isReview = false;
@@ -171,7 +192,7 @@ export function selectExtraTrainingPhrases(
   if (unlearned.length === 0) {
     // 全問習得済みの場合: 全フレーズから選出（復習出題）
     isReview = true;
-    selected = shuffleArray(allPhrases).slice(0, count);
+    selected = shuffleArray(coursePhrases).slice(0, count);
   } else if (unlearned.length === 1) {
     // 未習得が1問のみの場合: 未習得1問 ＋ 習得済みから補充
     const neededFromLearned = Math.min(count - 1, shuffledLearned.length);

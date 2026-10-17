@@ -34,12 +34,13 @@ test('extra training: selects 2 unlearned and 1 learned phrase when available', 
 });
 
 test('extra training: falls back gracefully when only 1 unlearned phrase remains', () => {
-  // 残り1問以外すべて習得済みとする
-  const allExceptOne = INITIAL_PHRASES.slice(0, INITIAL_PHRASES.length - 1).map((p) => p.id);
+  // 坂路調教プールから残り1問以外すべて習得済みとする
+  const uphillPhrases = INITIAL_PHRASES.filter((p) => p.type !== 'vocabulary');
+  const allExceptOne = uphillPhrases.slice(0, uphillPhrases.length - 1).map((p) => p.id);
   const learnedSet = new Set(allExceptOne);
-  const theUnlearnedId = INITIAL_PHRASES[INITIAL_PHRASES.length - 1].id;
+  const theUnlearnedId = uphillPhrases[uphillPhrases.length - 1].id;
 
-  const result = selectExtraTrainingPhrases(INITIAL_PHRASES, allExceptOne, 3);
+  const result = selectExtraTrainingPhrases(INITIAL_PHRASES, allExceptOne, 3, 'uphill');
 
   assert.equal(result.questions.length, 3, 'Should select exactly 3 questions');
   assert.equal(result.isReview, false, 'Should not be full review mode');
