@@ -156,13 +156,24 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
         </p>
       </div>
 
-      {/* 英文フレーズカード */}
+      {/* 英文問題カード（基礎単語または実戦フレーズ） */}
       <div className="bg-white border-2 border-amber-600/30 rounded-2xl p-4 shadow-2xs mb-3">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
-            TARGET PHRASE
-          </span>
-          <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+        <div className="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
+              {currentItem.type === 'vocabulary' ? 'TARGET VOCABULARY' : 'TARGET PHRASE'}
+            </span>
+            <span
+              className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                currentItem.type === 'vocabulary'
+                  ? 'bg-amber-100/70 text-amber-900 border-amber-200'
+                  : 'bg-emerald-100/70 text-emerald-900 border-emerald-200'
+              }`}
+            >
+              {currentItem.type === 'vocabulary' ? '🪵 基礎単語' : '🌿 実戦フレーズ'}
+            </span>
+          </div>
+          <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 truncate max-w-[200px]">
             {currentItem.situation}
           </span>
         </div>

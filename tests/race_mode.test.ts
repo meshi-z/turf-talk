@@ -9,8 +9,11 @@ import {
   buildPhaseDistanceLabels,
   RACE_PHASES,
   RACE_QUESTION_COUNT,
+  RACE_VOCABULARY_COUNT,
+  RACE_PHRASE_COUNT,
 } from '../src/lib/raceMode.ts';
 import { getCurrentWeekRaceInfo } from '../src/lib/careerCycle.ts';
+import { eliminateOneWrongOption } from '../src/lib/conditionBonus.ts';
 import { INITIAL_PHRASES } from '../src/data/phrases.ts';
 
 test('raceMode: phases metadata integrity', () => {
@@ -131,9 +134,25 @@ test('calculateRacePlacement: accurately determines rank from score across Weeks
   assert.ok(res0.rankText.includes('着外'));
 });
 
-test('selectRaceQuestions: selects exactly 5 questions with options shuffled', () => {
+test('selectRaceQuestions: hybrid question structure (Q1-Q2 vocabulary, Q3-Q5 phrase)', () => {
   const selected = selectRaceQuestions(INITIAL_PHRASES, []);
   assert.equal(selected.length, RACE_QUESTION_COUNT);
+  assert.equal(RACE_VOCABULARY_COUNT, 2);
+  assert.equal(RACE_PHRASE_COUNT, 3);
+
+  // Q1 and Q2 must be vocabulary (ウッドチップ調教の基礎単語)
+  assert.equal(selected[0].type, 'vocabulary', 'Question 1 must be vocabulary');
+  assert.equal(selected[1].type, 'vocabulary', 'Question 2 must be vocabulary');
+  assert.ok(selected[0].id.startsWith('vocab-'), 'Question 1 ID should start with vocab-');
+  assert.ok(selected[1].id.startsWith('vocab-'), 'Question 2 ID should start with vocab-');
+
+  // Q3, Q4, Q5 must be phrases (坂路調教の実戦フレーズ)
+  assert.notEqual(selected[2].type, 'vocabulary', 'Question 3 must be phrase');
+  assert.notEqual(selected[3].type, 'vocabulary', 'Question 4 must be phrase');
+  assert.notEqual(selected[4].type, 'vocabulary', 'Question 5 must be phrase');
+  assert.ok(selected[2].id.startsWith('phrase-'), 'Question 3 ID should start with phrase-');
+  assert.ok(selected[3].id.startsWith('phrase-'), 'Question 4 ID should start with phrase-');
+  assert.ok(selected[4].id.startsWith('phrase-'), 'Question 5 ID should start with phrase-');
 
   // All 5 must have 4 options and valid correct answer
   selected.forEach((q) => {
@@ -142,44 +161,75 @@ test('selectRaceQuestions: selects exactly 5 questions with options shuffled', (
   });
 });
 
-test('selectRaceQuestions: prioritizes learned phrases pool when no theme is specified', () => {
-  const learnedIds = ['phrase-001', 'phrase-002', 'phrase-003', 'phrase-004', 'phrase-005'];
+test('selectRaceQuestions: prioritizes learned pool across vocabulary and phrases', () => {
+  const learnedVocabIds = ['vocab-001', 'vocab-002'];
+  const learnedPhraseIds = ['phrase-001', 'phrase-002', 'phrase-003'];
+  const learnedIds = [...learnedVocabIds, ...learnedPhraseIds];
+
   const selected = selectRaceQuestions(INITIAL_PHRASES, learnedIds);
   assert.equal(selected.length, 5);
 
   const selectedIds = selected.map((q) => q.id);
   // All 5 should come from the learned pool
   learnedIds.forEach((id) => {
-    assert.ok(selectedIds.includes(id));
+    assert.ok(selectedIds.includes(id), `Selected questions should include learned item ${id}`);
   });
 });
 
-test('selectRaceQuestions: prioritizes themeCategory phrases and prefers learned within theme', () => {
-  const tacticsPhrases = INITIAL_PHRASES.filter((p) => p.category === 'tactics');
-  assert.ok(tacticsPhrases.length >= 5);
+test('selectRaceQuestions: prioritizes themeCategory across vocabulary and phrases', () => {
+  const tacticsVocab = INITIAL_PHRASES.filter((p) => p.type === 'vocabulary' && p.category === 'tactics');
+  const tacticsPhrase = INITIAL_PHRASES.filter((p) => p.type !== 'vocabulary' && p.category === 'tactics');
 
-  // Mark 3 tactics phrases and 5 non-tactics phrases as learned
-  const learnedTacticsIds = tacticsPhrases.slice(0, 3).map((p) => p.id);
-  const learnedOtherIds = INITIAL_PHRASES.filter((p) => p.category !== 'tactics')
+  assert.ok(tacticsVocab.length >= 2, 'Should have at least 2 tactics vocabularies');
+  assert.ok(tacticsPhrase.length >= 3, 'Should have at least 3 tactics phrases');
+
+  // Mark 1 tactics vocab and 2 tactics phrases as learned
+  const learnedVocabId = tacticsVocab[0].id;
+  const learnedPhraseIds = [tacticsPhrase[0].id, tacticsPhrase[1].id];
+
+  const otherLearnedIds = INITIAL_PHRASES.filter((p) => p.category !== 'tactics')
     .slice(0, 5)
     .map((p) => p.id);
 
   const selected = selectRaceQuestions(
     INITIAL_PHRASES,
-    [...learnedTacticsIds, ...learnedOtherIds],
+    [learnedVocabId, ...learnedPhraseIds, ...otherLearnedIds],
     'tactics'
   );
 
   assert.equal(selected.length, 5);
+
   // All 5 selected questions must be 'tactics' category
   selected.forEach((q) => {
-    assert.equal(q.category, 'tactics');
+    assert.equal(q.category, 'tactics', `Question ${q.id} must belong to theme category tactics`);
   });
 
-  // All 3 learned tactics phrases must be included first
+  // Learned items within theme must be included
   const selectedIds = selected.map((q) => q.id);
-  learnedTacticsIds.forEach((id) => {
-    assert.ok(selectedIds.includes(id));
+  assert.ok(selectedIds.includes(learnedVocabId), 'Learned tactics vocab should be prioritized');
+  learnedPhraseIds.forEach((id) => {
+    assert.ok(selectedIds.includes(id), `Learned tactics phrase ${id} should be prioritized`);
   });
+});
+
+test('raceMode: eliminateOneWrongOption works seamlessly for both vocabulary and phrase questions', () => {
+  const selected = selectRaceQuestions(INITIAL_PHRASES, []);
+  assert.equal(selected.length, 5);
+
+  // Q1 is vocabulary
+  const vocabQuestion = selected[0];
+  assert.equal(vocabQuestion.type, 'vocabulary');
+  const eliminatedVocab = eliminateOneWrongOption(vocabQuestion.options, []);
+  assert.ok(eliminatedVocab, 'Should eliminate one wrong option for vocabulary question');
+  const vocabCorrectOpt = vocabQuestion.options.find((o) => o.isCorrect);
+  assert.notEqual(eliminatedVocab, vocabCorrectOpt?.id, 'Correct option must not be eliminated for vocabulary');
+
+  // Q3 is phrase
+  const phraseQuestion = selected[2];
+  assert.notEqual(phraseQuestion.type, 'vocabulary');
+  const eliminatedPhrase = eliminateOneWrongOption(phraseQuestion.options, []);
+  assert.ok(eliminatedPhrase, 'Should eliminate one wrong option for phrase question');
+  const phraseCorrectOpt = phraseQuestion.options.find((o) => o.isCorrect);
+  assert.notEqual(eliminatedPhrase, phraseCorrectOpt?.id, 'Correct option must not be eliminated for phrase');
 });
 

@@ -2,6 +2,8 @@ import type { PhraseCategory, PhraseItem, QuizOption } from '../data/phrases';
 import type { CareerRouteRace, CareerWeek } from '../types';
 
 export const RACE_QUESTION_COUNT = 5;
+export const RACE_VOCABULARY_COUNT = 2; // レース前半（第1〜2問）: 基礎単語・競馬用語
+export const RACE_PHRASE_COUNT = 3;     // レース後半（第3〜5問）: 実戦フレーズ
 
 export interface RacePhase {
   step: number; // 1 to 5
@@ -392,8 +394,75 @@ function shuffleOptions(options: readonly QuizOption[]): QuizOption[] {
 }
 
 /**
- * 週末レース用の5問を選出
- * - themeCategory が指定されている場合、当該テーマカテゴリのフレーズ（履修済み → 未履修）を最優先でピックアップ
+ * 単一の母集団（単語プールまたはフレーズプール）から優先順位に基づいて問題を選出する
+ * - themeCategory が指定されている場合: 当該テーマ（履修済 → 未履修）を最優先
+ * - 残りは他カテゴリ（履修済 → 未履修）から選出
+ */
+function selectPoolQuestions(
+  poolPhrases: readonly PhraseItem[],
+  learnedSet: Set<string>,
+  targetCount: number,
+  themeCategory?: PhraseCategory
+): PhraseItem[] {
+  if (poolPhrases.length === 0 || targetCount <= 0) return [];
+
+  const pools: PhraseItem[][] = [];
+
+  if (themeCategory) {
+    const themeLearned = poolPhrases.filter(
+      (p) => p.category === themeCategory && learnedSet.has(p.id)
+    );
+    const themeUnlearned = poolPhrases.filter(
+      (p) => p.category === themeCategory && !learnedSet.has(p.id)
+    );
+    const otherLearned = poolPhrases.filter(
+      (p) => p.category !== themeCategory && learnedSet.has(p.id)
+    );
+    const otherUnlearned = poolPhrases.filter(
+      (p) => p.category !== themeCategory && !learnedSet.has(p.id)
+    );
+    pools.push(
+      shuffleArray(themeLearned),
+      shuffleArray(themeUnlearned),
+      shuffleArray(otherLearned),
+      shuffleArray(otherUnlearned)
+    );
+  } else {
+    const learnedPool = poolPhrases.filter((p) => learnedSet.has(p.id));
+    const unlearnedPool = poolPhrases.filter((p) => !learnedSet.has(p.id));
+    pools.push(shuffleArray(learnedPool), shuffleArray(unlearnedPool));
+  }
+
+  const selected: PhraseItem[] = [];
+  const selectedIds = new Set<string>();
+
+  for (const pool of pools) {
+    for (const item of pool) {
+      if (selected.length < targetCount && !selectedIds.has(item.id)) {
+        selected.push(item);
+        selectedIds.add(item.id);
+      }
+    }
+  }
+
+  // 万一足りない場合は対象プール全体から補填
+  if (selected.length < targetCount) {
+    for (const item of shuffleArray([...poolPhrases])) {
+      if (selected.length < targetCount && !selectedIds.has(item.id)) {
+        selected.push(item);
+        selectedIds.add(item.id);
+      }
+    }
+  }
+
+  return selected;
+}
+
+/**
+ * 週末レース用の5問をハイブリッド選出する
+ * - 第1〜2問: 基礎単語・競馬用語（vocabulary / 2問）
+ * - 第3〜5問: 実戦フレーズ（phrase / 3問）
+ * - themeCategory が指定されている場合、単語・フレーズそれぞれにおいて当該テーマカテゴリのフレーズ（履修済み → 未履修）を最優先でピックアップ
  * - 足りない分は他カテゴリの履修済み → 未履修から補充
  * - 各問題の選択肢を開くたびにシャッフル
  */
@@ -405,57 +474,53 @@ export function selectRaceQuestions(
   if (allPhrases.length === 0) return [];
 
   const learnedSet = new Set(learnedPhraseIds);
-  const pools: PhraseItem[][] = [];
 
-  if (themeCategory) {
-    const themeLearned = allPhrases.filter(
-      (p) => p.category === themeCategory && learnedSet.has(p.id)
-    );
-    const themeUnlearned = allPhrases.filter(
-      (p) => p.category === themeCategory && !learnedSet.has(p.id)
-    );
-    const otherLearned = allPhrases.filter(
-      (p) => p.category !== themeCategory && learnedSet.has(p.id)
-    );
-    const otherUnlearned = allPhrases.filter(
-      (p) => p.category !== themeCategory && !learnedSet.has(p.id)
-    );
-    pools.push(
-      shuffleArray(themeLearned),
-      shuffleArray(themeUnlearned),
-      shuffleArray(otherLearned),
-      shuffleArray(otherUnlearned)
-    );
-  } else {
-    const learnedPool = allPhrases.filter((p) => learnedSet.has(p.id));
-    const unlearnedPool = allPhrases.filter((p) => !learnedSet.has(p.id));
-    pools.push(shuffleArray(learnedPool), shuffleArray(unlearnedPool));
-  }
+  const vocabPool = allPhrases.filter((p) => p.type === 'vocabulary');
+  const phrasePool = allPhrases.filter((p) => p.type !== 'vocabulary');
 
-  const selected: PhraseItem[] = [];
-  const selectedIds = new Set<string>();
+  // 単語・フレーズの双方が存在する場合（通常のハイブリッド出題）
+  if (vocabPool.length > 0 && phrasePool.length > 0) {
+    const vocabSelected = selectPoolQuestions(
+      vocabPool,
+      learnedSet,
+      RACE_VOCABULARY_COUNT,
+      themeCategory
+    );
+    const phraseSelected = selectPoolQuestions(
+      phrasePool,
+      learnedSet,
+      RACE_PHRASE_COUNT,
+      themeCategory
+    );
 
-  for (const pool of pools) {
-    for (const item of pool) {
-      if (selected.length < RACE_QUESTION_COUNT && !selectedIds.has(item.id)) {
-        selected.push(item);
-        selectedIds.add(item.id);
+    const combined = [...vocabSelected, ...phraseSelected];
+
+    // 全体で5問に満たない場合（極小データセット等）のフォールバック
+    if (combined.length < RACE_QUESTION_COUNT) {
+      const combinedIds = new Set(combined.map((q) => q.id));
+      for (const item of shuffleArray(allPhrases)) {
+        if (combined.length < RACE_QUESTION_COUNT && !combinedIds.has(item.id)) {
+          combined.push(item);
+          combinedIds.add(item.id);
+        }
       }
     }
+
+    return combined.slice(0, RACE_QUESTION_COUNT).map((item) => ({
+      ...item,
+      options: shuffleOptions(item.options),
+    }));
   }
 
-  // それでも足りない場合（フレーズ総数が5問未満など）はプール全体から補填
-  if (selected.length < RACE_QUESTION_COUNT) {
-    for (const item of shuffleArray(allPhrases)) {
-      if (selected.length < RACE_QUESTION_COUNT && !selectedIds.has(item.id)) {
-        selected.push(item);
-        selectedIds.add(item.id);
-      }
-    }
-  }
+  // どちらか一方のプールしか存在しない場合の安全フォールバック（旧データ等）
+  const fallbackSelected = selectPoolQuestions(
+    allPhrases,
+    learnedSet,
+    RACE_QUESTION_COUNT,
+    themeCategory
+  );
 
-  // 各問題の選択肢をシャッフルして返す
-  return selected.map((item) => ({
+  return fallbackSelected.map((item) => ({
     ...item,
     options: shuffleOptions(item.options),
   }));
