@@ -37,16 +37,16 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   onGoHome,
   onRetryRace,
 }) => {
-  const placement: RacePlacement = calculateRacePlacement(score);
-  const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
-  const isWinner = placement.type === '1st';
-  const isSecond = placement.type === '2nd';
-
   const { careerHorse } = progress;
   const routeInfo = getCareerRouteInfo(careerHorse.routeId);
   const completedWeek = careerAdvance?.completedWeek ?? careerHorse.currentWeek;
   const completedRaceInfo = getCurrentWeekRaceInfo(careerHorse.routeId, completedWeek);
   const nextStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
+
+  const placement: RacePlacement = calculateRacePlacement(score, completedWeek);
+  const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
+  const isWinner = placement.type === '1st';
+  const isSecond = placement.type === '2nd';
 
   // 画面マウント時にファンファーレ等のSEを再生
   useEffect(() => {

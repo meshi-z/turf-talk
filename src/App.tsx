@@ -14,7 +14,7 @@ import {
   getPhrasesByIds,
 } from './lib/dailyRotation';
 import { selectRaceQuestions } from './lib/raceMode';
-import { type CareerRaceAdvanceResult } from './lib/careerCycle';
+import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
 type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result';
@@ -141,9 +141,18 @@ export function App() {
     isCorrect: boolean;
   }[]>([]);
 
+  const currentWeekRace = getCurrentWeekRaceInfo(
+    progress.careerHorse.routeId,
+    progress.careerHorse.currentWeek
+  );
+
   const handleStartRace = () => {
     soundManager.playGateOpen();
-    const questions = selectRaceQuestions(INITIAL_PHRASES, progress.learnedPhraseIds);
+    const questions = selectRaceQuestions(
+      INITIAL_PHRASES,
+      progress.learnedPhraseIds,
+      currentWeekRace.themeCategory
+    );
     setRaceQuestions(questions);
     setRaceCurrentIndex(0);
     setRaceScore(0);
@@ -243,6 +252,7 @@ export function App() {
               questions={raceQuestions}
               currentIndex={raceCurrentIndex}
               initialHints={conditionTier.hintCount}
+              raceInfo={currentWeekRace}
               onAnswer={handleAnswerRaceQuestion}
               onNext={handleNextRaceQuestion}
               onCancel={handleCancelQuiz}
