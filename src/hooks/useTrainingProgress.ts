@@ -10,12 +10,15 @@ import {
   type AppMode,
 } from '../lib/dayMode';
 import {
+  MAX_WEEKLY_TRAINING_DAYS,
   getConditionFromDays,
   calculateRaceFeedback,
 } from '../lib/conditionBonus';
 import {
   getLogicalDateString,
   calculateNextStreakOnCompletion,
+  getLogicalWeekMonday,
+  isWeeklyRaceCompletedForWeek,
 } from '../lib/logicalDate';
 import {
   evaluateStreakWithCarrotRescue,
@@ -50,6 +53,9 @@ const DEFAULT_PROGRESS: UserProgress = {
   weekdayTrainingDays: 3, // 初期値3日（好調）
   carrotCount: 1, // 初期所持数1個（お試し・安心設計）
   lastCarrotUsedDate: null,
+  currentWeekMonday: null,
+  lastRaceWeekMonday: null,
+  hasCompletedWeeklyRace: false,
   careerHorse: createDefaultCareerHorse(),
 };
 
@@ -60,6 +66,7 @@ export function useTrainingProgress() {
       if (saved) {
         const parsed = JSON.parse(saved);
         const today = getLogicalDateString();
+        const todayMonday = getLogicalWeekMonday(today);
         const isSameDay = parsed.lastTrainingDate === today;
         const savedStreak = typeof parsed.streakDays === 'number' ? parsed.streakDays : 0;
         const savedCarrots = typeof parsed.carrotCount === 'number' ? parsed.carrotCount : 1;
@@ -75,6 +82,21 @@ export function useTrainingProgress() {
         // 既存データから安全に CareerHorse をマイグレーション・復元
         const migratedHorse = migrateToCareerHorse(parsed);
 
+        // 週替わり判定（月曜午前4時で新しい週に入った場合は週間調教日数および週末レース出走済フラグをリセット）
+        const savedWeekMonday =
+          typeof parsed.currentWeekMonday === 'string' ? parsed.currentWeekMonday : null;
+        const isNewWeek = savedWeekMonday !== null && savedWeekMonday !== todayMonday;
+
+        const restoredWeeklyDays = isNewWeek
+          ? 0
+          : typeof parsed.weekdayTrainingDays === 'number'
+            ? Math.max(0, Math.min(MAX_WEEKLY_TRAINING_DAYS, parsed.weekdayTrainingDays))
+            : 3;
+
+        const lastRaceWeekMonday =
+          typeof parsed.lastRaceWeekMonday === 'string' ? parsed.lastRaceWeekMonday : null;
+        const completedWeeklyRace = isWeeklyRaceCompletedForWeek(lastRaceWeekMonday, today);
+
         return {
           ...DEFAULT_PROGRESS,
           ...parsed,
@@ -87,17 +109,20 @@ export function useTrainingProgress() {
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
           completedToday: isSameDay,
-          weekdayTrainingDays:
-            typeof parsed.weekdayTrainingDays === 'number'
-              ? Math.max(0, Math.min(5, parsed.weekdayTrainingDays))
-              : 3,
+          weekdayTrainingDays: restoredWeeklyDays,
+          currentWeekMonday: todayMonday,
+          lastRaceWeekMonday,
+          hasCompletedWeeklyRace: completedWeeklyRace,
           careerHorse: migratedHorse,
         };
       }
     } catch {
       // LocalStorage読み取り失敗時のフォールバック
     }
-    return DEFAULT_PROGRESS;
+    return {
+      ...DEFAULT_PROGRESS,
+      currentWeekMonday: getLogicalWeekMonday(getLogicalDateString()),
+    };
   });
 
   useEffect(() => {
@@ -126,15 +151,19 @@ export function useTrainingProgress() {
     sessionPhraseIds: string[] = []
   ) => {
     const today = getLogicalDateString();
+    const todayMonday = getLogicalWeekMonday(today);
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
       const nextStreak = isAlreadyCompletedToday
         ? prev.streakDays
         : calculateNextStreakOnCompletion(prev.streakDays, prev.lastTrainingDate, today);
 
+      const isSameWeek = !prev.currentWeekMonday || prev.currentWeekMonday === todayMonday;
+      const baseWeeklyDays = isSameWeek ? prev.weekdayTrainingDays : 0;
+
       const nextWeekdayDays = isAlreadyCompletedToday
-        ? prev.weekdayTrainingDays
-        : Math.min(5, prev.weekdayTrainingDays + 1);
+        ? baseWeeklyDays
+        : Math.min(MAX_WEEKLY_TRAINING_DAYS, baseWeeklyDays + 1);
 
       // 調教日数に応じたコンディションを算出
       const tier = getConditionFromDays(nextWeekdayDays);
@@ -168,6 +197,8 @@ export function useTrainingProgress() {
         lapCount: nextLapCount,
         todayPhraseIds: nextTodayPhraseIds,
         weekdayTrainingDays: nextWeekdayDays,
+        currentWeekMonday: todayMonday,
+        hasCompletedWeeklyRace: isWeeklyRaceCompletedForWeek(prev.lastRaceWeekMonday, today),
         careerHorse: nextCareerHorse,
       };
     });
@@ -177,11 +208,14 @@ export function useTrainingProgress() {
   const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
   const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
   const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
+  const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
 
   /**
-   * レース完了時のステータス変動、余力温存にんじんボーナス、および次週へのキャリア進行
+   * レース完了時のステータス変動、余力温存にんじんボーナス、次週へのキャリア進行、および当該週末の出走済記録
    */
   const markRaceCompleted = (score: number, remainingReserves: number = 0) => {
+    const today = getLogicalDateString();
+    const todayMonday = getLogicalWeekMonday(today);
     const activeWeek: CareerWeek =
       debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
     const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
@@ -205,11 +239,17 @@ export function useTrainingProgress() {
       horseWeight: feedback.nextWeight,
       condition: feedback.nextCondition,
       carrotCount: carrotBonus.nextCarrots,
+      currentWeekMonday: todayMonday,
+      lastRaceWeekMonday: todayMonday,
+      hasCompletedWeeklyRace: true,
       careerHorse: careerAdvance.nextHorse,
     }));
 
     if (debugCareerWeek !== null && careerAdvance.steppedUp) {
       setDebugCareerWeek(careerAdvance.nextWeek);
+    }
+    if (debugRaceCompleted !== null) {
+      setDebugRaceCompleted(true);
     }
 
     return {
@@ -279,6 +319,7 @@ export function useTrainingProgress() {
   };
 
   const resetProgressForDemo = () => {
+    const today = getLogicalDateString();
     const initialColor = rollHorseCoatColor();
     const initialName = generateRandomHorseName();
     const freshHorse = createDefaultCareerHorse({
@@ -295,12 +336,16 @@ export function useTrainingProgress() {
       lapCount: 1,
       todayPhraseIds: [],
       weekdayTrainingDays: 3,
+      currentWeekMonday: getLogicalWeekMonday(today),
+      lastRaceWeekMonday: null,
+      hasCompletedWeeklyRace: false,
       careerHorse: freshHorse,
     });
     setDebugDayOfWeek(null);
     setDebugWeekdayDays(null);
     setDebugCarrotCount(null);
     setDebugCareerWeek(null);
+    setDebugRaceCompleted(null);
   };
 
   const todayStr = getLogicalDateString();
@@ -310,7 +355,7 @@ export function useTrainingProgress() {
   const daysUntilWeekend: number = getDaysUntilWeekend(effectiveDayOfWeek);
   const isWeekendDay: boolean = isWeekend(effectiveDayOfWeek);
 
-  // 平日調教日数の実効値と、それに基づくコンディション・馬体重・ヒント数
+  // 週間調教日数の実効値と、それに基づくコンディション・馬体重・ヒント数
   const effectiveWeekdayDays =
     debugWeekdayDays !== null ? debugWeekdayDays : progress.weekdayTrainingDays;
   const conditionTier = getConditionFromDays(effectiveWeekdayDays);
@@ -321,6 +366,13 @@ export function useTrainingProgress() {
   const effectiveCareerWeek: CareerWeek =
     debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
 
+  const actualRaceCompleted = isWeeklyRaceCompletedForWeek(
+    progress.lastRaceWeekMonday,
+    todayStr
+  );
+  const effectiveRaceCompleted: boolean =
+    debugRaceCompleted !== null ? debugRaceCompleted : actualRaceCompleted;
+
   return {
     progress: {
       ...progress,
@@ -329,6 +381,7 @@ export function useTrainingProgress() {
       horseWeight: conditionTier.baseWeight,
       weekdayTrainingDays: effectiveWeekdayDays,
       carrotCount: effectiveCarrots,
+      hasCompletedWeeklyRace: effectiveRaceCompleted,
       careerHorse: {
         ...progress.careerHorse,
         currentWeek: effectiveCareerWeek,
@@ -360,6 +413,9 @@ export function useTrainingProgress() {
     debugCareerWeek,
     setDebugCareerWeek,
     effectiveCareerWeek,
+    debugRaceCompleted,
+    setDebugRaceCompleted,
+    hasCompletedWeeklyRace: effectiveRaceCompleted,
   };
 }
 

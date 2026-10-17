@@ -1,6 +1,8 @@
 import type { QuizOption } from '../data/phrases';
 import type { HorseCondition } from '../types';
 
+export const MAX_WEEKLY_TRAINING_DAYS = 7;
+
 export interface ConditionTierInfo {
   condition: HorseCondition;
   label: string;
@@ -11,12 +13,16 @@ export interface ConditionTierInfo {
 }
 
 /**
- * 平日調教消化日数（0〜5日）に応じた愛馬のコンディション・馬体重・ボーナス情報
+ * 週間調教消化日数（0〜7日）に応じた愛馬のコンディション・馬体重・ボーナス情報
+ * - 5〜7日: 絶好調 (peak, 余力2回)
+ * - 3〜4日: 好調 (up, 余力1回)
+ * - 1〜2日: 普通 (flat, 余力0回)
+ * - 0日: 太め残り (heavy, 余力0回)
  */
 export function getConditionFromDays(days: number): ConditionTierInfo {
-  const safeDays = Math.max(0, Math.min(5, Math.floor(days)));
+  const safeDays = Math.max(0, Math.min(MAX_WEEKLY_TRAINING_DAYS, Math.floor(days)));
 
-  if (safeDays >= 4) {
+  if (safeDays >= 5) {
     return {
       condition: 'peak',
       label: '絶好調 ⤴',
@@ -27,7 +33,7 @@ export function getConditionFromDays(days: number): ConditionTierInfo {
     };
   }
 
-  if (safeDays === 3) {
+  if (safeDays >= 3) {
     return {
       condition: 'up',
       label: '好調 ↗',

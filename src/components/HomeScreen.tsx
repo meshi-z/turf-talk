@@ -54,6 +54,8 @@ interface HomeScreenProps {
   onSetDebugCarrotCount?: (count: number | null) => void;
   debugCareerWeek?: CareerWeek | null;
   onSetDebugCareerWeek?: (week: CareerWeek | null) => void;
+  debugRaceCompleted?: boolean | null;
+  onSetDebugRaceCompleted?: (completed: boolean | null) => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -82,6 +84,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onSetDebugCarrotCount,
   debugCareerWeek = null,
   onSetDebugCareerWeek,
+  debugRaceCompleted = null,
+  onSetDebugRaceCompleted,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -328,18 +332,18 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           )}
         </div>
 
-        {/* 平日調教仕上がり & レースボーナス状況 */}
+        {/* 週間調教仕上がり & レースボーナス状況 */}
         <div className="mt-2.5 pt-2.5 border-t border-emerald-700/40 text-[11px] text-emerald-100 flex items-center justify-between">
           <span className="flex items-center gap-1">
             <span>🏋️ 調教消化:</span>
-            <strong className="text-white">{progress.weekdayTrainingDays} / 5日</strong>
+            <strong className="text-white">{progress.weekdayTrainingDays} / 7日</strong>
           </span>
-          {progress.weekdayTrainingDays >= 4 && (
+          {progress.weekdayTrainingDays >= 5 && (
             <span className="text-amber-300 font-extrabold flex items-center gap-0.5">
               <span>⚡</span> 愛馬の余力2回付与
             </span>
           )}
-          {progress.weekdayTrainingDays === 3 && (
+          {progress.weekdayTrainingDays >= 3 && progress.weekdayTrainingDays < 5 && (
             <span className="text-emerald-200 font-bold flex items-center gap-0.5">
               <span>⚡</span> 愛馬の余力1回付与
             </span>
@@ -401,16 +405,28 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </div>
 
           <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
-            平日の坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レースを完走して次のステージへ進もう。
+            {progress.hasCompletedWeeklyRace
+              ? '今週の週末レースは出走完了しました！土日も坂路調教や復習を続けて、来週末の次走に向けて愛馬を仕上げましょう。'
+              : '坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レース（週末1回限定）を完走して次のステージへ進もう。'}
           </p>
 
-          <button
-            onClick={onStartRace}
-            className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
-          >
-            <Trophy className="w-5 h-5 fill-amber-950" />
-            <span>{currentWeekRace.raceName}に出走する（5問）</span>
-          </button>
+          {progress.hasCompletedWeeklyRace ? (
+            <button
+              type="button"
+              disabled
+              className="mt-4 w-full bg-amber-950/70 text-amber-200/90 border border-amber-500/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+            >
+              <span>出走完了 🏁（次回出走は来週末）</span>
+            </button>
+          ) : (
+            <button
+              onClick={onStartRace}
+              className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
+            >
+              <Trophy className="w-5 h-5 fill-amber-950" />
+              <span>{currentWeekRace.raceName}に出走する（5問）</span>
+            </button>
+          )}
         </div>
       ) : null}
 
@@ -594,11 +610,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             </span>
           </div>
 
-          {/* 平日調教日数 (0〜5日) シミュレート */}
+          {/* 週間調教日数 (0〜7日) シミュレート */}
           <div className="mt-3 pt-2 border-t border-zinc-200/60">
             <div className="flex justify-between items-center mb-1.5">
               <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
-                <span>🏋️</span> 調教日数切替 (0〜5日)
+                <span>🏋️</span> 調教日数切替 (0〜7日)
               </span>
               {debugWeekdayDays !== null && (
                 <button
@@ -609,8 +625,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-6 gap-1">
-              {[0, 1, 2, 3, 4, 5].map((d) => (
+            <div className="grid grid-cols-8 gap-1">
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((d) => (
                 <button
                   key={d}
                   onClick={() => onSetDebugWeekdayDays(d)}
@@ -669,6 +685,49 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                     Week {w}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* 週末レース出走状態 (未出走 / 出走済) シミュレート */}
+          {onSetDebugRaceCompleted && (
+            <div className="mt-3 pt-2 border-t border-zinc-200/60">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
+                  <span>🏁</span> 週末レース出走状態切替
+                </span>
+                {debugRaceCompleted !== null && (
+                  <button
+                    onClick={() => onSetDebugRaceCompleted(null)}
+                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                  >
+                    実状態に戻す
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  type="button"
+                  onClick={() => onSetDebugRaceCompleted(false)}
+                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                    !progress.hasCompletedWeeklyRace
+                      ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
+                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                  }`}
+                >
+                  未出走 (出走可能)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSetDebugRaceCompleted(true)}
+                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                    progress.hasCompletedWeeklyRace
+                      ? 'bg-amber-700 text-white shadow-xs ring-2 ring-amber-400'
+                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                  }`}
+                >
+                  出走済 🏁 (制限中)
+                </button>
               </div>
             </div>
           )}

@@ -77,9 +77,12 @@ export interface UserProgress {
   learnedPhraseIds: string[]; // 履修済みフレーズID
   lapCount: number; // 周回数
   todayPhraseIds: string[]; // 本日の調教対象フレーズID
-  weekdayTrainingDays: number; // 今週の平日調教消化日数 (0〜5)
+  weekdayTrainingDays: number; // 今週の調教消化日数 (0〜7)
   carrotCount: number; // にんじん所持数 (0〜3)
   lastCarrotUsedDate?: string | null; // 直近ににんじんを消費して救済した論理日付
+  currentWeekMonday?: string | null; // 週間調教日数を集計している対象週の月曜日 (YYYY-MM-DD)
+  lastRaceWeekMonday?: string | null; // 直近に週末レースを出走完了した週の月曜日 (YYYY-MM-DD)
+  hasCompletedWeeklyRace?: boolean; // 当該週の週末レースに出走済みかどうか
   careerHorse: CareerHorse; // 現在の担当競走馬キャリア情報
 }
 
