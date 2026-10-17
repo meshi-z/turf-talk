@@ -25,6 +25,11 @@ import {
   sanitizeHorseName,
   updateCareerHorseAfterTraining,
   validateHorseName,
+  isCareerWeek4Completed,
+  determineHorseEpithet,
+  evaluateRetirementSummary,
+  createHallOfFameRecord,
+  retireAndSpawnNextGeneration,
 } from '../src/lib/careerCycle.ts';
 
 test('coat colors: defines all 8 JRA coat colors with weights summing to 100% and 白毛 at 1%', () => {
@@ -262,4 +267,96 @@ test('profile lock & reroll: allows name/color reroll and route change before fi
   assert.equal(nextGenHorse.hasTrained, false);
   assert.equal(isHorseProfileLocked(nextGenHorse), false);
 });
+
+test('retirement & next generation: evaluates epithets, creates Hall of Fame record, and spawns generation + 1', () => {
+  // 1. 4戦全勝（4勝）の場合は「不敗の世界覇者」
+  let unbeaten = createDefaultCareerHorse({ name: 'ディープスター', routeId: 'classic-colt' });
+  assert.equal(isCareerWeek4Completed(unbeaten), false);
+  unbeaten = updateCareerHorseAfterTraining(unbeaten, ['p01', 'p02', 'p03'], 480);
+  unbeaten = advanceCareerHorseAfterRace(unbeaten, 5, '1着 🥇 (優勝)', 478).nextHorse;
+  unbeaten = advanceCareerHorseAfterRace(unbeaten, 5, '1着 🥇 (優勝)', 476).nextHorse;
+  unbeaten = advanceCareerHorseAfterRace(unbeaten, 5, '1着 🥇 (優勝)', 474).nextHorse;
+  unbeaten = advanceCareerHorseAfterRace(unbeaten, 5, '1着 🥇 (優勝)', 472).nextHorse;
+
+  assert.equal(isCareerWeek4Completed(unbeaten), true);
+  const unbeatenSummary = evaluateRetirementSummary(unbeaten);
+  assert.equal(unbeatenSummary.wins, 4);
+  assert.equal(unbeatenSummary.totalRaces, 4);
+  assert.equal(unbeatenSummary.learnedCount, 3);
+  assert.equal(unbeatenSummary.titleName, '不敗の世界覇者');
+  assert.deepEqual(unbeatenSummary.titles, [
+    'メイクデビュー 制覇',
+    '弥生賞 制覇',
+    '日本ダービー 制覇',
+    '凱旋門賞 制覇',
+  ]);
+
+  // 2. Week 3（国内G1）+ Week 4（世界頂上決戦）連覇（3勝以下）の場合は路線別の最高称号
+  const sprintDoubleG1 = createDefaultCareerHorse({
+    name: 'ウインドジェット',
+    routeId: 'sprint',
+    currentWeek: 4,
+    raceHistory: [
+      { week: 1, raceName: '1勝クラス（芝1200m）', score: 3, placementText: '2着 🥈 (惜敗)' },
+      { week: 2, raceName: 'シルクロードステークス', score: 5, placementText: '1着 🥇 (優勝)' },
+      { week: 3, raceName: '高松宮記念', score: 5, placementText: '1着 🥇 (優勝)' },
+      { week: 4, raceName: '香港スプリント', score: 5, placementText: '1着 🥇 (優勝)' },
+    ],
+  });
+  assert.equal(determineHorseEpithet(sprintDoubleG1), '電光石火の世界快速王');
+
+  // 3. Week 3（国内G1）のみ制覇時は国内王者称号
+  const domesticWinner = createDefaultCareerHorse({
+    name: 'ロイヤルクラウン',
+    routeId: 'middle',
+    currentWeek: 4,
+    raceHistory: [
+      { week: 1, raceName: 'オープン特別（芝2000m）', score: 3, placementText: '2着 🥈 (惜敗)' },
+      { week: 2, raceName: '毎日王冠', score: 3, placementText: '2着 🥈 (惜敗)' },
+      { week: 3, raceName: '天皇賞（秋）', score: 5, placementText: '1着 🥇 (優勝)' },
+      { week: 4, raceName: 'ジャパンC', score: 4, placementText: '2着 🥈 (惜敗)' },
+    ],
+  });
+  assert.equal(determineHorseEpithet(domesticWinner), '盾を制した中距離の雄');
+
+  // 4. 未勝利でも入着（スコア3以上）多数なら「堅実無比の名バイプレイヤー」
+  const silverCollector = createDefaultCareerHorse({
+    name: 'シルバーコレクター',
+    routeId: 'stayer',
+    currentWeek: 4,
+    raceHistory: [
+      { week: 1, raceName: '1勝クラス（芝2400m）', score: 4, placementText: '2着 🥈 (惜敗)' },
+      { week: 2, raceName: '阪神大賞典', score: 3, placementText: '2着 🥈 (惜敗)' },
+      { week: 3, raceName: '天皇賞（春）', score: 4, placementText: '2着 🥈 (惜敗)' },
+      { week: 4, raceName: 'アスコットゴールドC', score: 2, placementText: '入着 🏇 (4着)' },
+    ],
+  });
+  assert.equal(determineHorseEpithet(silverCollector), '堅実無比の名バイプレイヤー');
+
+  // 5. 殿堂入りレコード作成と次世代誕生（retireAndSpawnNextGeneration）
+  const hofRecord = createHallOfFameRecord(unbeaten, '2026-10-18');
+  assert.equal(hofRecord.generation, 1);
+  assert.equal(hofRecord.name, 'ディープスター');
+  assert.equal(hofRecord.retiredDate, '2026-10-18');
+  assert.equal(hofRecord.wins, 4);
+  assert.equal(hofRecord.titleName, '不敗の世界覇者');
+
+  const handoff = retireAndSpawnNextGeneration(unbeaten, '2026-10-18', {
+    name: 'ネクストジェネシス',
+    color: '白毛',
+    routeId: 'dirt-classic',
+  });
+  assert.equal(handoff.retiredRecord.generation, 1);
+  assert.equal(handoff.retiredRecord.name, 'ディープスター');
+  assert.equal(handoff.nextHorse.generation, 2);
+  assert.equal(handoff.nextHorse.name, 'ネクストジェネシス');
+  assert.equal(handoff.nextHorse.color, '白毛');
+  assert.equal(handoff.nextHorse.routeId, 'dirt-classic');
+  assert.equal(handoff.nextHorse.currentWeek, 1);
+  assert.equal(handoff.nextHorse.weight, DEFAULT_HORSE_WEIGHT);
+  assert.deepEqual(handoff.nextHorse.learnedPhraseIdsInCareer, []);
+  assert.deepEqual(handoff.nextHorse.raceHistory, []);
+  assert.equal(handoff.nextHorse.hasTrained, false);
+});
+
 

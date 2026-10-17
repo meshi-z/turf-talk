@@ -67,6 +67,22 @@ export interface CareerHorse {
   learnedPhraseIdsInCareer: string[]; // この馬の担当期間中に習得したフレーズID
 }
 
+export interface HallOfFameHorse {
+  id: string;
+  generation: number;
+  name: string;
+  color: HorseCoatColor;
+  routeId: CareerRouteId;
+  routeName: string;
+  retiredDate: string;                // YYYY-MM-DD
+  wins: number;
+  totalRaces: number;
+  titles: string[];                   // 獲得タイトル一覧
+  learnedCount: number;               // この馬の担当期間中に習得したフレーズ数
+  titleName: string;                  // 授与された二つ名・称号
+  raceHistory: CareerRaceRecord[];    // 出走戦績履歴
+}
+
 export interface UserProgress {
   lastTrainingDate: string | null; // YYYY-MM-DD
   streakDays: number;
@@ -84,6 +100,7 @@ export interface UserProgress {
   lastRaceWeekMonday?: string | null; // 直近に週末レースを出走完了した週の月曜日 (YYYY-MM-DD)
   hasCompletedWeeklyRace?: boolean; // 当該週の週末レースに出走済みかどうか
   careerHorse: CareerHorse; // 現在の担当競走馬キャリア情報
+  hallOfFame?: HallOfFameHorse[]; // 引退・殿堂入りした愛馬アーカイブ
 }
 
 export interface QuizSessionState {

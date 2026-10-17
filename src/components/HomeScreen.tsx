@@ -13,6 +13,7 @@ import {
   X,
   Compass,
   Lock,
+  Crown,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -27,6 +28,7 @@ import {
   getCareerStageLabel,
   getCurrentWeekRaceInfo,
   isHorseProfileLocked,
+  isCareerWeek4Completed,
   validateHorseName,
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
@@ -41,6 +43,7 @@ interface HomeScreenProps {
   onRegenerateHorseName?: () => void;
   onUpdateCareerRoute?: (routeId: CareerRouteId) => void;
   onRerollCoatColor?: () => void;
+  onOpenRetirement?: () => void;
   appMode: AppMode;
   effectiveDayOfWeek: DayOfWeek;
   actualDayOfWeek: DayOfWeek;
@@ -72,6 +75,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onRegenerateHorseName,
   onUpdateCareerRoute,
   onRerollCoatColor,
+  onOpenRetirement,
   appMode,
   effectiveDayOfWeek,
   daysUntilWeekend,
@@ -110,6 +114,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   const currentWeekRace = getCurrentWeekRaceInfo(careerHorse.routeId, careerHorse.currentWeek);
   const careerStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
   const isProfileLocked = isHorseProfileLocked(careerHorse);
+  const isReadyForRetirement = isCareerWeek4Completed(careerHorse);
 
   const handleOpenNameEdit = () => {
     if (isProfileLocked) return;
@@ -378,6 +383,36 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               愛馬がにんじんを食べて調教記録を維持しました（連続{progress.streakDays}日継続中）。
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Week 4 完走済み・引退式セレモニー案内バナー */}
+      {isReadyForRetirement && onOpenRetirement && (
+        <div className="bg-linear-to-r from-amber-800 via-amber-900 to-zinc-900 text-white rounded-2xl p-4 shadow-md border border-amber-400/50 space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-xl shrink-0">
+              🌸
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full">
+                Week 4 完走 • 引退式準備完了
+              </span>
+              <h3 className="text-sm font-black text-white mt-1">
+                第{careerHorse.generation}世代「{careerHorse.name}」が全4週を駆け抜けました！
+              </h3>
+              <p className="text-[11px] text-amber-100/90 mt-0.5 leading-relaxed">
+                引退式セレモニーで二つ名（称号）を授与し、第{careerHorse.generation + 1}世代の新馬へバトンを繋ぎましょう。
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenRetirement}
+            className="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
+          >
+            <Crown className="w-4 h-4 fill-amber-950 shrink-0" />
+            <span>🌸 引退式セレモニーへ進む</span>
+          </button>
         </div>
       )}
 
@@ -686,6 +721,15 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                   </button>
                 ))}
               </div>
+              {onOpenRetirement && (
+                <button
+                  type="button"
+                  onClick={onOpenRetirement}
+                  className="mt-2 w-full py-1.5 px-2 rounded-lg text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <span>🌸 引退式セレモニーを試す（世代交代デモ）</span>
+                </button>
+              )}
             </div>
           )}
 

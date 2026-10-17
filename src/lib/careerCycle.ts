@@ -5,6 +5,7 @@ import type {
   CareerRouteInfo,
   CareerRouteRace,
   CareerWeek,
+  HallOfFameHorse,
   HorseCoatColor,
 } from '../types';
 
@@ -925,4 +926,187 @@ export function advanceCareerHorseAfterRace(
     raceRecord,
   };
 }
+
+/**
+ * Week 4（最終週・海外G1等）のレースを完走済みかどうかを判定する
+ */
+export function isCareerWeek4Completed(horse: CareerHorse): boolean {
+  return horse.raceHistory.some((r) => r.week === 4);
+}
+
+/**
+ * 路線別の最高称号（国内＆世界G1連覇時）と国内G1覇者称号マップ
+ */
+const ROUTE_SUPREME_EPITHETS: Record<CareerRouteId, string> = {
+  'classic-colt': '世界を翔ける至高の王者',
+  'classic-filly': '華麗なる世界の女帝',
+  sprint: '電光石火の世界快速王',
+  middle: '威風堂々たる中距離の皇帝',
+  stayer: '無尽蔵のワールドステイヤー',
+  'dirt-mile': '砂塵を切り裂く剛脚王',
+  'dirt-classic': '砂塵を統べる世界覇王',
+  jump: '伝説のグランドジャンパー',
+};
+
+const ROUTE_DOMESTIC_G1_EPITHETS: Record<CareerRouteId, string> = {
+  'classic-colt': '栄光のクラシック覇者',
+  'classic-filly': 'ターフに咲く優駿の女王',
+  sprint: '疾風の快速王',
+  middle: '盾を制した中距離の雄',
+  stayer: '不屈の長距離覇者',
+  'dirt-mile': '砂のマイル王',
+  'dirt-classic': '黄金のダート王者',
+  jump: '不撓不屈の大障害王者',
+};
+
+/**
+ * 生涯戦績・獲得タイトル・歩んだ路線から愛馬の「二つ名・称号」を決定する
+ */
+export function determineHorseEpithet(horse: CareerHorse): string {
+  const history = horse.raceHistory;
+  const wins = history.filter((r) => r.score === 5).length;
+  const totalScore = history.reduce((sum, r) => sum + r.score, 0);
+  const wonWeek3 = history.some((r) => r.week === 3 && r.score === 5);
+  const wonWeek4 = history.some((r) => r.week === 4 && r.score === 5);
+
+  if (wins >= 4 && history.length >= 4) {
+    return '不敗の世界覇者';
+  }
+
+  if (wonWeek3 && wonWeek4) {
+    return ROUTE_SUPREME_EPITHETS[horse.routeId] ?? '世界を制した名馬';
+  }
+
+  if (wonWeek4) {
+    return '世界の頂に立つ名馬';
+  }
+
+  if (wonWeek3) {
+    return ROUTE_DOMESTIC_G1_EPITHETS[horse.routeId] ?? '国内G1を制した名馬';
+  }
+
+  if (wins >= 1) {
+    return 'ターフを沸かせた実力馬';
+  }
+
+  if (totalScore >= 12) {
+    return '堅実無比の名バイプレイヤー';
+  }
+
+  return 'ひたむきな挑戦者';
+}
+
+export interface RetirementSummary {
+  totalRaces: number;
+  wins: number;
+  totalScore: number;
+  maxPossibleScore: number;
+  titles: string[];
+  titleName: string;
+  learnedCount: number;
+  routeName: string;
+}
+
+/**
+ * 引退式セレモニー用の戦績・獲得タイトル・二つ名サマリーを算出する
+ */
+export function evaluateRetirementSummary(horse: CareerHorse): RetirementSummary {
+  const route = getCareerRouteInfo(horse.routeId);
+  const history = [...horse.raceHistory].sort((a, b) => a.week - b.week);
+  const totalRaces = history.length;
+  const wins = history.filter((r) => r.score === 5).length;
+  const totalScore = history.reduce((sum, r) => sum + r.score, 0);
+  const maxPossibleScore = Math.max(1, totalRaces) * 5;
+
+  const titles = history
+    .filter((r) => r.score === 5)
+    .map((r) => `${r.raceName} 制覇`);
+
+  const titleName = determineHorseEpithet(horse);
+
+  return {
+    totalRaces,
+    wins,
+    totalScore,
+    maxPossibleScore,
+    titles,
+    titleName,
+    learnedCount: horse.learnedPhraseIdsInCareer.length,
+    routeName: route.name,
+  };
+}
+
+/**
+ * 引退する愛馬から殿堂入り（HallOfFameHorse）レコードを生成する
+ */
+export function createHallOfFameRecord(
+  horse: CareerHorse,
+  retiredDate: string
+): HallOfFameHorse {
+  const summary = evaluateRetirementSummary(horse);
+  const sortedHistory = [...horse.raceHistory].sort((a, b) => a.week - b.week);
+
+  return {
+    id: `hof-gen-${horse.generation}-${retiredDate}`,
+    generation: horse.generation,
+    name: horse.name,
+    color: horse.color,
+    routeId: horse.routeId,
+    routeName: summary.routeName,
+    retiredDate,
+    wins: summary.wins,
+    totalRaces: summary.totalRaces,
+    titles: summary.titles,
+    learnedCount: summary.learnedCount,
+    titleName: summary.titleName,
+    raceHistory: sortedHistory,
+  };
+}
+
+export interface NextGenerationHandoffResult {
+  retiredRecord: HallOfFameHorse;
+  nextHorse: CareerHorse;
+}
+
+/**
+ * 現世代の愛馬を引退させて殿堂入りレコードを生成し、次世代（generation + 1）の新馬を誕生させる
+ */
+export function retireAndSpawnNextGeneration(
+  currentHorse: CareerHorse,
+  retiredDate: string,
+  nextOverrides?: Partial<Pick<CareerHorse, 'name' | 'color' | 'routeId'>>
+): NextGenerationHandoffResult {
+  const retiredRecord = createHallOfFameRecord(currentHorse, retiredDate);
+  const nextGenerationNumber = currentHorse.generation + 1;
+
+  const nextName = nextOverrides?.name
+    ? sanitizeHorseName(nextOverrides.name, generateRandomHorseName(currentHorse.name))
+    : generateRandomHorseName(currentHorse.name);
+  const nextColor =
+    nextOverrides?.color && isValidCoatColor(nextOverrides.color)
+      ? nextOverrides.color
+      : rollHorseCoatColor();
+  const nextRouteId =
+    nextOverrides?.routeId && isValidCareerRouteId(nextOverrides.routeId)
+      ? nextOverrides.routeId
+      : currentHorse.routeId;
+
+  const nextHorse = createDefaultCareerHorse({
+    generation: nextGenerationNumber,
+    name: nextName,
+    color: nextColor,
+    routeId: nextRouteId,
+    currentWeek: 1,
+    weight: DEFAULT_HORSE_WEIGHT,
+    hasTrained: false,
+    raceHistory: [],
+    learnedPhraseIdsInCareer: [],
+  });
+
+  return {
+    retiredRecord,
+    nextHorse,
+  };
+}
+
 
