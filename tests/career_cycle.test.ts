@@ -10,13 +10,17 @@ import {
   HORSE_COAT_COLOR_WEIGHTS,
   MAX_HORSE_NAME_LENGTH,
   advanceCareerHorseAfterRace,
+  changeHorseNameIfUnlocked,
+  changeHorseRouteIfUnlocked,
   createDefaultCareerHorse,
   evaluateCareerRaceReadiness,
   generateRandomHorseName,
   getCareerRouteInfo,
   getCareerStageLabel,
   getCurrentWeekRaceInfo,
+  isHorseProfileLocked,
   migrateToCareerHorse,
+  rerollHorseIdentity,
   rollHorseCoatColor,
   sanitizeHorseName,
   updateCareerHorseAfterTraining,
@@ -215,4 +219,47 @@ test('migration: migrateToCareerHorse safely migrates legacy single-horse data a
   assert.equal(recovered.raceHistory.length, 1);
   assert.equal(recovered.raceHistory[0].week, 1);
   assert.equal(recovered.raceHistory[0].score, 5);
+  assert.equal(recovered.hasTrained, true);
 });
+
+test('profile lock & reroll: allows name/color reroll and route change before first training, locks after training', () => {
+  // 1. 新馬誕生直後は未調教（ロック解除状態）
+  let horse = createDefaultCareerHorse();
+  assert.equal(horse.hasTrained, false);
+  assert.equal(isHorseProfileLocked(horse), false);
+
+  // 2. 「🎲 命名」で馬名と毛色（例: 0.995 -> 白毛）が同時に抽選・更新されること
+  horse = rerollHorseIdentity(horse, 0.995);
+  assert.notEqual(horse.name, DEFAULT_HORSE_NAME);
+  assert.equal(horse.color, '白毛');
+
+  // 3. 未調教の間は手動馬名変更および路線変更が可能
+  horse = changeHorseNameIfUnlocked(horse, 'サイレントヒーロー');
+  assert.equal(horse.name, 'サイレントヒーロー');
+
+  horse = changeHorseRouteIfUnlocked(horse, 'sprint');
+  assert.equal(horse.routeId, 'sprint');
+
+  // 4. 初回調教を完了すると hasTrained=true となりロックされること
+  horse = updateCareerHorseAfterTraining(horse, ['p01'], 480);
+  assert.equal(horse.hasTrained, true);
+  assert.equal(isHorseProfileLocked(horse), true);
+
+  // 5. ロック後は命名リロール・手動馬名変更・路線変更がいずれも拒否され変化しないこと
+  const afterRerollAttempt = rerollHorseIdentity(horse, 0.0);
+  assert.equal(afterRerollAttempt.name, 'サイレントヒーロー');
+  assert.equal(afterRerollAttempt.color, '白毛');
+
+  const afterNameChangeAttempt = changeHorseNameIfUnlocked(horse, 'アナザーネーム');
+  assert.equal(afterNameChangeAttempt.name, 'サイレントヒーロー');
+
+  const afterRouteChangeAttempt = changeHorseRouteIfUnlocked(horse, 'stayer');
+  assert.equal(afterRouteChangeAttempt.routeId, 'sprint');
+
+  // 6. 次世代誕生（新規生成）時は再び hasTrained=false でロック解除されること
+  const nextGenHorse = createDefaultCareerHorse({ generation: 2 });
+  assert.equal(nextGenHorse.generation, 2);
+  assert.equal(nextGenHorse.hasTrained, false);
+  assert.equal(isHorseProfileLocked(nextGenHorse), false);
+});
+

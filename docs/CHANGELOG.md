@@ -9,6 +9,18 @@
 
 ---
 
+## [v0.7.1] - 2026-10-17
+
+### Added
+- **初回調教前の馬名・路線変更ロックおよび命名時の毛色同時抽選の実装 ([#54](https://github.com/meshi-z/turf-talk/issues/54)):**
+  - `CareerHorse` に初回調教実施済みフラグ `hasTrained: boolean` を追加し、ロック判定関数 `isHorseProfileLocked` およびロックガード付き更新関数（`rerollHorseIdentity`, `changeHorseNameIfUnlocked`, `changeHorseRouteIfUnlocked`）を実装（`src/types/index.ts`, `src/lib/careerCycle.ts`）。
+  - **「🎲 命名」実行時の馬名・毛色同時抽選:** 未調教時に「🎲 命名」をタップした際、馬名自動生成（`generateRandomHorseName`）とJRA基準8毛色の重み付き抽選（`rollHorseCoatColor`）を同時に実行し、馬名と毛色をセットでリロールできるよう改善。
+  - **初回調教完了による確定ロック:** 1度でも調教を完了すると `hasTrained: true` となり、ホーム画面の「🎲 命名」「✏️ 手動編集」「路線変更」コントロールを非表示（`🔒 確定済` 表示）にして世代交代まで変更不可に制御。
+  - **未調教時のUIガイド表示:** 初回調教前の愛馬カードに「💡 調教を開始すると馬名・毛色・路線が確定します」の案内メッセージを表示。
+  - 初回調教前後のロック制御・馬名毛色同時抽選・新馬誕生時のロック解除を検証する単体テスト（`tests/career_cycle.test.ts`）を追加。
+
+---
+
 ## [v0.7.0] - 2026-10-17
 
 ### Added

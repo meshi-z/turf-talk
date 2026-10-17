@@ -12,6 +12,7 @@ import {
   Check,
   X,
   Compass,
+  Lock,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -25,6 +26,7 @@ import {
   getCareerRouteInfo,
   getCareerStageLabel,
   getCurrentWeekRaceInfo,
+  isHorseProfileLocked,
   validateHorseName,
 } from '../lib/careerCycle';
 
@@ -102,8 +104,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   const routeInfo = getCareerRouteInfo(careerHorse.routeId);
   const currentWeekRace = getCurrentWeekRaceInfo(careerHorse.routeId, careerHorse.currentWeek);
   const careerStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
+  const isProfileLocked = isHorseProfileLocked(careerHorse);
 
   const handleOpenNameEdit = () => {
+    if (isProfileLocked) return;
     setNameInput(careerHorse.name);
     setNameError(null);
     setIsEditingName(true);
@@ -116,6 +120,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
   const handleSubmitNameEdit = (e: FormEvent) => {
     e.preventDefault();
+    if (isProfileLocked) {
+      setIsEditingName(false);
+      return;
+    }
     const result = validateHorseName(nameInput);
     if (!result.isValid) {
       setNameError(result.error ?? '無効な馬名です。');
@@ -151,7 +159,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
         {/* 馬名 & 毛色・ランダム生成・手動編集 */}
         <div className="mt-1">
-          {isEditingName ? (
+          {!isProfileLocked && isEditingName ? (
             <form onSubmit={handleSubmitNameEdit} className="space-y-1.5">
               <div className="flex items-center gap-1.5">
                 <input
@@ -199,31 +207,33 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                   （{routeInfo.sexAgeLabel} / {careerHorse.color}）
                 </span>
               </h2>
-              <div className="flex items-center gap-1 shrink-0">
-                {onRegenerateHorseName && (
-                  <button
-                    type="button"
-                    onClick={onRegenerateHorseName}
-                    className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-700/80 hover:bg-emerald-600/80 active:scale-95 text-emerald-100 border border-emerald-500/40 px-2 py-1 rounded-lg transition-all cursor-pointer"
-                    title="馬名をランダム再生成"
-                    aria-label="馬名をランダム再生成"
-                  >
-                    <Dices className="w-3.5 h-3.5 text-amber-300" />
-                    <span>命名</span>
-                  </button>
-                )}
-                {onUpdateHorseName && (
-                  <button
-                    type="button"
-                    onClick={handleOpenNameEdit}
-                    className="inline-flex items-center justify-center bg-emerald-800/80 hover:bg-emerald-700/80 active:scale-95 text-emerald-200 border border-emerald-600/50 p-1.5 rounded-lg transition-all cursor-pointer"
-                    title="馬名を手動編集"
-                    aria-label="馬名を手動編集"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
+              {!isProfileLocked && (
+                <div className="flex items-center gap-1 shrink-0">
+                  {onRegenerateHorseName && (
+                    <button
+                      type="button"
+                      onClick={onRegenerateHorseName}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-700/80 hover:bg-emerald-600/80 active:scale-95 text-emerald-100 border border-emerald-500/40 px-2 py-1 rounded-lg transition-all cursor-pointer"
+                      title="馬名と毛色をランダム再抽選"
+                      aria-label="馬名と毛色をランダム再抽選"
+                    >
+                      <Dices className="w-3.5 h-3.5 text-amber-300" />
+                      <span>命名</span>
+                    </button>
+                  )}
+                  {onUpdateHorseName && (
+                    <button
+                      type="button"
+                      onClick={handleOpenNameEdit}
+                      className="inline-flex items-center justify-center bg-emerald-800/80 hover:bg-emerald-700/80 active:scale-95 text-emerald-200 border border-emerald-600/50 p-1.5 rounded-lg transition-all cursor-pointer"
+                      title="馬名を手動編集"
+                      aria-label="馬名を手動編集"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -255,7 +265,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               <span className="text-[11px] text-emerald-200 shrink-0">歩む路線:</span>
               <strong className="text-white text-[11px] truncate">{routeInfo.name}</strong>
             </div>
-            {onUpdateCareerRoute && (
+            {!isProfileLocked && onUpdateCareerRoute ? (
               <button
                 type="button"
                 onClick={() => setIsRouteSelectorOpen((prev) => !prev)}
@@ -264,10 +274,22 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               >
                 {isRouteSelectorOpen ? '閉じる' : '路線変更'}
               </button>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300/90 shrink-0">
+                <Lock className="w-3 h-3" />
+                <span>確定済</span>
+              </span>
             )}
           </div>
 
-          {isRouteSelectorOpen && onUpdateCareerRoute && (
+          {!isProfileLocked && (
+            <p className="mt-1.5 text-[10px] text-amber-200/95 flex items-center gap-1">
+              <span>💡</span>
+              <span>調教を開始すると馬名・毛色・路線が確定します</span>
+            </p>
+          )}
+
+          {!isProfileLocked && isRouteSelectorOpen && onUpdateCareerRoute && (
             <div className="mt-2 p-2 bg-emerald-950/85 border border-emerald-600/50 rounded-xl space-y-1.5">
               <p className="text-[10px] text-emerald-300 font-semibold">
                 挑戦するキャリア路線を選択（全8路線）:

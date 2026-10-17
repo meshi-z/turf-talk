@@ -62,6 +62,7 @@ export interface CareerHorse {
   routeId: CareerRouteId;             // 選択した路線
   currentWeek: CareerWeek;            // 現在週 (1〜4)
   weight: number;                     // 馬体重 (kg)
+  hasTrained: boolean;                // 初回調教実施済みフラグ（trueで馬名・毛色・路線をロック）
   raceHistory: CareerRaceRecord[];    // 出走戦績履歴
   learnedPhraseIdsInCareer: string[]; // この馬の担当期間中に習得したフレーズID
 }

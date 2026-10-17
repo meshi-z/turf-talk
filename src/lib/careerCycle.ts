@@ -664,9 +664,71 @@ export function createDefaultCareerHorse(overrides?: Partial<CareerHorse>): Care
     routeId: DEFAULT_ROUTE_ID,
     currentWeek: 1,
     weight: DEFAULT_HORSE_WEIGHT,
+    hasTrained: false,
     raceHistory: [],
     learnedPhraseIdsInCareer: [],
     ...overrides,
+  };
+}
+
+/**
+ * 当該世代の競走馬が既に初回調教を実施済み（馬名・毛色・路線がロック状態）か判定する
+ */
+export function isHorseProfileLocked(horse: CareerHorse): boolean {
+  return Boolean(horse.hasTrained || horse.currentWeek > 1 || horse.raceHistory.length > 0);
+}
+
+/**
+ * 「🎲 命名」実行時に、未調教（ロック前）であれば馬名と毛色（JRA基準8毛色）を同時に再抽選する
+ * ロック済みの場合は変更せずそのまま返す
+ */
+export function rerollHorseIdentity(
+  horse: CareerHorse,
+  coatRandomValue?: number
+): CareerHorse {
+  if (isHorseProfileLocked(horse)) {
+    return horse;
+  }
+
+  return {
+    ...horse,
+    name: generateRandomHorseName(horse.name),
+    color: rollHorseCoatColor(coatRandomValue),
+  };
+}
+
+/**
+ * 未調教（ロック前）の場合のみ馬名をサニタイズして変更する
+ */
+export function changeHorseNameIfUnlocked(
+  horse: CareerHorse,
+  newName: string
+): CareerHorse {
+  if (isHorseProfileLocked(horse)) {
+    return horse;
+  }
+
+  const sanitized = sanitizeHorseName(newName, horse.name);
+  return {
+    ...horse,
+    name: sanitized,
+  };
+}
+
+/**
+ * 未調教（ロック前）の場合のみキャリア路線を変更する
+ */
+export function changeHorseRouteIfUnlocked(
+  horse: CareerHorse,
+  routeId: CareerRouteId
+): CareerHorse {
+  if (isHorseProfileLocked(horse) || !isValidCareerRouteId(routeId)) {
+    return horse;
+  }
+
+  return {
+    ...horse,
+    routeId,
   };
 }
 
@@ -706,6 +768,7 @@ export function migrateToCareerHorse(rawProgress: unknown): CareerHorse {
       routeId: DEFAULT_ROUTE_ID,
       currentWeek: 1,
       weight: fallbackWeight,
+      hasTrained: false,
       raceHistory: [],
       learnedPhraseIdsInCareer: fallbackLearnedIds,
     });
@@ -768,6 +831,11 @@ export function migrateToCareerHorse(rawProgress: unknown): CareerHorse {
       )
     : fallbackLearnedIds;
 
+  const hasTrained: boolean =
+    typeof rawHorse.hasTrained === 'boolean'
+      ? rawHorse.hasTrained
+      : currentWeek > 1 || raceHistory.length > 0;
+
   return {
     generation,
     name,
@@ -775,13 +843,14 @@ export function migrateToCareerHorse(rawProgress: unknown): CareerHorse {
     routeId,
     currentWeek,
     weight,
+    hasTrained,
     raceHistory,
     learnedPhraseIdsInCareer,
   };
 }
 
 /**
- * 平日調教完了時に、担当馬のキャリア内習得フレーズと馬体重を更新する
+ * 平日調教完了時に、担当馬のキャリア内習得フレーズと馬体重を更新し、プロフィールロック（hasTrained=true）を有効化する
  */
 export function updateCareerHorseAfterTraining(
   horse: CareerHorse,
@@ -795,6 +864,7 @@ export function updateCareerHorseAfterTraining(
   return {
     ...horse,
     weight: nextWeight,
+    hasTrained: true,
     learnedPhraseIdsInCareer: mergedLearnedIds,
   };
 }
@@ -842,6 +912,7 @@ export function advanceCareerHorseAfterRace(
     ...horse,
     currentWeek: nextWeek,
     weight: nextWeight,
+    hasTrained: true,
     raceHistory: nextHistory,
   };
 
@@ -854,3 +925,4 @@ export function advanceCareerHorseAfterRace(
     raceRecord,
   };
 }
+
