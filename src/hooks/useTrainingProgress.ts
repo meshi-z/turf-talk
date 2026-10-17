@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { CareerRouteId, CareerWeek, HorseCoatColor, UserProgress } from '../types';
+import type { CareerRouteId, CareerWeek, HorseCoatColor, TrainingCourse, UserProgress } from '../types';
 import { calculateNextProgressAfterCompletion } from '../lib/dailyRotation';
 import {
   getDayOfWeek,
@@ -51,6 +51,8 @@ const DEFAULT_PROGRESS: UserProgress = {
   learnedPhraseIds: [],
   lapCount: 1,
   todayPhraseIds: [],
+  todayWoodchipPhraseIds: [],
+  completedCoursesToday: [],
   weekdayTrainingDays: 3, // 初期値3日（好調）
   carrotCount: 1, // 初期所持数1個（お試し・安心設計）
   lastCarrotUsedDate: null,
@@ -110,6 +112,14 @@ export function useTrainingProgress() {
           learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
           lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
           todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
+          todayWoodchipPhraseIds:
+            isSameDay && Array.isArray(parsed.todayWoodchipPhraseIds)
+              ? parsed.todayWoodchipPhraseIds
+              : [],
+          completedCoursesToday:
+            isSameDay && Array.isArray(parsed.completedCoursesToday)
+              ? parsed.completedCoursesToday
+              : [],
           completedToday: isSameDay,
           weekdayTrainingDays: restoredWeeklyDays,
           currentWeekMonday: todayMonday,
@@ -136,8 +146,19 @@ export function useTrainingProgress() {
     }
   }, [progress]);
 
-  const recordTodayPhrases = (phraseIds: string[]) => {
+  const recordTodayPhrases = (phraseIds: string[], course: TrainingCourse = 'uphill') => {
     setProgress((prev) => {
+      if (course === 'woodchip') {
+        const currentWoodchip = prev.todayWoodchipPhraseIds ?? [];
+        if (currentWoodchip.length > 0 && currentWoodchip.join(',') === phraseIds.join(',')) {
+          return prev;
+        }
+        return {
+          ...prev,
+          todayWoodchipPhraseIds: phraseIds,
+        };
+      }
+
       if (prev.todayPhraseIds.length > 0 && prev.todayPhraseIds.join(',') === phraseIds.join(',')) {
         return prev;
       }
@@ -151,7 +172,8 @@ export function useTrainingProgress() {
   const markTrainingCompleted = (
     _score: number,
     correctPhraseIds: string[] = [],
-    sessionPhraseIds: string[] = []
+    sessionPhraseIds: string[] = [],
+    course: TrainingCourse = 'uphill'
   ) => {
     const today = getLogicalDateString();
     const todayMonday = getLogicalWeekMonday(today);
@@ -179,9 +201,20 @@ export function useTrainingProgress() {
       );
 
       const nextTodayPhraseIds =
-        prev.todayPhraseIds.length > 0
-          ? prev.todayPhraseIds
-          : sessionPhraseIds;
+        course === 'uphill'
+          ? (prev.todayPhraseIds.length > 0 ? prev.todayPhraseIds : sessionPhraseIds)
+          : prev.todayPhraseIds;
+
+      const nextTodayWoodchipPhraseIds =
+        course === 'woodchip'
+          ? ((prev.todayWoodchipPhraseIds && prev.todayWoodchipPhraseIds.length > 0)
+              ? prev.todayWoodchipPhraseIds
+              : sessionPhraseIds)
+          : (prev.todayWoodchipPhraseIds ?? []);
+
+      const nextCompletedCourses = Array.from(
+        new Set([...(prev.completedCoursesToday ?? []), course])
+      );
 
       const nextCareerHorse = updateCareerHorseAfterTraining(
         prev.careerHorse,
@@ -199,6 +232,8 @@ export function useTrainingProgress() {
         learnedPhraseIds: nextLearnedIds,
         lapCount: nextLapCount,
         todayPhraseIds: nextTodayPhraseIds,
+        todayWoodchipPhraseIds: nextTodayWoodchipPhraseIds,
+        completedCoursesToday: nextCompletedCourses,
         weekdayTrainingDays: nextWeekdayDays,
         currentWeekMonday: todayMonday,
         hasCompletedWeeklyRace: isWeeklyRaceCompletedForWeek(prev.lastRaceWeekMonday, today),
@@ -377,6 +412,8 @@ export function useTrainingProgress() {
       learnedPhraseIds: [],
       lapCount: 1,
       todayPhraseIds: [],
+      todayWoodchipPhraseIds: [],
+      completedCoursesToday: [],
       weekdayTrainingDays: 3,
       currentWeekMonday: getLogicalWeekMonday(today),
       lastRaceWeekMonday: null,

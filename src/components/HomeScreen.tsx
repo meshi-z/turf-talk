@@ -1,5 +1,5 @@
 import { useState, type FC, type FormEvent } from 'react';
-import type { CareerRouteId, CareerWeek, UserProgress } from '../types';
+import type { CareerRouteId, CareerWeek, TrainingCourse, UserProgress } from '../types';
 import {
   Play,
   CheckCircle2,
@@ -35,8 +35,8 @@ import { getRaceThemeLabel } from '../lib/raceMode';
 
 interface HomeScreenProps {
   progress: UserProgress;
-  onStartTraining: () => void;
-  onStartExtraTraining: () => void;
+  onStartTraining: (course?: TrainingCourse) => void;
+  onStartExtraTraining: (course?: TrainingCourse) => void;
   onStartRace: () => void;
   onResetForDemo: () => void;
   onUpdateHorseName?: (newName: string) => void;
@@ -585,67 +585,187 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </div>
         </div>
 
-        {progress.completedToday ? (
-          <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3.5 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="font-bold text-emerald-950 text-sm">本日の坂路調教 完了！💮</p>
-              <p className="text-xs text-emerald-700 mt-0.5">
-                息遣いも良く、素晴らしい仕上がりです。さらに未習得フレーズを学んだり、今日の復習ができます。
+        {/* 本日の調教総合ステータス表示 */}
+        {(() => {
+          const completedCourses = progress.completedCoursesToday ?? [];
+          const isUphillDone = completedCourses.includes('uphill') || (progress.completedToday && !completedCourses.includes('woodchip'));
+          const isWoodchipDone = completedCourses.includes('woodchip');
+          const isAllDone = isUphillDone && isWoodchipDone;
+
+          if (isAllDone) {
+            return (
+              <div className="mb-4 bg-emerald-50/90 border border-emerald-300 rounded-xl p-3.5 flex items-center gap-3 shadow-xs">
+                <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Trophy className="w-5 h-5 text-amber-100" />
+                </div>
+                <div>
+                  <p className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
+                    <span>本日全コース制覇！🏆</span>
+                  </p>
+                  <p className="text-xs text-emerald-700 mt-0.5">
+                    坂路・ウッドチップの両調教を完全走破！さらに追加トレーニングで語彙を伸ばせます。
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          if (progress.completedToday) {
+            return (
+              <div className="mb-4 bg-emerald-50/80 border border-emerald-200 rounded-xl p-3.5 flex items-center gap-3 shadow-xs">
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
+                    <span>本日の調教ノルマ達成！💮</span>
+                  </p>
+                  <p className="text-xs text-emerald-700 mt-0.5">
+                    連続調教ストリークを維持しました！もう一方のコースも受講してさらに経験を積めます。
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="mb-4 bg-amber-50/70 border border-amber-200 rounded-xl p-3.5">
+              <p className="font-bold text-amber-950 text-sm flex items-center gap-1.5">
+                <span>【{isWeekendMode ? '週末調整' : '本日の調教'}】 未完了</span>
+              </p>
+              <p className="text-xs text-amber-800 mt-1">
+                {isNewbornWeekendPending
+                  ? '💡 新馬入厩！まずはどちらかの調教で基礎体力をつけ、来週末のデビュー戦に備えましょう。'
+                  : isWeekendMode && !careerHorse.hasTrained
+                  ? '💡 まずは調教で愛馬を仕上げよう！どちらか1コース完了で週末レースに出走できます。'
+                  : '🌿坂路 または 🪵ウッドチップ のどちらか1つ完了で本日の調教達成となります！'}
               </p>
             </div>
-          </div>
-        ) : (
-          <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5">
-            <p className="font-bold text-amber-950 text-sm flex items-center gap-1.5">
-              <span>【{isWeekendMode ? '週末・坂路調整' : '平日・坂路調教'}】 未完了</span>
-            </p>
-            <p className="text-xs text-amber-800 mt-1">
-              {isNewbornWeekendPending
-                ? '💡 新馬入厩！まずは坂路調教で基礎体力をつけ、来週末のデビュー戦に備えましょう。'
-                : isWeekendMode && !careerHorse.hasTrained
-                ? '💡 まずは坂路調教で愛馬を仕上げよう！調教を1回完了すると、週末レースに出走できるようになります。'
-                : '勝利騎手インタビュー頻出の3フレーズを直感4択で解き、愛馬の調子を上げよう！'}
-            </p>
-          </div>
-        )}
+          );
+        })()}
 
-        {progress.completedToday ? (
-          <div className="mt-4 space-y-2">
-            <button
-              onClick={onStartExtraTraining}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
-            >
-              <Sparkles className="w-5 h-5 text-amber-300" />
-              <span>追加トレーニング（新しい3問）</span>
-            </button>
-            <button
-              onClick={onStartTraining}
-              className="w-full bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2.5 px-4 rounded-xl border border-zinc-300 flex items-center justify-center gap-2 text-sm cursor-pointer"
-            >
-              <RotateCcw className="w-4 h-4 text-zinc-500" />
-              <span>本日のフレーズを復習する</span>
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={onStartTraining}
-            className={`mt-4 w-full transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer ${
-              isWeekendMode
-                ? 'bg-emerald-800 hover:bg-emerald-900 active:scale-[0.98]'
-                : 'bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98]'
-            }`}
-          >
-            <Play className="w-5 h-5 fill-white" />
-            <span>
-              {isWeekendMode
-                ? '坂路調教で調整する（3問）'
-                : '本日の調教を始める（3問）'}
-            </span>
-          </button>
-        )}
+        {/* 2つの調教コース選択カード */}
+        <div className="space-y-3">
+          {/* コース 1: 🌿 坂路調教（実戦フレーズ） */}
+          {(() => {
+            const isDone = (progress.completedCoursesToday ?? []).includes('uphill') || (progress.completedToday && !(progress.completedCoursesToday ?? []).includes('woodchip'));
+            return (
+              <div className="bg-emerald-50/40 border border-emerald-200/90 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-emerald-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">🌿</span>
+                      <h4 className="font-bold text-emerald-950 text-sm">
+                        坂路調教 <span className="text-xs font-normal text-emerald-700">（実戦フレーズ / 3問）</span>
+                      </h4>
+                    </div>
+                    <p className="text-xs text-emerald-800/90 mt-1">
+                      勝利騎手インタビューや陣営コメント頻出の実戦英語表現
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                      isDone
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                    }`}
+                  >
+                    {isDone ? '完了 💮' : '未完了'}
+                  </span>
+                </div>
+
+                <div className="mt-3">
+                  {isDone ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onStartExtraTraining('uphill')}
+                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-2 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>追加（新3問）</span>
+                      </button>
+                      <button
+                        onClick={() => onStartTraining('uphill')}
+                        className="bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2 px-3 rounded-lg border border-zinc-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+                        <span>復習する</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => onStartTraining('uphill')}
+                      className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-2.5 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>坂路調教を始める（3問）</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* コース 2: 🪵 ウッドチップ調教（基礎単語・競馬用語） */}
+          {(() => {
+            const isDone = (progress.completedCoursesToday ?? []).includes('woodchip');
+            return (
+              <div className="bg-amber-50/40 border border-amber-200/90 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-amber-300">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">🪵</span>
+                      <h4 className="font-bold text-amber-950 text-sm">
+                        ウッドチップ調教 <span className="text-xs font-normal text-amber-700">（基礎単語・競馬用語 / 3問）</span>
+                      </h4>
+                    </div>
+                    <p className="text-xs text-amber-800/90 mt-1">
+                      JRA公式海外競馬英和辞典に準拠した頻出基礎用語
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                      isDone
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                    }`}
+                  >
+                    {isDone ? '完了 💮' : '未完了'}
+                  </span>
+                </div>
+
+                <div className="mt-3">
+                  {isDone ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onStartExtraTraining('woodchip')}
+                        className="flex-1 bg-amber-800 hover:bg-amber-900 active:scale-[0.98] transition-all text-white font-bold py-2 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>追加（新3問）</span>
+                      </button>
+                      <button
+                        onClick={() => onStartTraining('woodchip')}
+                        className="bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2 px-3 rounded-lg border border-zinc-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+                        <span>復習する</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => onStartTraining('woodchip')}
+                      className="w-full bg-amber-800 hover:bg-amber-900 active:scale-[0.98] transition-all text-white font-bold py-2.5 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>ウッドチップ調教を始める（3問）</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </div>
       </div>
 
       {/* 平日用の週末レース予告カード（平日の場合のみ表示） */}
