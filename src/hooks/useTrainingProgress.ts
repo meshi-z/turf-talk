@@ -34,6 +34,7 @@ import {
   rerollHorseIdentity,
   changeHorseNameIfUnlocked,
   changeHorseRouteIfUnlocked,
+  retireAndSpawnNextGeneration,
 } from '../lib/careerCycle';
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
@@ -57,6 +58,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   lastRaceWeekMonday: null,
   hasCompletedWeeklyRace: false,
   careerHorse: createDefaultCareerHorse(),
+  hallOfFame: [],
 };
 
 export function useTrainingProgress() {
@@ -114,6 +116,7 @@ export function useTrainingProgress() {
           lastRaceWeekMonday,
           hasCompletedWeeklyRace: completedWeeklyRace,
           careerHorse: migratedHorse,
+          hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
         };
       }
     } catch {
@@ -318,6 +321,45 @@ export function useTrainingProgress() {
     return nextColor;
   };
 
+  /**
+   * 現在の愛馬を引退させて殿堂入り記録へ追加し、次世代（generation + 1）の新馬へ世代交代する。
+   * ユーザー全体の連続学習ストリーク（streakDays）、にんじん所持数、習得フレーズ（learnedPhraseIds / lapCount）はそのまま引き継ぐ。
+   */
+  const retireCurrentHorse = (nextOverrides?: {
+    name?: string;
+    color?: HorseCoatColor;
+    routeId?: CareerRouteId;
+  }) => {
+    const today = getLogicalDateString();
+    const todayMonday = getLogicalWeekMonday(today);
+
+    setProgress((prev) => {
+      const { retiredRecord, nextHorse } = retireAndSpawnNextGeneration(
+        prev.careerHorse,
+        today,
+        nextOverrides
+      );
+      const existingHoF = Array.isArray(prev.hallOfFame) ? prev.hallOfFame : [];
+
+      return {
+        ...prev,
+        horseName: nextHorse.name,
+        horseWeight: nextHorse.weight,
+        condition: 'up',
+        weekdayTrainingDays: 3,
+        currentWeekMonday: todayMonday,
+        lastRaceWeekMonday: null,
+        hasCompletedWeeklyRace: false,
+        careerHorse: nextHorse,
+        hallOfFame: [retiredRecord, ...existingHoF],
+      };
+    });
+
+    setDebugCareerWeek(null);
+    setDebugWeekdayDays(null);
+    setDebugRaceCompleted(null);
+  };
+
   const resetProgressForDemo = () => {
     const today = getLogicalDateString();
     const initialColor = rollHorseCoatColor();
@@ -340,6 +382,7 @@ export function useTrainingProgress() {
       lastRaceWeekMonday: null,
       hasCompletedWeeklyRace: false,
       careerHorse: freshHorse,
+      hallOfFame: [],
     });
     setDebugDayOfWeek(null);
     setDebugWeekdayDays(null);
@@ -396,6 +439,7 @@ export function useTrainingProgress() {
     regenerateHorseName,
     updateCareerRoute,
     rerollHorseCoatColor,
+    retireCurrentHorse,
     resetProgressForDemo,
     todayString: todayStr,
     debugDayOfWeek,

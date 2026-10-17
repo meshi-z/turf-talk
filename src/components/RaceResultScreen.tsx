@@ -1,7 +1,7 @@
 import { useEffect, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
-import { Trophy, Home, Check, X, Sparkles, Award, Flag } from 'lucide-react';
+import { Trophy, Home, Check, X, Sparkles, Award, Flag, Crown } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { calculateRacePlacement, type RacePlacement } from '../lib/raceMode';
 import { calculateRaceFeedback, type RaceFeedback } from '../lib/conditionBonus';
@@ -24,6 +24,7 @@ interface RaceResultScreenProps {
   addedCarrots?: number;
   careerAdvance?: CareerRaceAdvanceResult | null;
   onGoHome: () => void;
+  onProceedToRetirement?: () => void;
 }
 
 export const RaceResultScreen: FC<RaceResultScreenProps> = ({
@@ -34,12 +35,14 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   addedCarrots = 0,
   careerAdvance = null,
   onGoHome,
+  onProceedToRetirement,
 }) => {
   const { careerHorse } = progress;
   const routeInfo = getCareerRouteInfo(careerHorse.routeId);
   const completedWeek = careerAdvance?.completedWeek ?? careerHorse.currentWeek;
   const completedRaceInfo = getCurrentWeekRaceInfo(careerHorse.routeId, completedWeek);
   const nextStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
+  const isFinalCareerRace = Boolean(careerAdvance?.isFinalWeekCompleted || completedWeek === 4);
 
   const placement: RacePlacement = calculateRacePlacement(score, completedWeek);
   const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
@@ -275,15 +278,30 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
 
       {/* アクションボタン */}
       <div className="space-y-2 pt-2">
+        {isFinalCareerRace && onProceedToRetirement && (
+          <button
+            onClick={onProceedToRetirement}
+            className="w-full bg-linear-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-4 px-4 rounded-xl shadow-md border border-amber-300 flex items-center justify-center gap-2 text-base cursor-pointer"
+          >
+            <Crown className="w-5 h-5 fill-amber-950 shrink-0" />
+            <span>🌸 引退式セレモニーへ進む（第{careerHorse.generation}世代 完走）</span>
+          </button>
+        )}
         <button
           onClick={onGoHome}
-          className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
+          className={`w-full active:scale-[0.98] transition-all font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer ${
+            isFinalCareerRace && onProceedToRetirement
+              ? 'bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-300'
+              : 'bg-emerald-700 hover:bg-emerald-800 text-white'
+          }`}
         >
           <Home className="w-4 h-4" />
           <span>ホーム（厩舎）に戻る</span>
         </button>
         <p className="text-[11px] text-center text-zinc-500">
-          ※ 週末レースの出走は1週末につき1回までです。次走へ向けて日々の坂路調教を重ねましょう！
+          {isFinalCareerRace
+            ? '※ 4週間のキャリアをすべて完走しました！引退式で称号を授与し、次世代の新馬を迎えましょう。'
+            : '※ 週末レースの出走は1週末につき1回までです。次走へ向けて日々の坂路調教を重ねましょう！'}
         </p>
       </div>
     </div>

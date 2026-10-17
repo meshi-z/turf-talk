@@ -6,6 +6,7 @@ import { QuizScreen } from './components/QuizScreen';
 import { ResultScreen } from './components/ResultScreen';
 import { RaceScreen } from './components/RaceScreen';
 import { RaceResultScreen } from './components/RaceResultScreen';
+import { RetirementScreen } from './components/RetirementScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import {
@@ -17,7 +18,7 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -29,6 +30,7 @@ export function App() {
     regenerateHorseName,
     updateCareerRoute,
     rerollHorseCoatColor,
+    retireCurrentHorse,
     resetProgressForDemo,
     todayString,
     appMode,
@@ -214,6 +216,7 @@ export function App() {
               onRegenerateHorseName={regenerateHorseName}
               onUpdateCareerRoute={updateCareerRoute}
               onRerollCoatColor={rerollHorseCoatColor}
+              onOpenRetirement={() => setCurrentScreen('retirement')}
               appMode={appMode}
               effectiveDayOfWeek={effectiveDayOfWeek}
               actualDayOfWeek={actualDayOfWeek}
@@ -274,6 +277,19 @@ export function App() {
               addedCarrots={raceCarrotReward}
               careerAdvance={lastCareerAdvance}
               onGoHome={handleGoHome}
+              onProceedToRetirement={() => setCurrentScreen('retirement')}
+            />
+          )}
+
+          {currentScreen === 'retirement' && (
+            <RetirementScreen
+              careerHorse={progress.careerHorse}
+              onConfirmNextGeneration={(nextConfig) => {
+                retireCurrentHorse(nextConfig);
+                setLastCareerAdvance(null);
+                setCurrentScreen('home');
+              }}
+              onBackToHome={handleGoHome}
             />
           )}
         </main>

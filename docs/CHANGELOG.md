@@ -9,6 +9,25 @@
 
 ---
 
+## [v0.9.0] - 2026-10-17
+
+### Added
+- **引退式セレモニーと次世代（新馬）への世代交代ロジックの実装 ([#44](https://github.com/meshi-z/turf-talk/issues/44)):**
+  - **二つ名（称号）の自動授与とキャリア戦績サマリー (`src/lib/careerCycle.ts`):**
+    - 4週間の戦績（勝利数・合計スコア）および歩んだ路線（全8路線）に応じて称号を授与する `determineHorseEpithet` / `evaluateRetirementSummary` を実装（4戦全勝「不敗の世界覇者」、国内G1＋世界G1連覇の路線別最高称号、世界G1制覇、国内G1制覇の路線別称号、実力馬、堅実無比の名バイプレイヤー等）。
+  - **引退式セレモニー画面 (`src/components/RetirementScreen.tsx`):**
+    - ファンファーレSEとともに、引退する愛馬の記念プレート（世代・馬名・毛色・路線・授与された二つ名・獲得タイトルバッジ）、Week 1〜4 の出走軌跡、および担当期間中にマスターした英語フレーズ数を表彰。
+    - 画面下部にて次世代（`generation + 1`）の新馬の馬名・毛色同時抽選（「🎲 命名・毛色抽選」）、馬名手動編集（「✏️ 手動編集」）、およびキャリア路線（全8路線）を選択して世代交代を確定するフローを実装。
+  - **殿堂入りデータの永続化と世代交代ハンドオフ (`src/types/index.ts`, `src/hooks/useTrainingProgress.ts`):**
+    - `HallOfFameHorse` 型および `UserProgress.hallOfFame` 配列を追加し、引退時に `createHallOfFameRecord` / `retireAndSpawnNextGeneration` で歴代名馬レコードを LocalStorage に永続保存。
+    - ユーザー全体の連続学習ストリーク（`streakDays`）、にんじん所持数（`carrotCount`）、全体の習得済みフレーズ（`learnedPhraseIds` / `lapCount`）を維持したまま、新馬（`generation + 1`, `currentWeek: 1`, `hasTrained: false`）へバトンタッチする `retireCurrentHorse` を実装。
+  - **導線・デバッグ機能の追加 (`src/components/RaceResultScreen.tsx`, `src/components/HomeScreen.tsx`, `src/App.tsx`):**
+    - Week 4（最終週）のレース完走時のレース結果画面およびホーム画面に「🌸 引退式セレモニーへ進む」ボタン・案内バナーを表示。
+    - ホーム画面のデバッグパネルに「🌸 引退式セレモニーを試す（世代交代デモ）」ボタンを追加。
+  - 二つ名判定・引退サマリー算出・殿堂入りレコード作成・次世代生成を検証する単体テスト（`tests/career_cycle.test.ts`）を追加。
+
+---
+
 ## [v0.8.1] - 2026-10-17
 
 ### Added
