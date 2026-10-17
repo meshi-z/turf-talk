@@ -178,7 +178,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-zinc-100 flex flex-col justify-start items-center text-zinc-900 selection:bg-emerald-200">
       <div className="w-full max-w-md bg-zinc-50 min-h-screen flex flex-col border-x border-zinc-200/60 shadow-lg">
-        <Header streakDays={progress.streakDays} carrotCount={progress.carrotCount} />
+        <Header streakDays={progress.streakDays} />
 
         <main className="flex-1 flex flex-col">
           {currentScreen === 'home' && (
