@@ -348,8 +348,8 @@ export function useTrainingProgress() {
         condition: 'up',
         weekdayTrainingDays: 3,
         currentWeekMonday: todayMonday,
-        lastRaceWeekMonday: null,
-        hasCompletedWeeklyRace: false,
+        lastRaceWeekMonday: prev.lastRaceWeekMonday ?? null,
+        hasCompletedWeeklyRace: prev.hasCompletedWeeklyRace ?? false,
         careerHorse: nextHorse,
         hallOfFame: [retiredRecord, ...existingHoF],
       };
