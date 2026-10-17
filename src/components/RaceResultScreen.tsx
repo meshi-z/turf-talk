@@ -1,10 +1,16 @@
 import { useEffect, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
-import { Trophy, Home, RotateCcw, Check, X, Sparkles, Award } from 'lucide-react';
+import { Trophy, Home, RotateCcw, Check, X, Sparkles, Award, Flag } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { calculateRacePlacement, type RacePlacement } from '../lib/raceMode';
 import { calculateRaceFeedback, type RaceFeedback } from '../lib/conditionBonus';
+import {
+  getCareerRouteInfo,
+  getCareerStageLabel,
+  getCurrentWeekRaceInfo,
+  type CareerRaceAdvanceResult,
+} from '../lib/careerCycle';
 
 interface RaceResultScreenProps {
   score: number;
@@ -16,6 +22,7 @@ interface RaceResultScreenProps {
     isCorrect: boolean;
   }[];
   addedCarrots?: number;
+  careerAdvance?: CareerRaceAdvanceResult | null;
   onGoHome: () => void;
   onRetryRace: () => void;
 }
@@ -26,6 +33,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   progress,
   answeredHistory,
   addedCarrots = 0,
+  careerAdvance = null,
   onGoHome,
   onRetryRace,
 }) => {
@@ -33,6 +41,12 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
   const isWinner = placement.type === '1st';
   const isSecond = placement.type === '2nd';
+
+  const { careerHorse } = progress;
+  const routeInfo = getCareerRouteInfo(careerHorse.routeId);
+  const completedWeek = careerAdvance?.completedWeek ?? careerHorse.currentWeek;
+  const completedRaceInfo = getCurrentWeekRaceInfo(careerHorse.routeId, completedWeek);
+  const nextStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
 
   // 画面マウント時にファンファーレ等のSEを再生
   useEffect(() => {
@@ -67,7 +81,9 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
 
         <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-900 border border-amber-200/80 text-xs font-bold px-3 py-1 rounded-full mb-3 shadow-2xs">
           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>ロンシャン 芝2400m（海外G1） 確定</span>
+          <span>
+            Week {completedWeek} • {completedRaceInfo.raceName}（{completedRaceInfo.distanceText}） 確定
+          </span>
         </div>
 
         {/* 着順表示バッジ */}
@@ -91,11 +107,13 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
         <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-zinc-100 text-center">
           <div className="bg-amber-50/60 rounded-xl p-3 border border-amber-100">
             <span className="text-[11px] text-amber-800 font-semibold block mb-0.5">
-              出走馬
+              出走馬（第{careerHorse.generation}世代）
             </span>
-            <span className="text-sm font-black text-amber-950 flex items-center justify-center gap-1">
-              <span>{progress.horseName}</span>
-              <span className="text-[11px] font-normal text-amber-700">（牡3）</span>
+            <span className="text-sm font-black text-amber-950 flex items-center justify-center gap-1 flex-wrap">
+              <span>{careerHorse.name}</span>
+              <span className="text-[11px] font-normal text-amber-700">
+                （{routeInfo.sexAgeLabel} / {careerHorse.color}）
+              </span>
             </span>
           </div>
           <div className="bg-zinc-50 rounded-xl p-3 border border-zinc-200/80">
@@ -108,6 +126,34 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* キャリアステージ進行カード */}
+      {careerAdvance && (
+        <div className="bg-linear-to-r from-emerald-800 to-emerald-950 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-emerald-700/70 border border-emerald-500/40 flex items-center justify-center shrink-0">
+            <Flag className="w-5 h-5 text-amber-300" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-200">
+                Career Stage Progression
+              </span>
+              <span className="text-[11px] font-extrabold bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full">
+                {nextStageLabel}
+              </span>
+            </div>
+            {careerAdvance.steppedUp ? (
+              <p className="text-xs font-bold text-white mt-1">
+                Week {careerAdvance.completedWeek} を完走し、Week {careerAdvance.nextWeek} へステップアップしました！
+              </p>
+            ) : (
+              <p className="text-xs font-bold text-white mt-1">
+                Week 4 ラストラン（{completedRaceInfo.raceName}）を完走しました！
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 余力温存ボーナスカード（にんじん獲得） */}
       {addedCarrots > 0 && (
@@ -168,6 +214,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
           💡 {feedback.comment}
         </p>
       </div>
+
 
       {/* レース出走フレーズ振り返り */}
       <div className="bg-white rounded-2xl border border-zinc-200/80 p-4 shadow-xs">
