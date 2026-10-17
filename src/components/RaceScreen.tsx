@@ -12,13 +12,20 @@ import {
   Zap,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
-import { RACE_PHASES, type RacePhase } from '../lib/raceMode';
+import {
+  RACE_PHASES,
+  getRacePhasesForWeek,
+  getRaceThemeLabel,
+  type RacePhase,
+} from '../lib/raceMode';
 import { eliminateOneWrongOption } from '../lib/conditionBonus';
+import type { CareerRouteRace } from '../types';
 
 interface RaceScreenProps {
   questions: PhraseItem[];
   currentIndex: number;
   initialHints?: number;
+  raceInfo?: CareerRouteRace;
   onAnswer: (optionId: string, isCorrect: boolean) => void;
   onNext: () => void;
   onCancel: () => void;
@@ -29,6 +36,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
   questions,
   currentIndex,
   initialHints = 0,
+  raceInfo,
   onAnswer,
   onNext,
   onCancel,
@@ -41,8 +49,11 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
   const currentItem = questions[currentIndex];
   const isAnswered = selectedOptionId !== null;
 
+  const phases: readonly RacePhase[] = raceInfo
+    ? getRacePhasesForWeek(raceInfo.week, raceInfo)
+    : RACE_PHASES;
   const currentPhase: RacePhase =
-    RACE_PHASES[currentIndex] ?? RACE_PHASES[RACE_PHASES.length - 1];
+    phases[currentIndex] ?? phases[phases.length - 1];
 
   const handleSelectOption = (option: QuizOption) => {
     if (isAnswered || eliminatedOptionIds.includes(option.id)) return;
@@ -85,19 +96,23 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
       <div className="flex items-center justify-between gap-3 mb-2.5">
         <button
           onClick={onCancel}
-          className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
+          className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>レース中止</span>
         </button>
 
-        <div className="flex-1 flex flex-col items-end">
-          <div className="flex items-center justify-between w-full text-xs font-bold text-amber-950 mb-1">
-            <span className="text-[11px] text-amber-800 font-bold flex items-center gap-1">
-              <Trophy className="w-3.5 h-3.5 text-amber-600" />
-              海外G1レース
+        <div className="flex-1 flex flex-col items-end min-w-0">
+          <div className="flex items-center justify-between w-full text-xs font-bold text-amber-950 mb-1 gap-2">
+            <span className="text-[11px] text-amber-800 font-bold flex items-center gap-1 truncate">
+              <Trophy className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span className="truncate">
+                {raceInfo
+                  ? `Week ${raceInfo.week} • ${raceInfo.raceName}（${raceInfo.distanceText}）`
+                  : '海外G1レース'}
+              </span>
             </span>
-            <span>
+            <span className="shrink-0">
               {currentIndex + 1} / {questions.length} 展開
             </span>
           </div>
@@ -112,7 +127,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
 
       {/* レース展開・実況ステータスカード */}
       <div className="bg-linear-to-r from-amber-700 via-amber-800 to-amber-900 text-white rounded-2xl p-3.5 mb-3 shadow-md border border-amber-600/40 relative overflow-hidden">
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center justify-between mb-1.5 gap-2">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
             <span className="text-[11px] font-extrabold tracking-wider uppercase text-amber-200 flex items-center gap-1">
@@ -120,15 +135,20 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
               LIVE RACE COMMENTARY
             </span>
           </div>
-          <span className="text-[10px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2 py-0.5 rounded-full shrink-0">
             {currentPhase.distanceRemaining}
           </span>
         </div>
 
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between gap-2 flex-wrap">
           <h3 className="text-base font-extrabold text-white">
             【{currentPhase.phaseName}】
           </h3>
+          {raceInfo && (
+            <span className="text-[10px] font-semibold text-amber-200/95 bg-amber-950/50 border border-amber-500/30 px-2 py-0.5 rounded-md">
+              テーマ: {getRaceThemeLabel(raceInfo.themeCategory)}
+            </span>
+          )}
         </div>
 
         <p className="text-xs text-amber-100/90 mt-1 leading-relaxed">

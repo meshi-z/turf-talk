@@ -182,12 +182,12 @@ export function useTrainingProgress() {
    * レース完了時のステータス変動、余力温存にんじんボーナス、および次週へのキャリア進行
    */
   const markRaceCompleted = (score: number, remainingReserves: number = 0) => {
-    const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
-    const carrotBonus = calculateCarrotsFromRemainingReserves(progress.carrotCount, remainingReserves);
-    const placement = calculateRacePlacement(score);
-
     const activeWeek: CareerWeek =
       debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
+    const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
+    const carrotBonus = calculateCarrotsFromRemainingReserves(progress.carrotCount, remainingReserves);
+    const placement = calculateRacePlacement(score, activeWeek);
+
     const horseForRace = {
       ...progress.careerHorse,
       currentWeek: activeWeek,

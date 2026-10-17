@@ -29,6 +29,7 @@ import {
   isHorseProfileLocked,
   validateHorseName,
 } from '../lib/careerCycle';
+import { getRaceThemeLabel } from '../lib/raceMode';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -395,6 +396,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             <span>週末・{currentWeekRace.raceName}</span>
           </h3>
 
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
+            <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
+          </div>
+
           <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
             平日の坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レースを完走して次のステージへ進もう。
           </p>
@@ -404,7 +409,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
           >
             <Trophy className="w-5 h-5 fill-amber-950" />
-            <span>週末G1レースに出走する（5問）</span>
+            <span>{currentWeekRace.raceName}に出走する（5問）</span>
           </button>
         </div>
       ) : null}
@@ -519,6 +524,9 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               出走まで あと {daysUntilWeekend} 日
             </span>
           </div>
+          <p className="text-[11px] font-semibold text-amber-800 mt-1">
+            🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}
+          </p>
           <p className="text-xs text-zinc-600 leading-relaxed mt-1">
             平日の調教をこなすほど、週末レースでの好走確率や愛馬のコンディションがアップします（土日限定解放）。
           </p>
