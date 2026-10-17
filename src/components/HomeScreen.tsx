@@ -18,6 +18,7 @@ import {
 interface HomeScreenProps {
   progress: UserProgress;
   onStartTraining: () => void;
+  onStartExtraTraining: () => void;
   onStartRace: () => void;
   onResetForDemo: () => void;
   appMode: AppMode;
@@ -39,6 +40,7 @@ const ORDERED_DAYS: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
 export const HomeScreen: FC<HomeScreenProps> = ({
   progress,
   onStartTraining,
+  onStartExtraTraining,
   onStartRace,
   onResetForDemo,
   appMode,
@@ -226,7 +228,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             <div>
               <p className="font-bold text-emerald-950 text-sm">本日の坂路調教 完了！💮</p>
               <p className="text-xs text-emerald-700 mt-0.5">
-                息遣いも良く、素晴らしい仕上がりです。何度でも復習できます。
+                息遣いも良く、素晴らしい仕上がりです。さらに未習得フレーズを学んだり、今日の復習ができます。
               </p>
             </div>
           </div>
@@ -241,23 +243,40 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </div>
         )}
 
-        <button
-          onClick={onStartTraining}
-          className={`mt-4 w-full transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer ${
-            isWeekendMode
-              ? 'bg-emerald-800 hover:bg-emerald-900 active:scale-[0.98]'
-              : 'bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98]'
-          }`}
-        >
-          <Play className="w-5 h-5 fill-white" />
-          <span>
-            {progress.completedToday
-              ? '本日のフレーズを復習する'
-              : isWeekendMode
-              ? '坂路調教で調整する（3問）'
-              : '本日の調教を始める（3問）'}
-          </span>
-        </button>
+        {progress.completedToday ? (
+          <div className="mt-4 space-y-2">
+            <button
+              onClick={onStartExtraTraining}
+              className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
+            >
+              <Sparkles className="w-5 h-5 text-amber-300" />
+              <span>追加トレーニング（新しい3問）</span>
+            </button>
+            <button
+              onClick={onStartTraining}
+              className="w-full bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2.5 px-4 rounded-xl border border-zinc-300 flex items-center justify-center gap-2 text-sm cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4 text-zinc-500" />
+              <span>本日のフレーズを復習する</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onStartTraining}
+            className={`mt-4 w-full transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer ${
+              isWeekendMode
+                ? 'bg-emerald-800 hover:bg-emerald-900 active:scale-[0.98]'
+                : 'bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98]'
+            }`}
+          >
+            <Play className="w-5 h-5 fill-white" />
+            <span>
+              {isWeekendMode
+                ? '坂路調教で調整する（3問）'
+                : '本日の調教を始める（3問）'}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* 平日用の週末レース予告カード（平日の場合のみ表示） */}

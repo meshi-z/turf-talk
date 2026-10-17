@@ -8,7 +8,11 @@ import { RaceScreen } from './components/RaceScreen';
 import { RaceResultScreen } from './components/RaceResultScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
-import { selectDailyPhrases, getPhrasesByIds } from './lib/dailyRotation';
+import {
+  selectDailyPhrases,
+  selectExtraTrainingPhrases,
+  getPhrasesByIds,
+} from './lib/dailyRotation';
 import { selectRaceQuestions } from './lib/raceMode';
 import { soundManager } from './lib/sound';
 
@@ -76,6 +80,18 @@ export function App() {
     }
 
     setSessionQuestions(questions);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setAnsweredHistory([]);
+    setCurrentScreen('quiz');
+  };
+
+  const handleStartExtraTraining = () => {
+    const selected = selectExtraTrainingPhrases(
+      INITIAL_PHRASES,
+      progress.learnedPhraseIds
+    );
+    setSessionQuestions(selected.questions);
     setCurrentQuestionIndex(0);
     setScore(0);
     setAnsweredHistory([]);
@@ -169,6 +185,7 @@ export function App() {
             <HomeScreen
               progress={progress}
               onStartTraining={handleStartTraining}
+              onStartExtraTraining={handleStartExtraTraining}
               onStartRace={handleStartRace}
               onResetForDemo={resetProgressForDemo}
               appMode={appMode}

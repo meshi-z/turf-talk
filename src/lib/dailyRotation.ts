@@ -141,6 +141,68 @@ export function getPhrasesByIds(
 }
 
 /**
+ * 当日調教完了後の追加トレーニング（未習得フレーズの継続学習）用フレーズを選出する
+ * 
+ * - 原則「未習得プールから2問 ＋ 習得済みプールから1問」の計3問を選出
+ * - 未習得プールが2問以下の場合は習得済みプールから補充して計3問を維持
+ * - 全問習得済みの場合は全フレーズからランダムに3問選出（全問復習モード）
+ * - 習得済みが0問の場合は未習得から3問選出
+ * - 各問題の選択肢はランダムにシャッフルされる
+ */
+export function selectExtraTrainingPhrases(
+  allPhrases: readonly PhraseItem[],
+  learnedIds: readonly string[],
+  count = 3
+): DailySelectionResult {
+  if (allPhrases.length === 0) {
+    return { questions: [], isReview: false };
+  }
+
+  const learnedSet = new Set(learnedIds);
+  const unlearned = allPhrases.filter((p) => !learnedSet.has(p.id));
+  const learned = allPhrases.filter((p) => learnedSet.has(p.id));
+
+  let selected: PhraseItem[] = [];
+  let isReview = false;
+
+  const shuffledUnlearned = shuffleArray(unlearned);
+  const shuffledLearned = shuffleArray(learned);
+
+  if (unlearned.length === 0) {
+    // 全問習得済みの場合: 全フレーズから選出（復習出題）
+    isReview = true;
+    selected = shuffleArray(allPhrases).slice(0, count);
+  } else if (unlearned.length === 1) {
+    // 未習得が1問のみの場合: 未習得1問 ＋ 習得済みから補充
+    const neededFromLearned = Math.min(count - 1, shuffledLearned.length);
+    selected = [shuffledUnlearned[0], ...shuffledLearned.slice(0, neededFromLearned)];
+  } else {
+    // 未習得が2問以上ある場合: 未習得から2問選出し、残りを習得済みから選出
+    const unlearnedCount = Math.min(2, shuffledUnlearned.length);
+    const neededFromLearned = count - unlearnedCount;
+
+    if (shuffledLearned.length >= neededFromLearned) {
+      selected = [
+        ...shuffledUnlearned.slice(0, unlearnedCount),
+        ...shuffledLearned.slice(0, neededFromLearned),
+      ];
+    } else {
+      // 習得済みが不足している場合（全問未習得等）: 未習得からcount問確保
+      selected = shuffledUnlearned.slice(0, count);
+    }
+  }
+
+  // 出題順序をシャッフルし、選択肢を動的にシャッフル
+  const shuffledSelected = shuffleArray(selected);
+  const questionsWithOptionsShuffled = shuffledSelected.map(shufflePhraseOptions);
+
+  return {
+    questions: questionsWithOptionsShuffled,
+    isReview,
+  };
+}
+
+/**
  * クイズ完了時に、正解したフレーズIDをもとに履修フレーズリストと周回数を更新する計算関数
  */
 export function calculateNextProgressAfterCompletion(
