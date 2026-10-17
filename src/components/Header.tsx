@@ -4,10 +4,9 @@ import { soundManager } from '../lib/sound';
 
 interface HeaderProps {
   streakDays: number;
-  carrotCount?: number;
 }
 
-export const Header: FC<HeaderProps> = ({ streakDays, carrotCount = 0 }) => {
+export const Header: FC<HeaderProps> = ({ streakDays }) => {
   const [soundEnabled, setSoundEnabled] = useState(() => soundManager.isEnabled());
 
   const handleToggleSound = () => {
@@ -34,15 +33,6 @@ export const Header: FC<HeaderProps> = ({ streakDays, carrotCount = 0 }) => {
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        {/* にんじんストック（ストリーク救済アイテム） */}
-        <div
-          title="ストリーク補填用アイテム（未受講日を自動救済）。レースで「余力」を温存すると獲得できます（最大3個）"
-          className="flex items-center gap-1 bg-orange-50 text-orange-900 border border-orange-200 px-2 py-1 rounded-full text-xs font-bold shadow-xs cursor-help whitespace-nowrap shrink-0"
-        >
-          <span className="text-sm leading-none">🥕</span>
-          <span>{carrotCount}/3</span>
-        </div>
-
         {/* 連続日数ストリーク */}
         <div className="flex items-center gap-1 bg-amber-50 text-amber-900 border border-amber-200 px-2 sm:px-2.5 py-1 rounded-full text-xs font-bold shadow-xs whitespace-nowrap shrink-0">
           <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 fill-amber-500 animate-pulse shrink-0" />
