@@ -416,53 +416,74 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
       )}
 
-      {/* 週末レース出走バナー（土日限定でメイン表示） */}
+      {/* 週末レース出走バナー（土日限定でメイン表示。調教1回以上実施で解放、未調教時はロック案内を表示） */}
       {isWeekendMode ? (
-        <div className="bg-linear-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden border border-amber-400/30">
-          <div className="absolute -right-6 -bottom-6 text-amber-500/20 text-9xl font-black select-none pointer-events-none">
-            🏆
+        careerHorse.hasTrained ? (
+          <div className="bg-linear-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden border border-amber-400/30">
+            <div className="absolute -right-6 -bottom-6 text-amber-500/20 text-9xl font-black select-none pointer-events-none">
+              🏆
+            </div>
+
+            <div className="flex items-center justify-between mb-2">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full shadow-xs">
+                <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • Week {careerHorse.currentWeek}
+              </span>
+              <span className="text-xs text-amber-200 font-semibold">{currentWeekRace.distanceText}</span>
+            </div>
+
+            <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
+              <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
+              <span>週末・{currentWeekRace.raceName}</span>
+            </h3>
+
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
+              <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
+            </div>
+
+            <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
+              {progress.hasCompletedWeeklyRace
+                ? '今週の週末レースは出走完了しました！土日も坂路調教や復習を続けて、来週末の次走に向けて愛馬を仕上げましょう。'
+                : '坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レース（週末1回限定）を完走して次のステージへ進もう。'}
+            </p>
+
+            {progress.hasCompletedWeeklyRace ? (
+              <button
+                type="button"
+                disabled
+                className="mt-4 w-full bg-amber-950/70 text-amber-200/90 border border-amber-500/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+              >
+                <span>出走完了 🏁（次回出走は来週末）</span>
+              </button>
+            ) : (
+              <button
+                onClick={onStartRace}
+                className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
+              >
+                <Trophy className="w-5 h-5 fill-amber-950" />
+                <span>{currentWeekRace.raceName}に出走する（5問）</span>
+              </button>
+            )}
           </div>
+        ) : (
+          <div className="bg-linear-to-br from-zinc-800 via-zinc-850 to-zinc-900 text-white rounded-2xl p-4 shadow-md border border-zinc-700/60 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-zinc-700/90 text-zinc-200 px-2.5 py-0.5 rounded-full border border-zinc-600/50">
+                <Lock className="w-3 h-3 text-amber-300 shrink-0" />
+                <span>週末レース出走 • ロック中</span>
+              </span>
+              <span className="text-xs text-amber-300 font-semibold">{currentWeekRace.distanceText}</span>
+            </div>
 
-          <div className="flex items-center justify-between mb-2">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full shadow-xs">
-              <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • Week {careerHorse.currentWeek}
-            </span>
-            <span className="text-xs text-amber-200 font-semibold">{currentWeekRace.distanceText}</span>
+            <h3 className="text-base font-extrabold text-white flex items-center gap-1.5 mt-1">
+              <Trophy className="w-4 h-4 text-zinc-400 shrink-0" />
+              <span>週末・{currentWeekRace.raceName}（Week {careerHorse.currentWeek}）</span>
+            </h3>
+
+            <p className="text-xs text-zinc-300 mt-2 leading-relaxed">
+              まずは下記の<strong>「坂路調教」を1回以上実施</strong>してください。調教を完了するとゲートが開き、週末レースに出走できるようになります。
+            </p>
           </div>
-
-          <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
-            <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
-            <span>週末・{currentWeekRace.raceName}</span>
-          </h3>
-
-          <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
-            <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
-          </div>
-
-          <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
-            {progress.hasCompletedWeeklyRace
-              ? '今週の週末レースは出走完了しました！土日も坂路調教や復習を続けて、来週末の次走に向けて愛馬を仕上げましょう。'
-              : '坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レース（週末1回限定）を完走して次のステージへ進もう。'}
-          </p>
-
-          {progress.hasCompletedWeeklyRace ? (
-            <button
-              type="button"
-              disabled
-              className="mt-4 w-full bg-amber-950/70 text-amber-200/90 border border-amber-500/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
-            >
-              <span>出走完了 🏁（次回出走は来週末）</span>
-            </button>
-          ) : (
-            <button
-              onClick={onStartRace}
-              className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
-            >
-              <Trophy className="w-5 h-5 fill-amber-950" />
-              <span>{currentWeekRace.raceName}に出走する（5問）</span>
-            </button>
-          )}
-        </div>
+        )
       ) : null}
 
       {/* 本日の調教ステータス */}
@@ -520,7 +541,9 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               <span>【{isWeekendMode ? '週末・坂路調整' : '平日・坂路調教'}】 未完了</span>
             </p>
             <p className="text-xs text-amber-800 mt-1">
-              勝利騎手インタビュー頻出の3フレーズを直感4択で解き、愛馬の調子を上げよう！
+              {isWeekendMode && !careerHorse.hasTrained
+                ? '💡 まずは坂路調教で愛馬を仕上げよう！調教を1回完了すると、週末レースに出走できるようになります。'
+                : '勝利騎手インタビュー頻出の3フレーズを直感4択で解き、愛馬の調子を上げよう！'}
             </p>
           </div>
         )}
