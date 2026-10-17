@@ -13,7 +13,10 @@ export const DEFAULT_HORSE_NAME = 'ターフスター';
 export const DEFAULT_HORSE_WEIGHT = 484;
 export const DEFAULT_COAT_COLOR: HorseCoatColor = '鹿毛';
 export const DEFAULT_ROUTE_ID: CareerRouteId = 'classic-colt';
-export const MAX_HORSE_NAME_LENGTH = 18;
+export const MIN_HORSE_NAME_LENGTH = 2;
+export const MAX_HORSE_NAME_JA_LENGTH = 9;
+export const MAX_HORSE_NAME_EN_LENGTH = 18;
+export const MAX_HORSE_NAME_LENGTH = MAX_HORSE_NAME_EN_LENGTH;
 export const RECOMMENDED_TRAINING_DAYS_FOR_RACE = 3;
 
 /**
@@ -141,6 +144,16 @@ export function generateRandomHorseName(currentName?: string): string {
 }
 
 /**
+ * 日本語文字（カタカナ・ひらがな・漢字・長音・中黒等）を検出する正規表現
+ */
+const JAPANESE_CHAR_REGEX = /[\u3041-\u3096\u30A1-\u30FA\u30FC\u30FB\u4E00-\u9FFF\u3005]/;
+
+/**
+ * 英字（アルファベット）を検出する正規表現
+ */
+const ENGLISH_CHAR_REGEX = /[a-zA-Z]/;
+
+/**
  * 馬名に許可される文字パターン（カタカナ・ひらがな・漢字・英数字・長音・中黒・スペースのみ）
  * HTMLタグやスクリプト記号（< > & " ' ` / \ ; ( ) { } [ ] = 等）は一切許可しない
  */
@@ -149,6 +162,20 @@ const SAFE_HORSE_NAME_CHAR_REGEX =
 const SAFE_HORSE_NAME_TEST_REGEX =
   /^[a-zA-Z0-9\u3041-\u3096\u30A1-\u30FA\u30FC\u30FB\u4E00-\u9FFF\u3005 ]+$/;
 const CONTROL_AND_BIDI_CHAR_REGEX = /[\p{Cc}\p{Cf}]/gu;
+
+/**
+ * 半角英数字・スペースのみで構成された馬名（国際英字馬名）かどうか判定する
+ */
+export function isAsciiHorseName(name: string): boolean {
+  return /^[a-zA-Z0-9 ]+$/.test(name);
+}
+
+/**
+ * 日本語文字（カタカナ等）と英字が混在しているかどうか判定する
+ */
+export function hasMixedLanguages(name: string): boolean {
+  return JAPANESE_CHAR_REGEX.test(name) && ENGLISH_CHAR_REGEX.test(name);
+}
 
 /**
  * ユーザー入力またはLocalStorage由来の馬名を無害化（サニタイズ）する
@@ -170,10 +197,17 @@ export function sanitizeHorseName(
   const cleaned = normalized
     .replace(/\s+/g, ' ')
     .replace(SAFE_HORSE_NAME_CHAR_REGEX, '')
-    .trim()
-    .slice(0, MAX_HORSE_NAME_LENGTH);
+    .trim();
 
-  return cleaned.length > 0 ? cleaned : fallback;
+  if (cleaned.length === 0) return fallback;
+
+  // 英字のみなら18文字、それ以外（日本語または混在）なら9文字でスライス
+  const maxLen = isAsciiHorseName(cleaned)
+    ? MAX_HORSE_NAME_EN_LENGTH
+    : MAX_HORSE_NAME_JA_LENGTH;
+  const sliced = cleaned.slice(0, maxLen).trim();
+
+  return sliced.length > 0 ? sliced : fallback;
 }
 
 export interface HorseNameValidationResult {
@@ -184,6 +218,9 @@ export interface HorseNameValidationResult {
 
 /**
  * カスタム馬名入力のバリデーション
+ * - 日本語（カタカナ等）: 2〜9文字
+ * - 英字（半角英数字・スペースのみ）: 2〜18文字
+ * - カタカナと英字の混在は公式規則に基づき不可
  */
 export function validateHorseName(rawInput: string): HorseNameValidationResult {
   if (typeof rawInput !== 'string') {
@@ -204,24 +241,55 @@ export function validateHorseName(rawInput: string): HorseNameValidationResult {
     return {
       isValid: false,
       sanitized: '',
-      error: '馬名を1文字以上入力してください。',
+      error: '馬名を入力してください。',
     };
   }
 
-  if (normalized.length > MAX_HORSE_NAME_LENGTH) {
+  // 最小文字数チェック（2文字未満を拒否）
+  if (normalized.length < MIN_HORSE_NAME_LENGTH) {
     return {
       isValid: false,
       sanitized: sanitizeHorseName(normalized, ''),
-      error: `馬名は${MAX_HORSE_NAME_LENGTH}文字以内で入力してください。`,
+      error: `馬名は${MIN_HORSE_NAME_LENGTH}文字以上で入力してください。`,
     };
   }
 
+  // 使用可能文字チェック
   if (!SAFE_HORSE_NAME_TEST_REGEX.test(normalized)) {
     return {
       isValid: false,
       sanitized: sanitizeHorseName(normalized, ''),
       error: '記号や特殊文字は使用できません（カタカナ・ひらがな・漢字・英数字のみ）。',
     };
+  }
+
+  // カタカナと英字の混在チェック
+  if (hasMixedLanguages(normalized)) {
+    return {
+      isValid: false,
+      sanitized: sanitizeHorseName(normalized, ''),
+      error:
+        'カタカナと英字を混在させることはできません。カタカナのみ（2〜9文字）、または英字のみ（2〜18文字）で入力してください。',
+    };
+  }
+
+  // 言語別の最大文字数チェック
+  if (isAsciiHorseName(normalized)) {
+    if (normalized.length > MAX_HORSE_NAME_EN_LENGTH) {
+      return {
+        isValid: false,
+        sanitized: sanitizeHorseName(normalized, ''),
+        error: `英字馬名は${MAX_HORSE_NAME_EN_LENGTH}文字以内で入力してください。`,
+      };
+    }
+  } else {
+    if (normalized.length > MAX_HORSE_NAME_JA_LENGTH) {
+      return {
+        isValid: false,
+        sanitized: sanitizeHorseName(normalized, ''),
+        error: `カタカナ等の日本語馬名は${MAX_HORSE_NAME_JA_LENGTH}文字以内で入力してください。`,
+      };
+    }
   }
 
   return {

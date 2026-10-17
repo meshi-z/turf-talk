@@ -187,7 +187,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                   }}
                   maxLength={MAX_HORSE_NAME_LENGTH}
                   aria-label="愛馬名を入力"
-                  placeholder="馬名を入力 (18文字以内)"
+                  placeholder="馬名を入力 (カタカナ9文字 / 英字18文字以内)"
                   className="flex-1 min-w-0 bg-emerald-950/90 border border-emerald-400/60 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white placeholder:text-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-amber-400"
                   autoFocus
                 />

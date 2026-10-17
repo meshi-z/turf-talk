@@ -293,7 +293,7 @@ export const RetirementScreen: FC<RetirementScreenProps> = ({
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
                   maxLength={MAX_HORSE_NAME_LENGTH}
-                  placeholder="新馬名を入力（最大18文字）"
+                  placeholder="新馬名を入力 (カタカナ9文字 / 英字18文字以内)"
                   aria-label="次世代の馬名を入力"
                   className="flex-1 min-w-0 bg-emerald-950/90 text-white text-sm font-bold px-2.5 py-1.5 rounded-lg border border-emerald-500/60 focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />

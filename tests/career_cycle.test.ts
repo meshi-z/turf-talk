@@ -8,7 +8,12 @@ import {
   DEFAULT_ROUTE_ID,
   HORSE_COAT_COLORS,
   HORSE_COAT_COLOR_WEIGHTS,
+  MIN_HORSE_NAME_LENGTH,
+  MAX_HORSE_NAME_JA_LENGTH,
+  MAX_HORSE_NAME_EN_LENGTH,
   MAX_HORSE_NAME_LENGTH,
+  isAsciiHorseName,
+  hasMixedLanguages,
   advanceCareerHorseAfterRace,
   changeHorseNameIfUnlocked,
   changeHorseRouteIfUnlocked,
@@ -99,15 +104,78 @@ test('security: sanitizeHorseName and validateHorseName prevent XSS and invalid 
   assert.equal(sanitizeHorseName('   ', 'フォールバック'), 'フォールバック');
   assert.equal(sanitizeHorseName(null, 'フォールバック'), 'フォールバック');
 
-  // 4. 文字数上限（18文字）チェック
-  const tooLong = 'ア'.repeat(MAX_HORSE_NAME_LENGTH + 1);
-  const longValidation = validateHorseName(tooLong);
-  assert.equal(longValidation.isValid, false);
-  assert.equal(sanitizeHorseName(tooLong).length, MAX_HORSE_NAME_LENGTH);
-
-  // 5. 制御文字・ゼロ幅文字の除去
+  // 4. 制御文字・ゼロ幅文字の除去
   const withControl = 'ターフ\u200B\u0000スター';
   assert.equal(sanitizeHorseName(withControl), 'ターフスター');
+});
+
+test('horse name validation: hybrid length limits (Katakana 2-9 chars, English 2-18 chars) and no mixed languages', () => {
+  // 定数の確認
+  assert.equal(MIN_HORSE_NAME_LENGTH, 2);
+  assert.equal(MAX_HORSE_NAME_JA_LENGTH, 9);
+  assert.equal(MAX_HORSE_NAME_EN_LENGTH, 18);
+  assert.equal(MAX_HORSE_NAME_LENGTH, 18);
+
+  // 1. 日本語（カタカナ等）の文字数制限（2〜9文字）
+  // 正常系（2〜9文字）
+  assert.equal(validateHorseName('タマ').isValid, true, '2-char Katakana should be valid');
+  assert.equal(validateHorseName('サイレンススズカ').isValid, true, '8-char Katakana should be valid');
+  assert.equal(validateHorseName('ディープインパクト').isValid, true, '9-char Katakana should be valid');
+
+  // 異常系: 10文字以上のカタカナはエラー
+  const tenCharsJa = 'ディープインパクト号';
+  const valTenCharsJa = validateHorseName(tenCharsJa);
+  assert.equal(valTenCharsJa.isValid, false, '10-char Katakana must be invalid');
+  assert.ok(valTenCharsJa.error?.includes('9文字以内'), 'Error should mention 9 characters limit');
+  assert.equal(sanitizeHorseName(tenCharsJa).length, MAX_HORSE_NAME_JA_LENGTH);
+
+  // 2. 英字馬名の文字数制限（2〜18文字）
+  // 正常系（2〜18文字）
+  assert.equal(validateHorseName('Go').isValid, true, '2-char English should be valid');
+  assert.equal(validateHorseName('Frankel').isValid, true, '7-char English should be valid');
+  assert.equal(validateHorseName('City of Troy').isValid, true, '12-char English with space should be valid');
+  assert.equal(validateHorseName('A'.repeat(MAX_HORSE_NAME_EN_LENGTH)).isValid, true, '18-char English should be valid');
+
+  // 異常系: 19文字以上の英字はエラー
+  const nineteenCharsEn = 'A'.repeat(MAX_HORSE_NAME_EN_LENGTH + 1);
+  const valNineteenEn = validateHorseName(nineteenCharsEn);
+  assert.equal(valNineteenEn.isValid, false, '19-char English must be invalid');
+  assert.ok(valNineteenEn.error?.includes('18文字以内'), 'Error should mention 18 characters limit');
+  assert.equal(sanitizeHorseName(nineteenCharsEn).length, MAX_HORSE_NAME_EN_LENGTH);
+
+  // 3. 1文字入力の拒否（最小文字数: 2文字未満は拒否）
+  const singleCharJa = validateHorseName('ア');
+  assert.equal(singleCharJa.isValid, false, '1-char Katakana must be invalid');
+  assert.ok(singleCharJa.error?.includes('2文字以上'), 'Error should mention 2 characters minimum');
+
+  const singleCharEn = validateHorseName('A');
+  assert.equal(singleCharEn.isValid, false, '1-char English must be invalid');
+  assert.ok(singleCharEn.error?.includes('2文字以上'), 'Error should mention 2 characters minimum');
+
+  const emptyName = validateHorseName('   ');
+  assert.equal(emptyName.isValid, false, 'Empty input must be invalid');
+
+  // 4. カタカナと英字の混在禁止（公式規則に基づく排他ルール）
+  const mixed1 = validateHorseName('サンデーR');
+  assert.equal(mixed1.isValid, false, 'Mixed Katakana and English must be invalid');
+  assert.ok(mixed1.error?.includes('混在'), 'Error should mention rejection of mixed languages');
+
+  const mixed2 = validateHorseName('Starスター');
+  assert.equal(mixed2.isValid, false, 'Mixed English and Katakana must be invalid');
+  assert.ok(mixed2.error?.includes('混在'), 'Error should mention rejection of mixed languages');
+
+  const mixed3 = validateHorseName('Kingヘイロー');
+  assert.equal(mixed3.isValid, false, 'Mixed English and Katakana must be invalid');
+  assert.ok(mixed3.error?.includes('混在'), 'Error should mention rejection of mixed languages');
+
+  // ヘルパー関数の動作確認
+  assert.equal(hasMixedLanguages('サンデーR'), true);
+  assert.equal(hasMixedLanguages('Starスター'), true);
+  assert.equal(hasMixedLanguages('ディープインパクト'), false);
+  assert.equal(hasMixedLanguages('Frankel'), false);
+  assert.equal(isAsciiHorseName('Frankel'), true);
+  assert.equal(isAsciiHorseName('City of Troy'), true);
+  assert.equal(isAsciiHorseName('ディープインパクト'), false);
 });
 
 test('career routes & stages: defines 8 routes and returns correct stage labels for Week 1 to 4', () => {
