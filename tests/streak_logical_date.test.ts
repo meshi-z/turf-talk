@@ -5,6 +5,8 @@ import {
   getLogicalDateDiffInDays,
   evaluateCurrentStreak,
   calculateNextStreakOnCompletion,
+  getLogicalWeekMonday,
+  isWeeklyRaceCompletedForWeek,
 } from '../src/lib/logicalDate.ts';
 
 test('logicalDate: 4am cutoff boundary logic', () => {
@@ -65,3 +67,28 @@ test('calculateNextStreakOnCompletion: handles completion updates accurately', (
   assert.equal(calculateNextStreakOnCompletion(0, '2026-10-11', today), 1);
   assert.equal(calculateNextStreakOnCompletion(5, '2026-10-10', today), 1);
 });
+
+test('getLogicalWeekMonday and isWeeklyRaceCompletedForWeek: tracks once-per-weekend race limit and Monday 4am reset', () => {
+  // 2026-10-12 is Monday, 2026-10-17 is Saturday, 2026-10-18 is Sunday, 2026-10-19 is next Monday
+  assert.equal(getLogicalWeekMonday('2026-10-12'), '2026-10-12');
+  assert.equal(getLogicalWeekMonday('2026-10-17'), '2026-10-12');
+  assert.equal(getLogicalWeekMonday('2026-10-18'), '2026-10-12');
+  assert.equal(getLogicalWeekMonday('2026-10-19'), '2026-10-19');
+
+  // Race completed on Saturday 2026-10-17 (week Monday = '2026-10-12')
+  const completedWeekMonday = getLogicalWeekMonday('2026-10-17');
+  assert.equal(isWeeklyRaceCompletedForWeek(null, '2026-10-17'), false);
+  assert.equal(isWeeklyRaceCompletedForWeek(completedWeekMonday, '2026-10-17'), true);
+  assert.equal(isWeeklyRaceCompletedForWeek(completedWeekMonday, '2026-10-18'), true); // Still completed on Sunday
+
+  // Monday 2026-10-19 before 4am -> logical date is still '2026-10-18' (Sunday) -> still completed
+  const mondayBefore4am = getLogicalDateString(new Date(2026, 9, 19, 3, 59, 59));
+  assert.equal(mondayBefore4am, '2026-10-18');
+  assert.equal(isWeeklyRaceCompletedForWeek(completedWeekMonday, mondayBefore4am), true);
+
+  // Monday 2026-10-19 at 4am -> logical date becomes '2026-10-19' (Monday) -> resets to false!
+  const mondayAt4am = getLogicalDateString(new Date(2026, 9, 19, 4, 0, 0));
+  assert.equal(mondayAt4am, '2026-10-19');
+  assert.equal(isWeeklyRaceCompletedForWeek(completedWeekMonday, mondayAt4am), false);
+});
+

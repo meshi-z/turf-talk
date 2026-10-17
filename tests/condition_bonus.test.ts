@@ -1,23 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  MAX_WEEKLY_TRAINING_DAYS,
   getConditionFromDays,
   eliminateOneWrongOption,
   calculateRaceFeedback,
 } from '../src/lib/conditionBonus.ts';
 import type { QuizOption } from '../src/data/phrases.ts';
 
-test('getConditionFromDays: correctly maps days to condition and hint counts', () => {
+test('getConditionFromDays: correctly maps 0-7 days to condition and hint counts', () => {
+  assert.equal(MAX_WEEKLY_TRAINING_DAYS, 7);
+
+  // 7 days -> peak, 480kg, 2 hints
+  const c7 = getConditionFromDays(7);
+  assert.equal(c7.condition, 'peak');
+  assert.equal(c7.hintCount, 2);
+  assert.equal(c7.baseWeight, 480);
+
+  // 6 days -> peak, 480kg, 2 hints
+  const c6 = getConditionFromDays(6);
+  assert.equal(c6.condition, 'peak');
+  assert.equal(c6.hintCount, 2);
+  assert.equal(c6.baseWeight, 480);
+
   // 5 days -> peak, 480kg, 2 hints
   const c5 = getConditionFromDays(5);
   assert.equal(c5.condition, 'peak');
   assert.equal(c5.hintCount, 2);
   assert.equal(c5.baseWeight, 480);
 
-  // 4 days -> peak, 480kg, 2 hints
+  // 4 days -> up, 484kg, 1 hint
   const c4 = getConditionFromDays(4);
-  assert.equal(c4.condition, 'peak');
-  assert.equal(c4.hintCount, 2);
+  assert.equal(c4.condition, 'up');
+  assert.equal(c4.hintCount, 1);
+  assert.equal(c4.baseWeight, 484);
 
   // 3 days -> up, 484kg, 1 hint
   const c3 = getConditionFromDays(3);

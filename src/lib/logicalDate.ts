@@ -103,3 +103,36 @@ export function calculateNextStreakOnCompletion(
   // 1日以上空いたあとの再開、または初回
   return 1;
 }
+
+/**
+ * 論理日付文字列 ('YYYY-MM-DD') から、その週の月曜日 ('YYYY-MM-DD') を取得（月曜始まり〜日曜終わり）
+ * 例: '2026-10-17' (土曜) -> '2026-10-12' (月曜)
+ * 例: '2026-10-18' (日曜) -> '2026-10-12' (月曜)
+ * 例: '2026-10-19' (月曜) -> '2026-10-19' (月曜)
+ */
+export function getLogicalWeekMonday(logicalDateStr: string): string {
+  const [y, m, d] = logicalDateStr.split('-').map(Number);
+  const utcDate = new Date(Date.UTC(y, m - 1, d));
+  const dayOfWeek = utcDate.getUTCDay(); // 0: 日曜, 1: 月曜, ..., 6: 土曜
+  const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  utcDate.setUTCDate(utcDate.getUTCDate() + diffToMonday);
+
+  const year = utcDate.getUTCFullYear();
+  const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(utcDate.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * 直近のレース出走週（月曜日の日付）と現在の論理日付を比較し、
+ * 当該週（月曜午前4時〜翌月曜午前3時59分）の週末レースに出走済みかどうかを判定する
+ */
+export function isWeeklyRaceCompletedForWeek(
+  lastRaceWeekMonday: string | null | undefined,
+  todayLogicalDate: string
+): boolean {
+  if (!lastRaceWeekMonday) return false;
+  const currentMonday = getLogicalWeekMonday(todayLogicalDate);
+  return lastRaceWeekMonday === currentMonday;
+}
+

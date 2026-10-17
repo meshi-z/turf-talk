@@ -1,7 +1,7 @@
 import { useEffect, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
-import { Trophy, Home, RotateCcw, Check, X, Sparkles, Award, Flag } from 'lucide-react';
+import { Trophy, Home, Check, X, Sparkles, Award, Flag } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { calculateRacePlacement, type RacePlacement } from '../lib/raceMode';
 import { calculateRaceFeedback, type RaceFeedback } from '../lib/conditionBonus';
@@ -24,7 +24,6 @@ interface RaceResultScreenProps {
   addedCarrots?: number;
   careerAdvance?: CareerRaceAdvanceResult | null;
   onGoHome: () => void;
-  onRetryRace: () => void;
 }
 
 export const RaceResultScreen: FC<RaceResultScreenProps> = ({
@@ -35,7 +34,6 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
   addedCarrots = 0,
   careerAdvance = null,
   onGoHome,
-  onRetryRace,
 }) => {
   const { careerHorse } = progress;
   const routeInfo = getCareerRouteInfo(careerHorse.routeId);
@@ -278,20 +276,15 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
       {/* アクションボタン */}
       <div className="space-y-2 pt-2">
         <button
-          onClick={onRetryRace}
-          className="w-full bg-amber-600 hover:bg-amber-700 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          <span>もう一度レースに出走する</span>
-        </button>
-
-        <button
           onClick={onGoHome}
-          className="w-full bg-white hover:bg-zinc-100 active:scale-[0.98] transition-all text-zinc-700 font-bold py-3 px-4 rounded-xl border border-zinc-200 flex items-center justify-center gap-2 text-sm cursor-pointer"
+          className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
         >
           <Home className="w-4 h-4" />
           <span>ホーム（厩舎）に戻る</span>
         </button>
+        <p className="text-[11px] text-center text-zinc-500">
+          ※ 週末レースの出走は1週末につき1回までです。次走へ向けて日々の坂路調教を重ねましょう！
+        </p>
       </div>
     </div>
   );

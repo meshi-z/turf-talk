@@ -44,6 +44,8 @@ export function App() {
     setDebugCarrotCount,
     debugCareerWeek,
     setDebugCareerWeek,
+    debugRaceCompleted,
+    setDebugRaceCompleted,
     conditionTier,
     markRaceCompleted,
   } = useTrainingProgress();
@@ -147,6 +149,7 @@ export function App() {
   );
 
   const handleStartRace = () => {
+    if (progress.hasCompletedWeeklyRace) return;
     soundManager.playGateOpen();
     const questions = selectRaceQuestions(
       INITIAL_PHRASES,
@@ -224,6 +227,8 @@ export function App() {
               onSetDebugCarrotCount={setDebugCarrotCount}
               debugCareerWeek={debugCareerWeek}
               onSetDebugCareerWeek={setDebugCareerWeek}
+              debugRaceCompleted={debugRaceCompleted}
+              onSetDebugRaceCompleted={setDebugRaceCompleted}
             />
           )}
 
@@ -269,7 +274,6 @@ export function App() {
               addedCarrots={raceCarrotReward}
               careerAdvance={lastCareerAdvance}
               onGoHome={handleGoHome}
-              onRetryRace={handleStartRace}
             />
           )}
         </main>
