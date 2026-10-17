@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { UserProgress } from '../types';
+import type { CareerRouteId, CareerWeek, HorseCoatColor, UserProgress } from '../types';
 import { calculateNextProgressAfterCompletion } from '../lib/dailyRotation';
 import {
   getDayOfWeek,
@@ -21,6 +21,17 @@ import {
   evaluateStreakWithCarrotRescue,
   calculateCarrotsFromRemainingReserves,
 } from '../lib/carrotBonus';
+import {
+  createDefaultCareerHorse,
+  migrateToCareerHorse,
+  updateCareerHorseAfterTraining,
+  advanceCareerHorseAfterRace,
+  generateRandomHorseName,
+  rollHorseCoatColor,
+  sanitizeHorseName,
+  isValidCareerRouteId,
+} from '../lib/careerCycle';
+import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
@@ -38,6 +49,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   weekdayTrainingDays: 3, // 初期値3日（好調）
   carrotCount: 1, // 初期所持数1個（お試し・安心設計）
   lastCarrotUsedDate: null,
+  careerHorse: createDefaultCareerHorse(),
 };
 
 export function useTrainingProgress() {
@@ -59,9 +71,14 @@ export function useTrainingProgress() {
           savedCarrots
         );
 
+        // 既存データから安全に CareerHorse をマイグレーション・復元
+        const migratedHorse = migrateToCareerHorse(parsed);
+
         return {
           ...DEFAULT_PROGRESS,
           ...parsed,
+          horseName: migratedHorse.name,
+          horseWeight: migratedHorse.weight,
           streakDays: evalResult.streakDays,
           carrotCount: evalResult.carrotCount,
           lastCarrotUsedDate: evalResult.rescuedByCarrot ? today : parsed.lastCarrotUsedDate ?? null,
@@ -73,6 +90,7 @@ export function useTrainingProgress() {
             typeof parsed.weekdayTrainingDays === 'number'
               ? Math.max(0, Math.min(5, parsed.weekdayTrainingDays))
               : 3,
+          careerHorse: migratedHorse,
         };
       }
     } catch {
@@ -132,6 +150,12 @@ export function useTrainingProgress() {
           ? prev.todayPhraseIds
           : sessionPhraseIds;
 
+      const nextCareerHorse = updateCareerHorseAfterTraining(
+        prev.careerHorse,
+        correctPhraseIds,
+        tier.baseWeight
+      );
+
       return {
         ...prev,
         lastTrainingDate: today,
@@ -143,45 +167,140 @@ export function useTrainingProgress() {
         lapCount: nextLapCount,
         todayPhraseIds: nextTodayPhraseIds,
         weekdayTrainingDays: nextWeekdayDays,
+        careerHorse: nextCareerHorse,
       };
     });
   };
 
+  const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
+  const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
+  const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
+  const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
+
   /**
-   * レース完了時のステータス変動および余力温存にんじんボーナス
+   * レース完了時のステータス変動、余力温存にんじんボーナス、および次週へのキャリア進行
    */
   const markRaceCompleted = (score: number, remainingReserves: number = 0) => {
     const feedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
     const carrotBonus = calculateCarrotsFromRemainingReserves(progress.carrotCount, remainingReserves);
+    const placement = calculateRacePlacement(score);
+
+    const activeWeek: CareerWeek =
+      debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
+    const horseForRace = {
+      ...progress.careerHorse,
+      currentWeek: activeWeek,
+    };
+
+    const careerAdvance = advanceCareerHorseAfterRace(
+      horseForRace,
+      score,
+      placement.rankText,
+      feedback.nextWeight
+    );
 
     setProgress((prev) => ({
       ...prev,
       horseWeight: feedback.nextWeight,
       condition: feedback.nextCondition,
       carrotCount: carrotBonus.nextCarrots,
+      careerHorse: careerAdvance.nextHorse,
     }));
+
+    if (debugCareerWeek !== null && careerAdvance.steppedUp) {
+      setDebugCareerWeek(careerAdvance.nextWeek);
+    }
+
     return {
       feedback,
       carrotBonus,
+      careerAdvance,
     };
   };
 
-  const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
-  const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
-  const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
+  /**
+   * 馬名を安全にサニタイズして更新する
+   */
+  const updateHorseName = (newName: string) => {
+    const sanitized = sanitizeHorseName(newName, progress.careerHorse.name);
+    setProgress((prev) => ({
+      ...prev,
+      horseName: sanitized,
+      careerHorse: {
+        ...prev.careerHorse,
+        name: sanitized,
+      },
+    }));
+  };
+
+  /**
+   * 馬名をランダム再生成して更新する
+   */
+  const regenerateHorseName = (): string => {
+    const nextName = generateRandomHorseName(progress.careerHorse.name);
+    setProgress((prev) => ({
+      ...prev,
+      horseName: nextName,
+      careerHorse: {
+        ...prev.careerHorse,
+        name: nextName,
+      },
+    }));
+    return nextName;
+  };
+
+  /**
+   * キャリア路線（8大路線）を変更する
+   */
+  const updateCareerRoute = (routeId: CareerRouteId) => {
+    if (!isValidCareerRouteId(routeId)) return;
+    setProgress((prev) => ({
+      ...prev,
+      careerHorse: {
+        ...prev.careerHorse,
+        routeId,
+      },
+    }));
+  };
+
+  /**
+   * 毛色を重み付き抽選で再設定する
+   */
+  const rerollHorseCoatColor = (): HorseCoatColor => {
+    const nextColor = rollHorseCoatColor();
+    setProgress((prev) => ({
+      ...prev,
+      careerHorse: {
+        ...prev.careerHorse,
+        color: nextColor,
+      },
+    }));
+    return nextColor;
+  };
 
   const resetProgressForDemo = () => {
+    const initialColor = rollHorseCoatColor();
+    const initialName = generateRandomHorseName();
+    const freshHorse = createDefaultCareerHorse({
+      name: initialName,
+      color: initialColor,
+    });
     setProgress({
       ...DEFAULT_PROGRESS,
+      horseName: freshHorse.name,
+      horseWeight: freshHorse.weight,
       lastTrainingDate: null,
       completedToday: false,
       learnedPhraseIds: [],
       lapCount: 1,
       todayPhraseIds: [],
       weekdayTrainingDays: 3,
+      careerHorse: freshHorse,
     });
     setDebugDayOfWeek(null);
     setDebugWeekdayDays(null);
+    setDebugCarrotCount(null);
+    setDebugCareerWeek(null);
   };
 
   const todayStr = getLogicalDateString();
@@ -199,18 +318,31 @@ export function useTrainingProgress() {
   const effectiveCarrots =
     debugCarrotCount !== null ? debugCarrotCount : progress.carrotCount;
 
+  const effectiveCareerWeek: CareerWeek =
+    debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
+
   return {
     progress: {
       ...progress,
+      horseName: progress.careerHorse.name,
       condition: conditionTier.condition,
       horseWeight: conditionTier.baseWeight,
       weekdayTrainingDays: effectiveWeekdayDays,
       carrotCount: effectiveCarrots,
+      careerHorse: {
+        ...progress.careerHorse,
+        currentWeek: effectiveCareerWeek,
+        weight: conditionTier.baseWeight,
+      },
     },
     conditionTier,
     recordTodayPhrases,
     markTrainingCompleted,
     markRaceCompleted,
+    updateHorseName,
+    regenerateHorseName,
+    updateCareerRoute,
+    rerollHorseCoatColor,
     resetProgressForDemo,
     todayString: todayStr,
     debugDayOfWeek,
@@ -225,5 +357,9 @@ export function useTrainingProgress() {
     effectiveWeekdayDays,
     debugCarrotCount,
     setDebugCarrotCount,
+    debugCareerWeek,
+    setDebugCareerWeek,
+    effectiveCareerWeek,
   };
 }
+

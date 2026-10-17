@@ -1,5 +1,5 @@
-import type { FC } from 'react';
-import type { UserProgress } from '../types';
+import { useState, type FC, type FormEvent } from 'react';
+import type { CareerRouteId, CareerWeek, UserProgress } from '../types';
 import {
   Play,
   CheckCircle2,
@@ -7,6 +7,11 @@ import {
   RotateCcw,
   Trophy,
   Sparkles,
+  Dices,
+  Pencil,
+  Check,
+  X,
+  Compass,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -14,6 +19,14 @@ import {
   type AppMode,
   DAY_NAMES_JA,
 } from '../lib/dayMode';
+import {
+  CAREER_ROUTES,
+  MAX_HORSE_NAME_LENGTH,
+  getCareerRouteInfo,
+  getCareerStageLabel,
+  getCurrentWeekRaceInfo,
+  validateHorseName,
+} from '../lib/careerCycle';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -21,6 +34,10 @@ interface HomeScreenProps {
   onStartExtraTraining: () => void;
   onStartRace: () => void;
   onResetForDemo: () => void;
+  onUpdateHorseName?: (newName: string) => void;
+  onRegenerateHorseName?: () => void;
+  onUpdateCareerRoute?: (routeId: CareerRouteId) => void;
+  onRerollCoatColor?: () => void;
   appMode: AppMode;
   effectiveDayOfWeek: DayOfWeek;
   actualDayOfWeek: DayOfWeek;
@@ -32,10 +49,13 @@ interface HomeScreenProps {
   effectiveWeekdayDays: number;
   debugCarrotCount?: number | null;
   onSetDebugCarrotCount?: (count: number | null) => void;
+  debugCareerWeek?: CareerWeek | null;
+  onSetDebugCareerWeek?: (week: CareerWeek | null) => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
 const ORDERED_DAYS: DayOfWeek[] = [1, 2, 3, 4, 5, 6, 0];
+const CAREER_WEEKS: CareerWeek[] = [1, 2, 3, 4];
 
 export const HomeScreen: FC<HomeScreenProps> = ({
   progress,
@@ -43,6 +63,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onStartExtraTraining,
   onStartRace,
   onResetForDemo,
+  onUpdateHorseName,
+  onRegenerateHorseName,
+  onUpdateCareerRoute,
+  onRerollCoatColor,
   appMode,
   effectiveDayOfWeek,
   daysUntilWeekend,
@@ -53,7 +77,14 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   effectiveWeekdayDays,
   debugCarrotCount = null,
   onSetDebugCarrotCount,
+  debugCareerWeek = null,
+  onSetDebugCareerWeek,
 }) => {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(progress.careerHorse.name);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [isRouteSelectorOpen, setIsRouteSelectorOpen] = useState(false);
+
   const conditionLabel = {
     heavy: { text: '太め残り ↘', color: 'text-purple-700 bg-purple-50 border-purple-200' },
     flat: { text: '普通 ➡', color: 'text-zinc-600 bg-zinc-100 border-zinc-200' },
@@ -67,6 +98,34 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
   const isWeekendMode = appMode === 'weekend';
 
+  const { careerHorse } = progress;
+  const routeInfo = getCareerRouteInfo(careerHorse.routeId);
+  const currentWeekRace = getCurrentWeekRaceInfo(careerHorse.routeId, careerHorse.currentWeek);
+  const careerStageLabel = getCareerStageLabel(careerHorse.currentWeek, careerHorse.raceHistory);
+
+  const handleOpenNameEdit = () => {
+    setNameInput(careerHorse.name);
+    setNameError(null);
+    setIsEditingName(true);
+  };
+
+  const handleCancelNameEdit = () => {
+    setIsEditingName(false);
+    setNameError(null);
+  };
+
+  const handleSubmitNameEdit = (e: FormEvent) => {
+    e.preventDefault();
+    const result = validateHorseName(nameInput);
+    if (!result.isValid) {
+      setNameError(result.error ?? '無効な馬名です。');
+      return;
+    }
+    onUpdateHorseName?.(result.sanitized);
+    setIsEditingName(false);
+    setNameError(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
       {/* 愛馬ステータスカード */}
@@ -75,34 +134,179 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           🏇
         </div>
 
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-300 uppercase">
-              My Stable / 担当馬
+        {/* キャリア世代 & ステージバッジ */}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] font-bold tracking-wider bg-emerald-700/80 text-emerald-100 border border-emerald-500/40 px-2 py-0.5 rounded-full">
+              第{careerHorse.generation}世代
             </span>
-            <h2 className="text-xl font-bold text-white flex items-center gap-1.5 mt-0.5">
-              <span>{progress.horseName}</span>
-              <span className="text-xs font-normal text-emerald-200">（牡3 / 鹿毛）</span>
-            </h2>
+            <span className="text-[11px] font-extrabold bg-amber-400/95 text-amber-950 px-2.5 py-0.5 rounded-full shadow-2xs">
+              {careerStageLabel}
+            </span>
           </div>
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border shadow-xs ${conditionLabel.color}`}>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border shadow-xs shrink-0 ${conditionLabel.color}`}>
             {conditionLabel.text}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-emerald-700/50 text-xs">
+        {/* 馬名 & 毛色・ランダム生成・手動編集 */}
+        <div className="mt-1">
+          {isEditingName ? (
+            <form onSubmit={handleSubmitNameEdit} className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => {
+                    setNameInput(e.target.value);
+                    if (nameError) setNameError(null);
+                  }}
+                  maxLength={MAX_HORSE_NAME_LENGTH}
+                  aria-label="愛馬名を入力"
+                  placeholder="馬名を入力 (18文字以内)"
+                  className="flex-1 min-w-0 bg-emerald-950/90 border border-emerald-400/60 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white placeholder:text-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold p-1.5 rounded-lg cursor-pointer shrink-0"
+                  title="馬名を保存"
+                  aria-label="馬名を保存"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelNameEdit}
+                  className="bg-emerald-900 hover:bg-emerald-800 text-emerald-200 p-1.5 rounded-lg border border-emerald-600 cursor-pointer shrink-0"
+                  title="キャンセル"
+                  aria-label="編集をキャンセル"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              {nameError && (
+                <p role="alert" className="text-[11px] text-amber-300 font-semibold">
+                  ⚠️ {nameError}
+                </p>
+              )}
+            </form>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-xl font-bold text-white flex items-baseline gap-1.5 flex-wrap">
+                <span>{careerHorse.name}</span>
+                <span className="text-xs font-normal text-emerald-200">
+                  （{routeInfo.sexAgeLabel} / {careerHorse.color}）
+                </span>
+              </h2>
+              <div className="flex items-center gap-1 shrink-0">
+                {onRegenerateHorseName && (
+                  <button
+                    type="button"
+                    onClick={onRegenerateHorseName}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-700/80 hover:bg-emerald-600/80 active:scale-95 text-emerald-100 border border-emerald-500/40 px-2 py-1 rounded-lg transition-all cursor-pointer"
+                    title="馬名をランダム再生成"
+                    aria-label="馬名をランダム再生成"
+                  >
+                    <Dices className="w-3.5 h-3.5 text-amber-300" />
+                    <span>命名</span>
+                  </button>
+                )}
+                {onUpdateHorseName && (
+                  <button
+                    type="button"
+                    onClick={handleOpenNameEdit}
+                    className="inline-flex items-center justify-center bg-emerald-800/80 hover:bg-emerald-700/80 active:scale-95 text-emerald-200 border border-emerald-600/50 p-1.5 rounded-lg transition-all cursor-pointer"
+                    title="馬名を手動編集"
+                    aria-label="馬名を手動編集"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 馬体重 & 今週の目標レース */}
+        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-emerald-700/50 text-xs">
           <div>
             <span className="text-emerald-300 block text-[10px]">馬体重</span>
             <span className="text-base font-bold text-white">{progress.horseWeight} kg</span>
           </div>
           <div>
-            <span className="text-emerald-300 block text-[10px]">目標レース</span>
-            <span className="text-base font-bold text-white">海外G1初制覇</span>
+            <span className="text-emerald-300 block text-[10px]">
+              Week {careerHorse.currentWeek} 目標レース
+            </span>
+            <span className="text-sm font-bold text-white block truncate" title={`${currentWeekRace.raceName} (${currentWeekRace.distanceText})`}>
+              {currentWeekRace.raceName}
+              <span className="text-[11px] font-normal text-emerald-200 ml-1">
+                ({currentWeekRace.distanceText})
+              </span>
+            </span>
           </div>
         </div>
 
+        {/* キャリア路線（8大路線）表示 & 変更パネル */}
+        <div className="mt-2.5 pt-2.5 border-t border-emerald-700/40 text-xs">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Compass className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <span className="text-[11px] text-emerald-200 shrink-0">歩む路線:</span>
+              <strong className="text-white text-[11px] truncate">{routeInfo.name}</strong>
+            </div>
+            {onUpdateCareerRoute && (
+              <button
+                type="button"
+                onClick={() => setIsRouteSelectorOpen((prev) => !prev)}
+                aria-expanded={isRouteSelectorOpen}
+                className="text-[10px] font-bold bg-emerald-900/90 hover:bg-emerald-700 text-emerald-200 border border-emerald-600/60 px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0"
+              >
+                {isRouteSelectorOpen ? '閉じる' : '路線変更'}
+              </button>
+            )}
+          </div>
+
+          {isRouteSelectorOpen && onUpdateCareerRoute && (
+            <div className="mt-2 p-2 bg-emerald-950/85 border border-emerald-600/50 rounded-xl space-y-1.5">
+              <p className="text-[10px] text-emerald-300 font-semibold">
+                挑戦するキャリア路線を選択（全8路線）:
+              </p>
+              <div className="grid grid-cols-2 gap-1">
+                {CAREER_ROUTES.map((route) => {
+                  const isSelected = route.id === careerHorse.routeId;
+                  return (
+                    <button
+                      key={route.id}
+                      type="button"
+                      onClick={() => {
+                        onUpdateCareerRoute(route.id);
+                        setIsRouteSelectorOpen(false);
+                      }}
+                      className={`text-left px-2 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-amber-400 text-amber-950 font-extrabold border-amber-300 shadow-2xs'
+                          : 'bg-emerald-900/60 text-emerald-100 hover:bg-emerald-800/80 border-emerald-700/60'
+                      }`}
+                    >
+                      <span className="block truncate font-bold">{route.shortName}</span>
+                      <span
+                        className={`block text-[9px] truncate ${
+                          isSelected ? 'text-amber-900' : 'text-emerald-300/90'
+                        }`}
+                      >
+                        最終: {route.races[3].raceName}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 平日調教仕上がり & レースボーナス状況 */}
-        <div className="mt-3 pt-2.5 border-t border-emerald-700/40 text-[11px] text-emerald-100 flex items-center justify-between">
+        <div className="mt-2.5 pt-2.5 border-t border-emerald-700/40 text-[11px] text-emerald-100 flex items-center justify-between">
           <span className="flex items-center gap-1">
             <span>🏋️ 調教消化:</span>
             <strong className="text-white">{progress.weekdayTrainingDays} / 5日</strong>
@@ -159,18 +363,18 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
           <div className="flex items-center justify-between mb-2">
             <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full shadow-xs">
-              <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • 開催中
+              <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • Week {careerHorse.currentWeek}
             </span>
-            <span className="text-xs text-amber-200 font-semibold">土日限定</span>
+            <span className="text-xs text-amber-200 font-semibold">{currentWeekRace.distanceText}</span>
           </div>
 
           <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
             <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
-            <span>週末・海外G1レース</span>
+            <span>週末・{currentWeekRace.raceName}</span>
           </h3>
 
           <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
-            平日の坂路調教で培った英語力を実戦で試す時が来ました！海外強豪馬との白熱したレースに挑もう。
+            平日の坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レースを完走して次のステージへ進もう。
           </p>
 
           <button
@@ -285,9 +489,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5">
               <span className="text-base">🏆</span>
-              <h4 className="font-bold text-zinc-800 text-sm">週末・海外G1レース</h4>
+              <h4 className="font-bold text-zinc-800 text-sm">
+                週末・{currentWeekRace.raceName}（{currentWeekRace.distanceText}）
+              </h4>
             </div>
-            <span className="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full">
+            <span className="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
               出走まで あと {daysUntilWeekend} 日
             </span>
           </div>
@@ -391,6 +597,52 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             </div>
           </div>
 
+          {/* キャリア週 (Week 1〜4) シミュレート & 毛色再抽選 */}
+          {onSetDebugCareerWeek && (
+            <div className="mt-3 pt-2 border-t border-zinc-200/60">
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
+                  <span>🗓️</span> キャリア週切替 (Week 1〜4)
+                </span>
+                <div className="flex items-center gap-2">
+                  {onRerollCoatColor && (
+                    <button
+                      type="button"
+                      onClick={onRerollCoatColor}
+                      className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                    >
+                      🎨 毛色抽選 ({careerHorse.color})
+                    </button>
+                  )}
+                  {debugCareerWeek !== null && (
+                    <button
+                      onClick={() => onSetDebugCareerWeek(null)}
+                      className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                    >
+                      実週に戻す
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-1">
+                {CAREER_WEEKS.map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => onSetDebugCareerWeek(w)}
+                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                      careerHorse.currentWeek === w
+                        ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
+                        : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                    }`}
+                    title={`Week ${w} に切り替え`}
+                  >
+                    Week {w}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* にんじん所持数 (0〜3個) シミュレート */}
           {onSetDebugCarrotCount && (
             <div className="mt-3 pt-2 border-t border-zinc-200/60">
@@ -441,3 +693,4 @@ export const HomeScreen: FC<HomeScreenProps> = ({
     </div>
   );
 };
+

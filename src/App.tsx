@@ -14,6 +14,7 @@ import {
   getPhrasesByIds,
 } from './lib/dailyRotation';
 import { selectRaceQuestions } from './lib/raceMode';
+import { type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
 type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result';
@@ -24,6 +25,10 @@ export function App() {
     progress,
     recordTodayPhrases,
     markTrainingCompleted,
+    updateHorseName,
+    regenerateHorseName,
+    updateCareerRoute,
+    rerollHorseCoatColor,
     resetProgressForDemo,
     todayString,
     appMode,
@@ -37,12 +42,15 @@ export function App() {
     effectiveWeekdayDays,
     debugCarrotCount,
     setDebugCarrotCount,
+    debugCareerWeek,
+    setDebugCareerWeek,
     conditionTier,
     markRaceCompleted,
   } = useTrainingProgress();
 
   const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
   const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);
+  const [lastCareerAdvance, setLastCareerAdvance] = useState<CareerRaceAdvanceResult | null>(null);
 
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
   const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
@@ -142,6 +150,7 @@ export function App() {
     setRaceAnsweredHistory([]);
     setRaceRemainingReserves(conditionTier.hintCount);
     setRaceCarrotReward(0);
+    setLastCareerAdvance(null);
     setCurrentScreen('race');
   };
 
@@ -160,9 +169,10 @@ export function App() {
     if (raceCurrentIndex + 1 < raceQuestions.length) {
       setRaceCurrentIndex((prev) => prev + 1);
     } else {
-      // 5問終了 -> レース完了ステータス更新 & 余力温存にんじん獲得 & レース結果画面へ
+      // 5問終了 -> レース完了ステータス更新 & 余力温存にんじん獲得 & キャリア進行 & レース結果画面へ
       const result = markRaceCompleted(raceScore, raceRemainingReserves);
       setRaceCarrotReward(result.carrotBonus.addedCarrots);
+      setLastCareerAdvance(result.careerAdvance);
       setCurrentScreen('race-result');
     }
   };
@@ -188,6 +198,10 @@ export function App() {
               onStartExtraTraining={handleStartExtraTraining}
               onStartRace={handleStartRace}
               onResetForDemo={resetProgressForDemo}
+              onUpdateHorseName={updateHorseName}
+              onRegenerateHorseName={regenerateHorseName}
+              onUpdateCareerRoute={updateCareerRoute}
+              onRerollCoatColor={rerollHorseCoatColor}
               appMode={appMode}
               effectiveDayOfWeek={effectiveDayOfWeek}
               actualDayOfWeek={actualDayOfWeek}
@@ -199,6 +213,8 @@ export function App() {
               effectiveWeekdayDays={effectiveWeekdayDays}
               debugCarrotCount={debugCarrotCount}
               onSetDebugCarrotCount={setDebugCarrotCount}
+              debugCareerWeek={debugCareerWeek}
+              onSetDebugCareerWeek={setDebugCareerWeek}
             />
           )}
 
@@ -241,6 +257,7 @@ export function App() {
               progress={progress}
               answeredHistory={raceAnsweredHistory}
               addedCarrots={raceCarrotReward}
+              careerAdvance={lastCareerAdvance}
               onGoHome={handleGoHome}
               onRetryRace={handleStartRace}
             />
@@ -254,3 +271,4 @@ export function App() {
 }
 
 export default App;
+
