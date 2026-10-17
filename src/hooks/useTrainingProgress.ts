@@ -28,8 +28,9 @@ import {
   advanceCareerHorseAfterRace,
   generateRandomHorseName,
   rollHorseCoatColor,
-  sanitizeHorseName,
-  isValidCareerRouteId,
+  rerollHorseIdentity,
+  changeHorseNameIfUnlocked,
+  changeHorseRouteIfUnlocked,
 } from '../lib/careerCycle';
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
@@ -219,52 +220,51 @@ export function useTrainingProgress() {
   };
 
   /**
-   * 馬名を安全にサニタイズして更新する
+   * 未調教（ロック前）の場合のみ馬名を安全にサニタイズして更新する
    */
   const updateHorseName = (newName: string) => {
-    const sanitized = sanitizeHorseName(newName, progress.careerHorse.name);
-    setProgress((prev) => ({
-      ...prev,
-      horseName: sanitized,
-      careerHorse: {
-        ...prev.careerHorse,
-        name: sanitized,
-      },
-    }));
+    setProgress((prev) => {
+      const nextHorse = changeHorseNameIfUnlocked(prev.careerHorse, newName);
+      return {
+        ...prev,
+        horseName: nextHorse.name,
+        careerHorse: nextHorse,
+      };
+    });
   };
 
   /**
-   * 馬名をランダム再生成して更新する
+   * 「🎲 命名」実行時、未調教（ロック前）であれば馬名と毛色を同時にランダム再抽選して更新する
    */
   const regenerateHorseName = (): string => {
-    const nextName = generateRandomHorseName(progress.careerHorse.name);
-    setProgress((prev) => ({
-      ...prev,
-      horseName: nextName,
-      careerHorse: {
-        ...prev.careerHorse,
-        name: nextName,
-      },
-    }));
-    return nextName;
+    const nextHorse = rerollHorseIdentity(progress.careerHorse);
+    setProgress((prev) => {
+      if (prev.careerHorse.hasTrained) return prev;
+      return {
+        ...prev,
+        horseName: nextHorse.name,
+        careerHorse: {
+          ...prev.careerHorse,
+          name: nextHorse.name,
+          color: nextHorse.color,
+        },
+      };
+    });
+    return nextHorse.name;
   };
 
   /**
-   * キャリア路線（8大路線）を変更する
+   * 未調教（ロック前）の場合のみキャリア路線（8大路線）を変更する
    */
   const updateCareerRoute = (routeId: CareerRouteId) => {
-    if (!isValidCareerRouteId(routeId)) return;
     setProgress((prev) => ({
       ...prev,
-      careerHorse: {
-        ...prev.careerHorse,
-        routeId,
-      },
+      careerHorse: changeHorseRouteIfUnlocked(prev.careerHorse, routeId),
     }));
   };
 
   /**
-   * 毛色を重み付き抽選で再設定する
+   * 毛色を重み付き抽選で再設定する（デバッグ用）
    */
   const rerollHorseCoatColor = (): HorseCoatColor => {
     const nextColor = rollHorseCoatColor();
