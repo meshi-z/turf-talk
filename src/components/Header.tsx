@@ -19,7 +19,7 @@ export const Header: FC<HeaderProps> = ({ streakDays }) => {
     <header className="sticky top-0 z-50 flex items-center justify-between px-3 sm:px-4 h-14 bg-white/95 backdrop-blur-xs border-b border-emerald-100 shadow-xs">
       <div className="flex items-center space-x-2 min-w-0 pr-1">
         <img
-          src="/icon.svg"
+          src={`${import.meta.env.BASE_URL}icon.svg`}
           alt="TurfTalk"
           className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-2xs shrink-0 select-none object-cover"
         />
