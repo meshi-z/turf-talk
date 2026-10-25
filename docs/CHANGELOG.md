@@ -20,6 +20,14 @@
   - **公式サービスアイコンへの差し替え (`src/components/Header.tsx`):**
     - プロトタイプ初期の絵文字（`🏇`）から、公式アイコン（`public/icon.svg`）の画像表示（`<img>`）へ差し替え。
     - タイトルテキストや行間とのバランスを最適化（`w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-2xs`）。
+- **調教画面・レース画面の上部プログレスバー領域の常時固定（sticky化） ([#75](https://github.com/meshi-z/turf-talk/issues/75)):**
+  - **調教画面の上部プログレスバー固定 (`src/components/QuizScreen.tsx`):**
+    - 上部ヘッダー（中断ボタン、調教コース名、問題数カウント、プログレスバー）コンテナに `sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-zinc-200/60 shadow-2xs mb-3` を適用。
+    - タイトルヘッダー直下に自然に密着追従し、解説や選択肢の縦スクロール時にも全体の進行状況と中断操作を常に視認・利用可能に改善。
+    - コース種別に応じたコース名（「坂路調教」/「ウッドチップ調教」）の動的表示に対応。
+  - **週末レース画面の上部プログレスバー固定 (`src/components/RaceScreen.tsx`):**
+    - レース上部ヘッダー（レース中止ボタン、レース名、展開カウント、プログレスバー）コンテナに `sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-amber-200/60 shadow-2xs mb-3` を適用。
+    - 実況カードや4択の選択肢スクロール時にも、現在の展開カウント・進捗・中止ボタンが常に上部に留まり、実戦レースの臨場感と操作性を両立。
 
 ---
 

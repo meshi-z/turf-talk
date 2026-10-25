@@ -46,26 +46,30 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full">
-      {/* 上部ヘッダー & プログレス */}
-      <div className="flex items-center justify-between gap-3 mb-2.5">
-        <button
-          onClick={onCancel}
-          className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>中断</span>
-        </button>
+      {/* 上部ヘッダー & プログレス（常時固定 sticky） */}
+      <div className="sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-zinc-200/60 shadow-2xs mb-3">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={onCancel}
+            className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>中断</span>
+          </button>
 
-        <div className="flex-1 flex flex-col items-end">
-          <div className="flex items-center justify-between w-full text-xs font-bold text-emerald-950 mb-1">
-            <span className="text-[11px] text-zinc-500 font-medium">坂路調教</span>
-            <span>{currentIndex + 1} / {questions.length} 問</span>
-          </div>
-          <div className="w-full bg-zinc-200/70 h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-emerald-600 h-full rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
+          <div className="flex-1 flex flex-col items-end">
+            <div className="flex items-center justify-between w-full text-xs font-bold text-emerald-950 mb-1">
+              <span className="text-[11px] text-zinc-500 font-medium">
+                {currentItem?.type === 'vocabulary' ? 'ウッドチップ調教' : '坂路調教'}
+              </span>
+              <span>{currentIndex + 1} / {questions.length} 問</span>
+            </div>
+            <div className="w-full bg-zinc-200/70 h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-emerald-600 h-full rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
