@@ -9,6 +9,20 @@
 
 ---
 
+## [v0.12.0] - 2026-10-25
+
+### Added
+- **タイトルヘッダのページ上部固定（sticky化）およびサービスアイコンへの変更 ([#74](https://github.com/meshi-z/turf-talk/issues/74)):**
+  - **タイトルヘッダーの上部固定（sticky）化 (`src/components/Header.tsx`):**
+    - `<header>` に `sticky top-0 z-50 bg-white/95 backdrop-blur-xs border-b border-emerald-100 shadow-xs h-14` を適用。
+    - ホーム画面や各画面の縦スクロール時にもヘッダー（愛馬情報・タイトル、連続日数ストリーク、音声切り替えボタン）が常に画面最上部に追従して表示される操作性を確保。
+    - ヘッダー高さを `h-14`（56px）に安定化し、後続のプログレスバー固定領域とのオフセット基準を統一。
+  - **公式サービスアイコンへの差し替え (`src/components/Header.tsx`):**
+    - プロトタイプ初期の絵文字（`🏇`）から、公式アイコン（`public/icon.svg`）の画像表示（`<img>`）へ差し替え。
+    - タイトルテキストや行間とのバランスを最適化（`w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-2xs`）。
+
+---
+
 ## [v0.11.0] - 2026-10-18
 
 ### Added

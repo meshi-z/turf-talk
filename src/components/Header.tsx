@@ -16,9 +16,13 @@ export const Header: FC<HeaderProps> = ({ streakDays }) => {
   };
 
   return (
-    <header className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white border-b border-emerald-100 shadow-xs">
+    <header className="sticky top-0 z-50 flex items-center justify-between px-3 sm:px-4 h-14 bg-white/95 backdrop-blur-xs border-b border-emerald-100 shadow-xs">
       <div className="flex items-center space-x-2 min-w-0 pr-1">
-        <span className="text-2xl shrink-0 select-none" role="img" aria-label="horse">🏇</span>
+        <img
+          src="/icon.svg"
+          alt="TurfTalk"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-2xs shrink-0 select-none object-cover"
+        />
         <div className="min-w-0">
           <h1 className="text-lg font-bold tracking-tight text-emerald-950 flex items-center gap-1 leading-none">
             TurfTalk
