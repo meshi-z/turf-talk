@@ -9,6 +9,16 @@
 
 ---
 
+## [v0.12.1] - 2026-10-25
+
+### Fixed
+- **GitHub Pages環境でヘッダーアイコン（icon.svg）が404エラーになる不具合の修正 ([#77](https://github.com/meshi-z/turf-talk/issues/77)):**
+  - **ベースURL対応のアセットパス指定 (`src/components/Header.tsx`):**
+    - ヘッダー内のサービスアイコン参照をルート絶対パス `/icon.svg` から `${import.meta.env.BASE_URL}icon.svg` に修正。
+    - `vite.config.ts` の `base: './'`（相対パス配信）設定と整合させ、GitHub Pages 等のサブディレクトリ環境でも 404 Not Found を起こさず正常に画像が表示されるように改善。
+
+---
+
 ## [v0.12.0] - 2026-10-25
 
 ### Added
