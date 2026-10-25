@@ -92,35 +92,37 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full">
-      {/* レース上部ヘッダー & プログレス */}
-      <div className="flex items-center justify-between gap-3 mb-2.5">
-        <button
-          onClick={onCancel}
-          className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span>レース中止</span>
-        </button>
+      {/* レース上部ヘッダー & プログレス（常時固定 sticky） */}
+      <div className="sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-amber-200/60 shadow-2xs mb-3">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={onCancel}
+            className="text-xs font-semibold text-zinc-500 hover:text-zinc-800 flex items-center gap-0.5 py-1 px-1.5 -ml-1.5 rounded-lg hover:bg-zinc-100 transition-colors cursor-pointer shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>レース中止</span>
+          </button>
 
-        <div className="flex-1 flex flex-col items-end min-w-0">
-          <div className="flex items-center justify-between w-full text-xs font-bold text-amber-950 mb-1 gap-2">
-            <span className="text-[11px] text-amber-800 font-bold flex items-center gap-1 truncate">
-              <Trophy className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span className="truncate">
-                {raceInfo
-                  ? `Week ${raceInfo.week} • ${raceInfo.raceName}（${raceInfo.distanceText}）`
-                  : '海外G1レース'}
+          <div className="flex-1 flex flex-col items-end min-w-0">
+            <div className="flex items-center justify-between w-full text-xs font-bold text-amber-950 mb-1 gap-2">
+              <span className="text-[11px] text-amber-800 font-bold flex items-center gap-1 truncate">
+                <Trophy className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span className="truncate">
+                  {raceInfo
+                    ? `Week ${raceInfo.week} • ${raceInfo.raceName}（${raceInfo.distanceText}）`
+                    : '海外G1レース'}
+                </span>
               </span>
-            </span>
-            <span className="shrink-0">
-              {currentIndex + 1} / {questions.length} 展開
-            </span>
-          </div>
-          <div className="w-full bg-amber-100 h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-amber-600 h-full rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progressPercent}%` }}
-            />
+              <span className="shrink-0">
+                {currentIndex + 1} / {questions.length} 展開
+              </span>
+            </div>
+            <div className="w-full bg-amber-100 h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-amber-600 h-full rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>

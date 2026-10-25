@@ -9,6 +9,28 @@
 
 ---
 
+## [v0.12.0] - 2026-10-25
+
+### Added
+- **タイトルヘッダのページ上部固定（sticky化）およびサービスアイコンへの変更 ([#74](https://github.com/meshi-z/turf-talk/issues/74)):**
+  - **タイトルヘッダーの上部固定（sticky）化 (`src/components/Header.tsx`):**
+    - `<header>` に `sticky top-0 z-50 bg-white/95 backdrop-blur-xs border-b border-emerald-100 shadow-xs h-14` を適用。
+    - ホーム画面や各画面の縦スクロール時にもヘッダー（愛馬情報・タイトル、連続日数ストリーク、音声切り替えボタン）が常に画面最上部に追従して表示される操作性を確保。
+    - ヘッダー高さを `h-14`（56px）に安定化し、後続のプログレスバー固定領域とのオフセット基準を統一。
+  - **公式サービスアイコンへの差し替え (`src/components/Header.tsx`):**
+    - プロトタイプ初期の絵文字（`🏇`）から、公式アイコン（`public/icon.svg`）の画像表示（`<img>`）へ差し替え。
+    - タイトルテキストや行間とのバランスを最適化（`w-7 h-7 sm:w-8 sm:h-8 rounded-lg shadow-2xs`）。
+- **調教画面・レース画面の上部プログレスバー領域の常時固定（sticky化） ([#75](https://github.com/meshi-z/turf-talk/issues/75)):**
+  - **調教画面の上部プログレスバー固定 (`src/components/QuizScreen.tsx`):**
+    - 上部ヘッダー（中断ボタン、調教コース名、問題数カウント、プログレスバー）コンテナに `sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-zinc-200/60 shadow-2xs mb-3` を適用。
+    - タイトルヘッダー直下に自然に密着追従し、解説や選択肢の縦スクロール時にも全体の進行状況と中断操作を常に視認・利用可能に改善。
+    - コース種別に応じたコース名（「坂路調教」/「ウッドチップ調教」）の動的表示に対応。
+  - **週末レース画面の上部プログレスバー固定 (`src/components/RaceScreen.tsx`):**
+    - レース上部ヘッダー（レース中止ボタン、レース名、展開カウント、プログレスバー）コンテナに `sticky top-14 z-40 bg-zinc-50/95 backdrop-blur-xs -mt-4 pt-3 pb-2.5 -mx-4 px-4 border-b border-amber-200/60 shadow-2xs mb-3` を適用。
+    - 実況カードや4択の選択肢スクロール時にも、現在の展開カウント・進捗・中止ボタンが常に上部に留まり、実戦レースの臨場感と操作性を両立。
+
+---
+
 ## [v0.11.0] - 2026-10-18
 
 ### Added
