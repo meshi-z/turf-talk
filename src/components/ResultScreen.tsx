@@ -4,6 +4,7 @@ import type { UserProgress } from '../types';
 import { TrendingUp, Home, Sparkles } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { getLogicalDate } from '../lib/logicalDate';
+import { HorseIllustration } from './HorseIllustration';
 
 interface ResultScreenProps {
   score: number;
@@ -71,6 +72,15 @@ export const ResultScreen: FC<ResultScreenProps> = ({
               {todayDateString}
             </div>
           </div>
+        </div>
+
+        {/* 調教完了立ち絵（右向き・無装具） */}
+        <div className="mt-4 max-w-[280px] mx-auto rounded-xl overflow-hidden border border-emerald-200/80 shadow-xs">
+          <HorseIllustration
+            color={progress.careerHorse.color}
+            scene="training_complete"
+            alt={`${progress.horseName}（${progress.careerHorse.color}）の調教完了立ち絵`}
+          />
         </div>
 
         {/* スコア・ステータス変動 */}

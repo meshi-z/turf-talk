@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import type { PhraseItem, QuizOption } from '../data/phrases';
 import { Check, X, ArrowRight, Lightbulb, ChevronLeft } from 'lucide-react';
 import { soundManager } from '../lib/sound';
+import type { HorseCoatColor, TrainingCourse } from '../types';
+import { HorseSpriteAnimation } from './HorseSpriteAnimation';
 
 interface QuizScreenProps {
   questions: PhraseItem[];
   currentIndex: number;
+  horseColor?: HorseCoatColor;
+  course?: TrainingCourse;
   onAnswer: (optionId: string, isCorrect: boolean) => void;
   onNext: () => void;
   onCancel: () => void;
@@ -14,6 +18,8 @@ interface QuizScreenProps {
 export const QuizScreen: React.FC<QuizScreenProps> = ({
   questions,
   currentIndex,
+  horseColor,
+  course,
   onAnswer,
   onNext,
   onCancel,
@@ -73,6 +79,17 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 平日調教疾走アニメーション（白ゼッケン・コース背景連動） */}
+      {horseColor && (
+        <div className="mb-3">
+          <HorseSpriteAnimation
+            color={horseColor}
+            scene="training_gallop"
+            courseType={course}
+          />
+        </div>
+      )}
 
       {/* シチュエーションバッジ */}
       <div className="mb-2">

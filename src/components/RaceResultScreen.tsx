@@ -3,6 +3,7 @@ import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
 import { Trophy, Home, Check, X, Sparkles, Award, Flag, Crown } from 'lucide-react';
 import { soundManager } from '../lib/sound';
+import { HorseIllustration } from './HorseIllustration';
 import { calculateRacePlacement, type RacePlacement } from '../lib/raceMode';
 import { calculateRaceFeedback, type RaceFeedback } from '../lib/conditionBonus';
 import {
@@ -103,6 +104,15 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
         <p className="text-xs text-zinc-600 mb-4 px-2 leading-relaxed">
           {placement.comment}
         </p>
+
+        {/* レース結果立ち絵（1着勝利 / 惜敗・労い） */}
+        <div className="my-3 max-w-[280px] mx-auto rounded-xl overflow-hidden border border-amber-300/80 shadow-xs">
+          <HorseIllustration
+            color={careerHorse.color}
+            scene={isWinner ? 'race_victory' : 'race_cooldown'}
+            alt={`${careerHorse.name}（${careerHorse.color}）の${isWinner ? '1着勝利' : '惜敗労い'}立ち絵`}
+          />
+        </div>
 
         {/* 成績・詳細スペック */}
         <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-zinc-100 text-center">
