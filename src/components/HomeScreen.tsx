@@ -32,6 +32,7 @@ import {
   validateHorseName,
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
+import { HorseIllustration } from './HorseIllustration';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -154,9 +155,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
     <div className="flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
       {/* 愛馬ステータスカード */}
       <div className="bg-linear-to-br from-emerald-800 to-emerald-950 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
-        <div className="absolute -right-4 -bottom-4 text-emerald-800/30 text-8xl font-black select-none pointer-events-none">
-          🏇
-        </div>
+
 
         {/* キャリア世代 & ステージバッジ */}
         <div className="flex items-center justify-between gap-2 mb-2">
@@ -252,6 +251,17 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               )}
             </div>
           )}
+        </div>
+
+        {/* 愛馬公式立ち絵（左向き・無装具） */}
+        <div className="mt-3 overflow-hidden rounded-xl border border-emerald-600/40 shadow-inner bg-emerald-950/40">
+          <HorseIllustration
+            color={careerHorse.color}
+            scene="standing_left"
+            alt={`${careerHorse.name}（${careerHorse.color}）の公式立ち絵`}
+            className="w-full rounded-lg"
+            priority
+          />
         </div>
 
         {/* 馬体重 & 今週の目標レース */}

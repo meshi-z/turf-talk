@@ -7,6 +7,30 @@
 
 ## [Unreleased]
 
+---
+
+## [v0.13.0] - 2026-10-31
+
+### Added
+- **競走馬イラスト・アニメーション素材のWebサービス組み込み（全6シーン × 毛色連動） ([#84](https://github.com/meshi-z/turf-talk/issues/84)):**
+  - **毛色マッピング・アセット解決ユーティリティの実装 (`src/lib/horseAssets.ts`):**
+    - JRA全8毛色（鹿毛、栗毛、黒鹿毛、芦毛、青鹿毛、青毛、栃栗毛、白毛）と英字キーのマッピングを定義。
+    - `import.meta.glob` によるVite静的アセット解決（GitHub Pages相対パス配信完全対応）。
+  - **競走馬スプライトアニメーションコンポーネントの実装 (`src/components/HorseSpriteAnimation.tsx`):**
+    - 6コマ（500×360px、3列×2行）の滑らかな連続再生（約11.7 FPS）。
+    - オフスクリーンCanvasによる事前背景透過処理（外周フラッドフィル＋手綱間・交差脚間の透過、白ゼッケン保護）。
+    - コース種別（坂路・ウッドチップ・芝ターフ）に応じた背景演出とスピードライン。
+  - **静止画立ち絵コンポーネントの実装 (`src/components/HorseIllustration.tsx`):**
+    - アスペクト比 1376:768 に準拠したレイアウトシフト（CLS）防止、角丸・枠線スタイリング共通コンポーネント。
+  - **全6シーンのWebサービス各画面組み込み:**
+    - **ホーム画面 (`src/components/HomeScreen.tsx`)**: 愛馬ステータスカード内の初期絵文字（🏇）を公式立ち絵（① `{coat}_standing_left.jpg`）へリプレイス。「🎲 命名」時の毛色再抽選にも即時連動。
+    - **調教画面 (`src/components/QuizScreen.tsx`)**: 上部プログレスバー直下に平日調教疾走アニメーション（② `{coat}_training_gallop.jpg`）を組み込み、坂路/ウッドチップ背景と調和。
+    - **調教結果画面 (`src/components/ResultScreen.tsx`)**: 調教完成立ち絵（③ `{coat}_training_complete.jpg`）を組み込み、「調教済」スタンプ演出と連動。
+    - **週末レース画面 (`src/components/RaceScreen.tsx`)**: 実況ステータスカード直下に週末レース全力疾走アニメーション（④ `{coat}_race_gallop.jpg`）を組み込み、首振り（ヘッドボブ）モーションを表示。
+    - **レース結果画面 (`src/components/RaceResultScreen.tsx`)**: 勝敗判定に応じ、1着勝利時（⑤-A `{coat}_race_victory.jpg`）と2着以下惜敗時（⑤-B `{coat}_race_cooldown.jpg`）を動的分岐表示。
+  - **テスト拡充 (`tests/horse_assets.test.ts`):**
+    - 全8毛色キーマッピング、全6シーンURL解決、全48アセットファイルの実在検証テストを追加（全69テストPASS）。
+
 ### Added
 - **競走馬ビジュアル・イラスト素材制作（JRA全8毛色 × 全6シーン構成） ([#83](https://github.com/meshi-z/turf-talk/issues/83)):**
   - **制作仕様書の策定 (`docs/specs/horse-visual-assets.md`):**
