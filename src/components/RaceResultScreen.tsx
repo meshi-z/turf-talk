@@ -11,6 +11,7 @@ import {
   getCurrentWeekRaceInfo,
   type CareerRaceAdvanceResult,
 } from '../lib/careerCycle';
+import { SpeechButton } from './SpeechButton';
 
 interface RaceResultScreenProps {
   score: number;
@@ -158,45 +159,37 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
 
       {/* 余力温存ボーナスカード（にんじん獲得） */}
       {addedCarrots > 0 && (
-        <div className="bg-linear-to-r from-orange-50 via-amber-50 to-orange-100 border-2 border-orange-300 rounded-2xl p-4 shadow-sm flex items-center gap-3 animate-in fade-in zoom-in-95 duration-300">
-          <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-300 flex items-center justify-center text-3xl shrink-0">
-            🥕
-          </div>
+        <div className="bg-linear-to-r from-orange-500 to-amber-500 text-white rounded-2xl p-4 shadow-sm flex items-center gap-3 animate-in zoom-in-95 duration-200">
+          <div className="text-3xl shrink-0">🥕</div>
           <div className="flex-1 text-left">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-800 bg-orange-200/60 px-2 py-0.5 rounded-full">
-                余力温存ボーナス！
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-100">
+                Stamina Reserve Bonus
               </span>
-              <span className="text-xs font-black text-orange-950">
-                所持: {progress.carrotCount} / 3個
+              <span className="text-xs font-black bg-white text-orange-700 px-2 py-0.5 rounded-full shadow-2xs">
+                +{addedCarrots}個獲得！
               </span>
             </div>
-            <h4 className="text-sm font-bold text-orange-950 mt-1">
-              にんじん 🥕 +{addedCarrots}個 を獲得！
-            </h4>
-            <p className="text-[11px] text-orange-900/80 leading-tight mt-0.5">
-              余力を残してゴールした愛馬へのご褒美！万が一の未受講日を自動補填します。
+            <p className="text-xs font-bold mt-0.5">
+              愛馬の余力を温存してゴール！にんじんを獲得しました（所持数: {progress.carrotCount}個）
+            </p>
+            <p className="text-[10px] text-orange-100 mt-0.5">
+              平日に受講できない日があっても、自動でストリークを救済維持できます。
             </p>
           </div>
         </div>
       )}
 
-      {/* レース後フィードバックカード（馬体重・調子変動） */}
-      <div className="bg-linear-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-            <span>🐴</span>
-            <span>レース後フィードバック（愛馬の仕上がり）</span>
-          </h3>
-          <span className="text-[10px] font-bold bg-emerald-200/70 text-emerald-900 px-2 py-0.5 rounded-full">
-            激闘の成果
-          </span>
-        </div>
+      {/* レース後フィードバック・愛馬状態カード */}
+      <div className="bg-linear-to-b from-white to-emerald-50/40 rounded-2xl border border-emerald-200/80 p-4 shadow-xs text-left">
+        <h3 className="text-xs font-bold text-emerald-950 mb-2 flex items-center gap-1.5">
+          <span>📋</span> レース後フィードバック・愛馬の状態
+        </h3>
 
-        <div className="grid grid-cols-2 gap-2 my-2 text-xs">
+        <div className="grid grid-cols-2 gap-2 text-center my-2 text-xs">
           <div className="bg-white/80 rounded-xl p-2.5 border border-emerald-100">
             <span className="text-[10px] text-zinc-500 block">馬体重変動</span>
-            <div className="font-extrabold text-zinc-800 flex items-baseline gap-1 mt-0.5">
+            <div className="font-extrabold text-zinc-800 flex items-baseline justify-center gap-1 mt-0.5">
               <span>{feedback.nextWeight} kg</span>
               <span className="text-[10px] text-emerald-700 font-bold">
                 ({feedback.weightChange}kg 絞れました)
@@ -215,7 +208,6 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
           💡 {feedback.comment}
         </p>
       </div>
-
 
       {/* レース出走フレーズ振り返り */}
       <div className="bg-white rounded-2xl border border-zinc-200/80 p-4 shadow-xs">
@@ -262,9 +254,12 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
                 </span>
               </div>
 
-              <blockquote className="font-extrabold text-sm text-zinc-900 mb-1 leading-snug">
-                “{item.phrase.phrase}”
-              </blockquote>
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <blockquote className="font-extrabold text-sm text-zinc-900 leading-snug flex-1">
+                  “{item.phrase.phrase}”
+                </blockquote>
+                <SpeechButton text={item.phrase.phrase} size="xs" />
+              </div>
               <p className="text-[11px] font-semibold text-zinc-700 mb-1">
                 意味: {item.phrase.options.find((o) => o.isCorrect)?.text}
               </p>
