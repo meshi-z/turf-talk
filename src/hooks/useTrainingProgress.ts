@@ -62,6 +62,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   hasCompletedWeeklyRace: false,
   careerHorse: createDefaultCareerHorse(),
   hallOfFame: [],
+  bookmarkedPhraseIds: [],
 };
 
 // 曜日連動の調教日数シミュレーション用テーブル（月: 0日, 火: 1日, 水: 2日, 木: 3日, 金: 4日, 土: 5日, 日: 5日）
@@ -139,6 +140,7 @@ export function useTrainingProgress() {
           hasCompletedWeeklyRace: completedWeeklyRace,
           careerHorse: migratedHorse,
           hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
+          bookmarkedPhraseIds: Array.isArray(parsed.bookmarkedPhraseIds) ? parsed.bookmarkedPhraseIds : [],
         };
       }
     } catch {
@@ -411,6 +413,22 @@ export function useTrainingProgress() {
   };
 
   /**
+   * フレーズのお気に入り・要復習ブックマークをトグルする
+   */
+  const toggleBookmarkPhrase = (phraseId: string) => {
+    setProgress((prev) => {
+      const current = prev.bookmarkedPhraseIds ?? [];
+      const next = current.includes(phraseId)
+        ? current.filter((id) => id !== phraseId)
+        : [...current, phraseId];
+      return {
+        ...prev,
+        bookmarkedPhraseIds: next,
+      };
+    });
+  };
+
+  /**
    * 現在の愛馬を引退させて殿堂入り記録へ追加し、次世代（generation + 1）の新馬へ世代交代する。
    * ユーザー全体の連続学習ストリーク（streakDays）、にんじん所持数、習得フレーズ（learnedPhraseIds / lapCount）はそのまま引き継ぐ。
    */
@@ -474,6 +492,7 @@ export function useTrainingProgress() {
       hasCompletedWeeklyRace: false,
       careerHorse: freshHorse,
       hallOfFame: [],
+      bookmarkedPhraseIds: [],
     });
     setDebugDayOfWeek(null);
     setDebugWeekdayDays(null);
@@ -495,6 +514,7 @@ export function useTrainingProgress() {
       completedCoursesToday: effectiveCompletedCoursesToday,
       todayPhraseIds: isCompletedOnEffectiveDate ? progress.todayPhraseIds : [],
       todayWoodchipPhraseIds: isCompletedOnEffectiveDate ? (progress.todayWoodchipPhraseIds ?? []) : [],
+      bookmarkedPhraseIds: progress.bookmarkedPhraseIds ?? [],
       careerHorse: {
         ...progress.careerHorse,
         currentWeek: effectiveCareerWeek,
@@ -511,6 +531,7 @@ export function useTrainingProgress() {
     rerollHorseCoatColor,
     retireCurrentHorse,
     resetProgressForDemo,
+    toggleBookmarkPhrase,
     todayString: effectiveTodayString,
     debugDayOfWeek,
     setDebugDayOfWeek,

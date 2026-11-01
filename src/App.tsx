@@ -8,6 +8,7 @@ import { RaceScreen } from './components/RaceScreen';
 import { RaceResultScreen } from './components/RaceResultScreen';
 import { RetirementScreen } from './components/RetirementScreen';
 import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
+import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
@@ -20,7 +21,7 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -35,6 +36,7 @@ export function App() {
     rerollHorseCoatColor,
     retireCurrentHorse,
     resetProgressForDemo,
+    toggleBookmarkPhrase,
     todayString,
     appMode,
     effectiveDayOfWeek,
@@ -248,6 +250,7 @@ export function App() {
               debugRaceCompleted={debugRaceCompleted}
               onSetDebugRaceCompleted={setDebugRaceCompleted}
               onOpenDebugQuestions={() => setCurrentScreen('debug-questions')}
+              onOpenPhraseBook={() => setCurrentScreen('phrase-book')}
             />
           )}
 
@@ -311,6 +314,14 @@ export function App() {
 
           {currentScreen === 'debug-questions' && (
             <DebugQuestionsScreen onBackToHome={handleGoHome} />
+          )}
+
+          {currentScreen === 'phrase-book' && (
+            <PhraseBookScreen
+              progress={progress}
+              onBackToHome={handleGoHome}
+              onToggleBookmark={toggleBookmarkPhrase}
+            />
           )}
         </main>
 
