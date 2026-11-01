@@ -1,8 +1,6 @@
-declare const __APP_VERSION__: string | undefined;
-
 /**
- * アプリケーションのバージョン文字列（例: "v0.1.5"）
- * Vite ビルド時に package.json から注入されます。
+ * TurfTalk アプリケーションバージョン定義
+ * - セマンティックバージョニング形式（vMAJOR.MINOR.PATCH）
+ * - package.json の version フィールド（先頭に v を付与）と完全一致させること
  */
-export const APP_VERSION: string =
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'v0.12.1';
+export const APP_VERSION = 'v0.13.1';

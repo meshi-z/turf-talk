@@ -19,6 +19,7 @@ import {
   calculateNextStreakOnCompletion,
   getLogicalWeekMonday,
   isWeeklyRaceCompletedForWeek,
+  getDateStringForDayOfWeek,
 } from '../lib/logicalDate';
 import {
   evaluateStreakWithCarrotRescue,
@@ -61,6 +62,17 @@ const DEFAULT_PROGRESS: UserProgress = {
   hasCompletedWeeklyRace: false,
   careerHorse: createDefaultCareerHorse(),
   hallOfFame: [],
+};
+
+// 曜日連動の調教日数シミュレーション用テーブル（月: 0日, 火: 1日, 水: 2日, 木: 3日, 金: 4日, 土: 5日, 日: 5日）
+const SIMULATED_WEEKDAY_DAYS_BY_DAY: Record<DayOfWeek, number> = {
+  1: 0,
+  2: 1,
+  3: 2,
+  4: 3,
+  5: 4,
+  6: 5,
+  0: 5,
 };
 
 export function useTrainingProgress() {
@@ -138,6 +150,12 @@ export function useTrainingProgress() {
     };
   });
 
+  const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
+  const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
+  const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
+  const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
+  const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
@@ -145,6 +163,48 @@ export function useTrainingProgress() {
       // 保存エラーは無視
     }
   }, [progress]);
+
+  const actualTodayStr = getLogicalDateString();
+  const currentMonday = getLogicalWeekMonday(actualTodayStr);
+  const actualDayOfWeek = getDayOfWeek(actualTodayStr);
+  const effectiveDayOfWeek: DayOfWeek = debugDayOfWeek !== null ? debugDayOfWeek : actualDayOfWeek;
+  const effectiveTodayString: string =
+    debugDayOfWeek !== null
+      ? getDateStringForDayOfWeek(currentMonday, debugDayOfWeek)
+      : actualTodayStr;
+  const appMode: AppMode = getAppMode(effectiveDayOfWeek);
+  const daysUntilWeekend: number = getDaysUntilWeekend(effectiveDayOfWeek);
+  const isWeekendDay: boolean = isWeekend(effectiveDayOfWeek);
+
+  // 週間調教日数の実効値と、それに基づくコンディション・馬体重・ヒント数
+  // 手動で debugWeekdayDays が設定されている場合はそれを最優先。
+  // debugDayOfWeek のみが指定されている場合は、曜日に応じた調教消化日数を自動シミュレート。
+  const effectiveWeekdayDays =
+    debugWeekdayDays !== null
+      ? debugWeekdayDays
+      : debugDayOfWeek !== null
+        ? SIMULATED_WEEKDAY_DAYS_BY_DAY[debugDayOfWeek]
+        : progress.weekdayTrainingDays;
+  const conditionTier = getConditionFromDays(effectiveWeekdayDays);
+
+  const effectiveCarrots =
+    debugCarrotCount !== null ? debugCarrotCount : progress.carrotCount;
+
+  const effectiveCareerWeek: CareerWeek =
+    debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
+
+  const actualRaceCompleted = isWeeklyRaceCompletedForWeek(
+    progress.lastRaceWeekMonday,
+    effectiveTodayString
+  );
+  const effectiveRaceCompleted: boolean =
+    debugRaceCompleted !== null ? debugRaceCompleted : actualRaceCompleted;
+
+  // 仮想日・当日における調教完了状態
+  const isCompletedOnEffectiveDate = progress.lastTrainingDate === effectiveTodayString;
+  const effectiveCompletedCoursesToday = isCompletedOnEffectiveDate
+    ? (progress.completedCoursesToday ?? [])
+    : [];
 
   const recordTodayPhrases = (phraseIds: string[], course: TrainingCourse = 'uphill') => {
     setProgress((prev) => {
@@ -175,7 +235,7 @@ export function useTrainingProgress() {
     sessionPhraseIds: string[] = [],
     course: TrainingCourse = 'uphill'
   ) => {
-    const today = getLogicalDateString();
+    const today = effectiveTodayString;
     const todayMonday = getLogicalWeekMonday(today);
     setProgress((prev) => {
       const isAlreadyCompletedToday = prev.lastTrainingDate === today;
@@ -242,17 +302,11 @@ export function useTrainingProgress() {
     });
   };
 
-  const [debugDayOfWeek, setDebugDayOfWeek] = useState<DayOfWeek | null>(null);
-  const [debugWeekdayDays, setDebugWeekdayDays] = useState<number | null>(null);
-  const [debugCarrotCount, setDebugCarrotCount] = useState<number | null>(null);
-  const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
-  const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
-
   /**
    * レース完了時のステータス変動、余力温存にんじんボーナス、次週へのキャリア進行、および当該週末の出走済記録
    */
   const markRaceCompleted = (score: number, remainingReserves: number = 0) => {
-    const today = getLogicalDateString();
+    const today = effectiveTodayString;
     const todayMonday = getLogicalWeekMonday(today);
     const activeWeek: CareerWeek =
       debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
@@ -365,7 +419,7 @@ export function useTrainingProgress() {
     color?: HorseCoatColor;
     routeId?: CareerRouteId;
   }) => {
-    const today = getLogicalDateString();
+    const today = effectiveTodayString;
     const todayMonday = getLogicalWeekMonday(today);
 
     setProgress((prev) => {
@@ -428,31 +482,6 @@ export function useTrainingProgress() {
     setDebugRaceCompleted(null);
   };
 
-  const todayStr = getLogicalDateString();
-  const actualDayOfWeek = getDayOfWeek(todayStr);
-  const effectiveDayOfWeek: DayOfWeek = debugDayOfWeek !== null ? debugDayOfWeek : actualDayOfWeek;
-  const appMode: AppMode = getAppMode(effectiveDayOfWeek);
-  const daysUntilWeekend: number = getDaysUntilWeekend(effectiveDayOfWeek);
-  const isWeekendDay: boolean = isWeekend(effectiveDayOfWeek);
-
-  // 週間調教日数の実効値と、それに基づくコンディション・馬体重・ヒント数
-  const effectiveWeekdayDays =
-    debugWeekdayDays !== null ? debugWeekdayDays : progress.weekdayTrainingDays;
-  const conditionTier = getConditionFromDays(effectiveWeekdayDays);
-
-  const effectiveCarrots =
-    debugCarrotCount !== null ? debugCarrotCount : progress.carrotCount;
-
-  const effectiveCareerWeek: CareerWeek =
-    debugCareerWeek !== null ? debugCareerWeek : progress.careerHorse.currentWeek;
-
-  const actualRaceCompleted = isWeeklyRaceCompletedForWeek(
-    progress.lastRaceWeekMonday,
-    todayStr
-  );
-  const effectiveRaceCompleted: boolean =
-    debugRaceCompleted !== null ? debugRaceCompleted : actualRaceCompleted;
-
   return {
     progress: {
       ...progress,
@@ -462,6 +491,10 @@ export function useTrainingProgress() {
       weekdayTrainingDays: effectiveWeekdayDays,
       carrotCount: effectiveCarrots,
       hasCompletedWeeklyRace: effectiveRaceCompleted,
+      completedToday: isCompletedOnEffectiveDate,
+      completedCoursesToday: effectiveCompletedCoursesToday,
+      todayPhraseIds: isCompletedOnEffectiveDate ? progress.todayPhraseIds : [],
+      todayWoodchipPhraseIds: isCompletedOnEffectiveDate ? (progress.todayWoodchipPhraseIds ?? []) : [],
       careerHorse: {
         ...progress.careerHorse,
         currentWeek: effectiveCareerWeek,
@@ -478,7 +511,7 @@ export function useTrainingProgress() {
     rerollHorseCoatColor,
     retireCurrentHorse,
     resetProgressForDemo,
-    todayString: todayStr,
+    todayString: effectiveTodayString,
     debugDayOfWeek,
     setDebugDayOfWeek,
     actualDayOfWeek,
@@ -499,4 +532,3 @@ export function useTrainingProgress() {
     hasCompletedWeeklyRace: effectiveRaceCompleted,
   };
 }
-

@@ -7,6 +7,7 @@ import { ResultScreen } from './components/ResultScreen';
 import { RaceScreen } from './components/RaceScreen';
 import { RaceResultScreen } from './components/RaceResultScreen';
 import { RetirementScreen } from './components/RetirementScreen';
+import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
@@ -19,7 +20,7 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -246,6 +247,7 @@ export function App() {
               onSetDebugCareerWeek={setDebugCareerWeek}
               debugRaceCompleted={debugRaceCompleted}
               onSetDebugRaceCompleted={setDebugRaceCompleted}
+              onOpenDebugQuestions={() => setCurrentScreen('debug-questions')}
             />
           )}
 
@@ -305,6 +307,10 @@ export function App() {
               }}
               onBackToHome={handleGoHome}
             />
+          )}
+
+          {currentScreen === 'debug-questions' && (
+            <DebugQuestionsScreen onBackToHome={handleGoHome} />
           )}
         </main>
 

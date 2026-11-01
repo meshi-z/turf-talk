@@ -32,6 +32,7 @@ import {
   validateHorseName,
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
+import { isDevOrLocalhost } from '../lib/environment';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -59,6 +60,7 @@ interface HomeScreenProps {
   onSetDebugCareerWeek?: (week: CareerWeek | null) => void;
   debugRaceCompleted?: boolean | null;
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
+  onOpenDebugQuestions?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -90,6 +92,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onSetDebugCareerWeek,
   debugRaceCompleted = null,
   onSetDebugRaceCompleted,
+  onOpenDebugQuestions,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -791,8 +794,9 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
       ) : null}
 
-      {/* デバッグ・デモ用曜日切り替えコントロール */}
-      <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
+      {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
+      {isDevOrLocalhost() && (
+        <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
         <div className="bg-zinc-100/80 rounded-xl p-2.5 border border-zinc-200/70 text-xs">
           <div className="flex justify-between items-center mb-2">
             <span className="font-bold text-zinc-700 flex items-center gap-1 text-[11px]">
@@ -1019,6 +1023,20 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           )}
         </div>
 
+        {/* 問題・解答一覧（デバッグ用）参照ボタン */}
+        {onOpenDebugQuestions && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onOpenDebugQuestions}
+              className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-emerald-950 border border-emerald-600/40 shadow-2xs hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>📖</span>
+              <span>問題・解答一覧を表示（全120問・校正用）</span>
+            </button>
+          </div>
+        )}
+
         {/* デモ用データリセットボタン */}
         <div className="text-center pt-1">
           <button
@@ -1030,6 +1048,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 };
