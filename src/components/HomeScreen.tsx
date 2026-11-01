@@ -32,6 +32,7 @@ import {
   validateHorseName,
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
+import { isDevOrLocalhost } from '../lib/environment';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -793,8 +794,9 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
       ) : null}
 
-      {/* デバッグ・デモ用曜日切り替えコントロール */}
-      <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
+      {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
+      {isDevOrLocalhost() && (
+        <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
         <div className="bg-zinc-100/80 rounded-xl p-2.5 border border-zinc-200/70 text-xs">
           <div className="flex justify-between items-center mb-2">
             <span className="font-bold text-zinc-700 flex items-center gap-1 text-[11px]">
@@ -1046,6 +1048,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 };
