@@ -8,11 +8,12 @@ import {
 import {
   ChevronLeft,
   Search,
-  X,
   BookOpen,
   CheckCircle2,
   Filter,
 } from 'lucide-react';
+import { SpeechButton } from './SpeechButton';
+import { SpeechControls } from './SpeechControls';
 
 interface DebugQuestionsScreenProps {
   onBackToHome: () => void;
@@ -118,39 +119,39 @@ export const DebugQuestionsScreen: FC<DebugQuestionsScreenProps> = ({
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-0.5 cursor-pointer"
                 title="検索をクリア"
               >
-                <X className="w-3.5 h-3.5" />
+                ✕
               </button>
             )}
           </div>
 
-          {/* コース種別フィルタータブ */}
-          <div className="flex gap-1.5 p-1 bg-zinc-100 rounded-lg text-xs font-bold">
+          {/* コース種別選択チップ */}
+          <div className="grid grid-cols-3 gap-1.5">
             <button
               onClick={() => setCourseFilter('all')}
-              className={`flex-1 py-1 px-2 rounded-md transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                 courseFilter === 'all'
-                  ? 'bg-white text-zinc-900 shadow-2xs'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-600'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
               }`}
             >
               すべて ({INITIAL_PHRASES.length})
             </button>
             <button
               onClick={() => setCourseFilter('phrase')}
-              className={`flex-1 py-1 px-2 rounded-md transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                 courseFilter === 'phrase'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-600'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
               }`}
             >
               🌿 坂路 ({uphillCount})
             </button>
             <button
               onClick={() => setCourseFilter('vocabulary')}
-              className={`flex-1 py-1 px-2 rounded-md transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                 courseFilter === 'vocabulary'
-                  ? 'bg-amber-700 text-white shadow-2xs'
-                  : 'text-zinc-600 hover:text-zinc-900'
+                  ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-600'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
               }`}
             >
               🪵 ウッド ({woodchipCount})
@@ -187,16 +188,24 @@ export const DebugQuestionsScreen: FC<DebugQuestionsScreenProps> = ({
               );
             })}
           </div>
+
+          {/* 音声発音設定バー */}
+          <div className="flex items-center justify-between pt-1 border-t border-zinc-100 text-[11px] text-zinc-500">
+            <span className="font-semibold text-zinc-600 flex items-center gap-1">
+              <span>🔊</span> 発音設定:
+            </span>
+            <SpeechControls />
+          </div>
         </div>
       </div>
 
       {/* 設問一覧リスト */}
       <main className="flex-1 p-3 sm:p-4 max-w-md mx-auto w-full space-y-3.5">
         {filteredPhrases.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-zinc-200 p-8 text-center text-zinc-500 my-8">
-            <p className="text-sm font-bold mb-1">該当する問題が見つかりませんでした</p>
-            <p className="text-xs text-zinc-400">
-              検索ワードやフィルター条件を変更してお試しください。
+          <div className="bg-white rounded-2xl border border-zinc-200 p-8 text-center text-zinc-500">
+            <p className="text-sm font-bold">該当する問題が見つかりませんでした。</p>
+            <p className="text-xs text-zinc-400 mt-1">
+              フィルター条件や検索キーワードを変更してお試しください。
             </p>
           </div>
         ) : (
@@ -244,16 +253,19 @@ export const DebugQuestionsScreen: FC<DebugQuestionsScreenProps> = ({
                   </div>
 
                   {/* 英語フレーズ / 単語 */}
-                  <div>
-                    <h2 className="text-base sm:text-lg font-black text-zinc-900 leading-snug tracking-tight">
-                      {item.phrase}
-                    </h2>
-                    {item.literalTranslation && (
-                      <p className="text-[11px] text-zinc-500 mt-0.5 leading-snug">
-                        <span className="font-semibold text-zinc-400 mr-1">直訳:</span>
-                        {item.literalTranslation}
-                      </p>
-                    )}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-base sm:text-lg font-black text-zinc-900 leading-snug tracking-tight">
+                        {item.phrase}
+                      </h2>
+                      {item.literalTranslation && (
+                        <p className="text-[11px] text-zinc-500 mt-0.5 leading-snug">
+                          <span className="font-semibold text-zinc-400 mr-1">直訳:</span>
+                          {item.literalTranslation}
+                        </p>
+                      )}
+                    </div>
+                    <SpeechButton text={item.phrase} size="xs" />
                   </div>
 
                   {/* 4択選択肢 */}
