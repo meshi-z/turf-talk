@@ -39,6 +39,7 @@ import {
 } from '../lib/careerCycle';
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
+import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
@@ -467,6 +468,19 @@ export function useTrainingProgress() {
     setDebugRaceCompleted(null);
   };
 
+  const addSampleHallOfFameForDemo = () => {
+    const samples = createSampleHallOfFameHorses();
+    setProgress((prev) => {
+      const currentHoF = Array.isArray(prev.hallOfFame) ? prev.hallOfFame : [];
+      const existingIds = new Set(currentHoF.map((h) => h.id));
+      const newSamples = samples.filter((s) => !existingIds.has(s.id));
+      return {
+        ...prev,
+        hallOfFame: [...newSamples, ...currentHoF],
+      };
+    });
+  };
+
   const resetProgressForDemo = () => {
     const today = getLogicalDateString();
     const initialColor = rollHorseCoatColor();
@@ -531,6 +545,7 @@ export function useTrainingProgress() {
     rerollHorseCoatColor,
     retireCurrentHorse,
     resetProgressForDemo,
+    addSampleHallOfFameForDemo,
     toggleBookmarkPhrase,
     todayString: effectiveTodayString,
     debugDayOfWeek,

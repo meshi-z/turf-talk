@@ -64,6 +64,8 @@ interface HomeScreenProps {
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
   onOpenDebugQuestions?: () => void;
   onOpenPhraseBook?: () => void;
+  onOpenHallOfFame?: () => void;
+  onAddSampleHallOfFame?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -97,6 +99,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onSetDebugRaceCompleted,
   onOpenDebugQuestions,
   onOpenPhraseBook,
+  onOpenHallOfFame,
+  onAddSampleHallOfFame,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -827,6 +831,35 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </button>
       )}
 
+      {/* 殿堂入りギャラリーへの導線カード */}
+      {onOpenHallOfFame && (
+        <button
+          type="button"
+          onClick={onOpenHallOfFame}
+          className="w-full bg-linear-to-r from-amber-900 via-amber-950 to-zinc-900 hover:from-amber-800 hover:via-amber-900 hover:to-zinc-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-amber-700/50 flex items-center justify-between gap-3 cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Trophy className="w-5 h-5 text-amber-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-sm text-white">
+                  殿堂入り愛馬ギャラリー
+                </h4>
+                <span className="text-[10px] font-black bg-amber-500/80 text-zinc-950 px-2 py-0.5 rounded-full border border-amber-300/40">
+                  {progress.hallOfFame?.length ?? 0} 頭 殿堂入り
+                </span>
+              </div>
+              <p className="text-xs text-amber-100/80 mt-0.5">
+                引退した歴代名馬の栄誉・二つ名・戦績アーカイブ
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-amber-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      )}
+
       {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
       {isDevOrLocalhost() && (
         <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
@@ -1069,6 +1102,19 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             </button>
           </div>
         )}
+
+        {onAddSampleHallOfFame && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onAddSampleHallOfFame}
+                className="w-full py-1.5 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-amber-900 border border-amber-600/40 shadow-2xs hover:border-amber-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🏛️</span>
+                <span>殿堂入りサンプル愛馬を追加（デバッグ用）</span>
+              </button>
+            </div>
+          )}
 
         {/* デモ用データリセットボタン */}
         <div className="text-center pt-1">
