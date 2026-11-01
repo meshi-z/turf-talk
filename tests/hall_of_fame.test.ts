@@ -110,19 +110,65 @@ describe('Hall of Fame statistics & logic (hallOfFame.ts)', () => {
   });
 
   describe('generateHallOfFameShareText & Twitter URL', () => {
-    it('contains all essential horse attributes, stats, and hashtags', () => {
+    it('contains all essential horse attributes, stats, hashtags, and is within 120 chars', () => {
       const horse = sampleHorses[0];
       const text = generateHallOfFameShareText(horse);
 
       assert.ok(text.includes('第1世代「ターフスター」'));
-      assert.ok(text.includes('（鹿毛）'));
       assert.ok(text.includes('【不敗の世界覇者】'));
-      assert.ok(text.includes('3歳牡馬クラシック路線'));
       assert.ok(text.includes('4戦4勝'));
-      assert.ok(text.includes('12問マスター'));
+      assert.ok(text.includes('12問'));
       assert.ok(text.includes('#TurfTalk'));
-      assert.ok(text.includes('#HallOfFame'));
       assert.ok(text.includes('#競馬英語'));
+      assert.ok(text.includes('https://meshi-z.github.io/turf-talk/'));
+      assert.ok(text.length <= 120, `Text length must be <= 120, but was ${text.length}`);
+    });
+
+    it('stays strictly within 120 chars even with max-length Japanese name and longest epithet', () => {
+      const maxJaHorse: HallOfFameHorse = {
+        id: 'max-ja',
+        generation: 99,
+        name: 'クリスタルクラウン', // 最大9文字
+        color: '芦毛',
+        routeId: 'stayer',
+        routeName: '古馬長距離（ステイヤー）路線',
+        retiredDate: '2026-12-31',
+        wins: 4,
+        totalRaces: 4,
+        titles: ['菊花賞 制覇', '天皇賞（春） 制覇'],
+        learnedCount: 120,
+        titleName: '無尽蔵のワールドステイヤー', // 最長12文字二つ名
+        raceHistory: [],
+      };
+
+      const text = generateHallOfFameShareText(maxJaHorse);
+      assert.ok(text.length <= 120, `Max JA name length must be <= 120, but was ${text.length}`);
+      assert.ok(text.includes('第99世代「クリスタルクラウン」'));
+      assert.ok(text.includes('#TurfTalk #競馬英語'));
+    });
+
+    it('guarantees 120 chars limit even with extreme max-length English name (18 chars)', () => {
+      const maxEnHorse: HallOfFameHorse = {
+        id: 'max-en',
+        generation: 99,
+        name: 'CRYSTAL CROWN WING', // 英字最大18文字
+        color: '白毛',
+        routeId: 'stayer',
+        routeName: '古馬長距離（ステイヤー）路線',
+        retiredDate: '2026-12-31',
+        wins: 4,
+        totalRaces: 4,
+        titles: ['ゴールドカップ 制覇'],
+        learnedCount: 120,
+        titleName: '無尽蔵のワールドステイヤー', // 最長12文字二つ名
+        raceHistory: [],
+      };
+
+      const text = generateHallOfFameShareText(maxEnHorse);
+      assert.ok(text.length <= 120, `Max EN name length must be <= 120, but was ${text.length}`);
+      assert.ok(text.includes('CRYSTAL CROWN WING'));
+      assert.ok(text.includes('#TurfTalk #競馬英語'));
+      assert.ok(text.includes('https://meshi-z.github.io/turf-talk/'));
     });
 
     it('generates valid encoded Twitter Web Intent URL', () => {
