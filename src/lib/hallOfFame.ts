@@ -147,19 +147,37 @@ export function sortHallOfFame(
  * SNS（X等）シェア用テキストの生成
  */
 export function generateHallOfFameShareText(horse: HallOfFameHorse): string {
-  const titlesText =
-    horse.titles.length > 0 ? ` (${horse.titles.slice(0, 2).join('・')})` : '';
+  const line1 = '🏇 TurfTalk 殿堂入り';
+  const line2 = `第${horse.generation}世代「${horse.name}」【${horse.titleName}】`;
+  const line3 = `戦績: ${horse.totalRaces}戦${horse.wins}勝 / 習得: ${horse.learnedCount}問`;
+  const line4 = '#TurfTalk #競馬英語';
+  const line5 = 'https://meshi-z.github.io/turf-talk/';
 
-  return `🏇 TurfTalk 殿堂入り愛馬カード 🏛️
-第${horse.generation}世代「${horse.name}」（${horse.color}）
-二つ名: 【${horse.titleName}】
-路線: ${horse.routeName}
-通算戦績: ${horse.totalRaces}戦${horse.wins}勝${titlesText}
-習得フレーズ: ${horse.learnedCount}問マスター！
+  let text = `${line1}\n${line2}\n${line3}\n${line4}\n${line5}`;
 
-競馬英語マイクロラーニング TurfTalk で愛馬と英語を学ぼう！
-#TurfTalk #競馬英語 #HallOfFame
-https://meshi-z.github.io/turf-talk/`;
+  if (text.length <= 120) {
+    return text;
+  }
+
+  // 120文字を超える極端に長い馬名・二つ名の場合の調整（スペース詰め）
+  const compactLine3 = `戦績:${horse.totalRaces}戦${horse.wins}勝/習得:${horse.learnedCount}問`;
+  text = `${line1}\n${line2}\n${compactLine3}\n${line4}\n${line5}`;
+  if (text.length <= 120) {
+    return text;
+  }
+
+  // さらに長い場合は二つ名を調整して確実に120文字以内に収める
+  const excess = text.length - 120;
+  const maxTitleLen = Math.max(4, horse.titleName.length - excess - 1);
+  const truncatedTitle =
+    horse.titleName.length > maxTitleLen
+      ? `${horse.titleName.slice(0, maxTitleLen)}…`
+      : horse.titleName;
+
+  const adjustedLine2 = `第${horse.generation}世代「${horse.name}」【${truncatedTitle}】`;
+  const finalText = `${line1}\n${adjustedLine2}\n${compactLine3}\n${line4}\n${line5}`;
+
+  return finalText.length <= 120 ? finalText : finalText.slice(0, 120);
 }
 
 /**
