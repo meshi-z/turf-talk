@@ -14,6 +14,8 @@ import {
   Compass,
   Lock,
   Crown,
+  BookOpen,
+  ChevronRight,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -61,6 +63,7 @@ interface HomeScreenProps {
   debugRaceCompleted?: boolean | null;
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
   onOpenDebugQuestions?: () => void;
+  onOpenPhraseBook?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -93,6 +96,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   debugRaceCompleted = null,
   onSetDebugRaceCompleted,
   onOpenDebugQuestions,
+  onOpenPhraseBook,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -793,6 +797,35 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </p>
         </div>
       ) : null}
+
+      {/* フレーズ図鑑への導線カード */}
+      {onOpenPhraseBook && (
+        <button
+          type="button"
+          onClick={onOpenPhraseBook}
+          className="w-full bg-linear-to-r from-emerald-800 to-teal-900 hover:from-emerald-700 hover:to-teal-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-emerald-700/60 flex items-center justify-between gap-3 cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <BookOpen className="w-5 h-5 text-emerald-200" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-sm text-white">
+                  競馬英語フレーズ図鑑
+                </h4>
+                <span className="text-[10px] font-black bg-emerald-500/80 text-white px-2 py-0.5 rounded-full border border-emerald-400/40">
+                  {progress.learnedPhraseIds?.length ?? 0} / {INITIAL_PHRASES.length} 習得
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100/80 mt-0.5">
+                いつでも辞書代わりに検索・復習・発音確認（要復習マーク対応）
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-emerald-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      )}
 
       {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
       {isDevOrLocalhost() && (

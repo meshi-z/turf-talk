@@ -105,6 +105,7 @@ export interface UserProgress {
   hasCompletedWeeklyRace?: boolean; // 当該週の週末レースに出走済みかどうか
   careerHorse: CareerHorse; // 現在の担当競走馬キャリア情報
   hallOfFame?: HallOfFameHorse[]; // 引退・殿堂入りした愛馬アーカイブ
+  bookmarkedPhraseIds?: string[]; // お気に入り・要復習としてブックマークしたフレーズID
 }
 
 export interface QuizSessionState {
@@ -119,4 +120,3 @@ export interface QuizSessionState {
     isCorrect: boolean;
   }[];
 }
-
