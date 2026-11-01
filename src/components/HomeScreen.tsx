@@ -59,6 +59,7 @@ interface HomeScreenProps {
   onSetDebugCareerWeek?: (week: CareerWeek | null) => void;
   debugRaceCompleted?: boolean | null;
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
+  onOpenDebugQuestions?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -90,6 +91,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onSetDebugCareerWeek,
   debugRaceCompleted = null,
   onSetDebugRaceCompleted,
+  onOpenDebugQuestions,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -1018,6 +1020,20 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             </div>
           )}
         </div>
+
+        {/* 問題・解答一覧（デバッグ用）参照ボタン */}
+        {onOpenDebugQuestions && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onOpenDebugQuestions}
+              className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-emerald-950 border border-emerald-600/40 shadow-2xs hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>📖</span>
+              <span>問題・解答一覧を表示（全120問・校正用）</span>
+            </button>
+          </div>
+        )}
 
         {/* デモ用データリセットボタン */}
         <div className="text-center pt-1">
