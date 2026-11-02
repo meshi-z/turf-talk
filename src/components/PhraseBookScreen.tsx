@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { SpeechButton } from './SpeechButton';
 import { SpeechControls } from './SpeechControls';
+import { resolvePhrasePartner } from '../lib/phrasePartner';
+import { COAT_COLOR_THEMES } from '../lib/hallOfFame';
 
 interface PhraseBookScreenProps {
   progress: UserProgress;
@@ -348,6 +350,12 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
             const categoryMeta = CATEGORY_NAMES[item.category];
             const categoryLabel = isVocab ? categoryMeta.vocab : categoryMeta.phrase;
             const correctOption = item.options.find((o) => o.isCorrect);
+            const partnerHorse = resolvePhrasePartner(
+              item.id,
+              progress.phrasePartners,
+              isLearned,
+              progress.careerHorse
+            );
 
             return (
               <div
@@ -449,6 +457,45 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                       {item.explanation}
                     </p>
                   </div>
+
+                  {/* 初習得パートナー馬 */}
+                  {isLearned ? (
+                    partnerHorse ? (
+                      <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-900">
+                          <span className="text-sm">🐴</span>
+                          <span>初習得パートナー:</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-zinc-950 shadow-2xs">
+                            第{partnerHorse.generation}世代
+                          </span>
+                          <span className="font-extrabold text-zinc-900 text-xs">{partnerHorse.name}</span>
+                          <span
+                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+                              COAT_COLOR_THEMES[partnerHorse.color]?.borderClass ?? 'border-zinc-300'
+                            } ${
+                              COAT_COLOR_THEMES[partnerHorse.color]?.bgClass ?? 'bg-zinc-100'
+                            } ${
+                              COAT_COLOR_THEMES[partnerHorse.color]?.textClass ?? 'text-zinc-700'
+                            }`}
+                          >
+                            {partnerHorse.color}
+                          </span>
+                        </div>
+                      </div>
+                    ) : null
+                  ) : (
+                    <div className="bg-zinc-50 border border-dashed border-zinc-200/90 rounded-xl p-2 flex items-center justify-between text-[11px] text-zinc-600">
+                      <div className="flex items-center gap-1 font-medium text-zinc-600">
+                        <span>🐴</span>
+                        <span>パートナー:</span>
+                      </div>
+                      <span className="text-zinc-600 font-medium">
+                        第{progress.careerHorse.generation}世代「{progress.careerHorse.name}」と調教で習得しよう！
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             );

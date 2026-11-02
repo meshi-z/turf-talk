@@ -83,6 +83,13 @@ export interface HallOfFameHorse {
   raceHistory: CareerRaceRecord[];    // 出走戦績履歴
 }
 
+
+export interface PhrasePartnerHorse {
+  generation: number;                 // 初習得時の愛馬の世代 (1, 2, ...)
+  name: string;                       // 初習得時の愛馬名
+  color: HorseCoatColor;              // 初習得時の毛色
+}
+
 export type TrainingCourse = 'uphill' | 'woodchip';
 
 export interface UserProgress {
@@ -106,6 +113,7 @@ export interface UserProgress {
   careerHorse: CareerHorse; // 現在の担当競走馬キャリア情報
   hallOfFame?: HallOfFameHorse[]; // 引退・殿堂入りした愛馬アーカイブ
   bookmarkedPhraseIds?: string[]; // お気に入り・要復習としてブックマークしたフレーズID
+  phrasePartners?: Record<string, PhrasePartnerHorse>; // フレーズごとの初習得パートナー愛馬情報 (phraseId -> PhrasePartnerHorse)
 }
 
 export interface QuizSessionState {
