@@ -40,6 +40,7 @@ import {
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
+import { recordNewPhrasePartners } from '../lib/phrasePartner';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
@@ -64,6 +65,7 @@ const DEFAULT_PROGRESS: UserProgress = {
   careerHorse: createDefaultCareerHorse(),
   hallOfFame: [],
   bookmarkedPhraseIds: [],
+  phrasePartners: {},
 };
 
 // 曜日連動の調教日数シミュレーション用テーブル（月: 0日, 火: 1日, 水: 2日, 木: 3日, 金: 4日, 土: 5日, 日: 5日）
@@ -142,6 +144,7 @@ export function useTrainingProgress() {
           careerHorse: migratedHorse,
           hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
           bookmarkedPhraseIds: Array.isArray(parsed.bookmarkedPhraseIds) ? parsed.bookmarkedPhraseIds : [],
+          phrasePartners: parsed.phrasePartners && typeof parsed.phrasePartners === 'object' ? parsed.phrasePartners : {},
         };
       }
     } catch {
@@ -285,6 +288,12 @@ export function useTrainingProgress() {
         tier.baseWeight
       );
 
+      const nextPhrasePartners = recordNewPhrasePartners(
+        prev.phrasePartners,
+        correctPhraseIds,
+        prev.careerHorse
+      );
+
       return {
         ...prev,
         lastTrainingDate: today,
@@ -301,6 +310,7 @@ export function useTrainingProgress() {
         currentWeekMonday: todayMonday,
         hasCompletedWeeklyRace: isWeeklyRaceCompletedForWeek(prev.lastRaceWeekMonday, today),
         careerHorse: nextCareerHorse,
+        phrasePartners: nextPhrasePartners,
       };
     });
   };
@@ -529,6 +539,7 @@ export function useTrainingProgress() {
       todayPhraseIds: isCompletedOnEffectiveDate ? progress.todayPhraseIds : [],
       todayWoodchipPhraseIds: isCompletedOnEffectiveDate ? (progress.todayWoodchipPhraseIds ?? []) : [],
       bookmarkedPhraseIds: progress.bookmarkedPhraseIds ?? [],
+      phrasePartners: progress.phrasePartners ?? {},
       careerHorse: {
         ...progress.careerHorse,
         currentWeek: effectiveCareerWeek,
