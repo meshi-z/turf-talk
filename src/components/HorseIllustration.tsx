@@ -141,7 +141,9 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
           alt={alt ?? defaultAlt}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          className="relative z-10 w-full h-full object-contain"
+          className={`relative z-10 w-full h-full object-contain ${
+            bgType === 'hall_of_fame' ? 'scale-90 -translate-y-1' : ''
+          }`}
         />
       ) : (
         <canvas
@@ -151,8 +153,8 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
           role="img"
           aria-label={alt ?? defaultAlt}
           className={`relative z-10 w-full h-full object-contain transition-opacity duration-300 drop-shadow-[0_4px_6px_rgba(0,0,0,0.35)] ${
-            isHorseReady ? 'opacity-100' : 'opacity-0'
-          }`}
+            bgType === 'hall_of_fame' ? 'scale-90 -translate-y-1' : ''
+          } ${isHorseReady ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
 
