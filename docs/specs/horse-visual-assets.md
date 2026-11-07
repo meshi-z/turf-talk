@@ -118,9 +118,9 @@
 | # | シーン区分 | ファイル名 | 対応コンポーネント・条件 | 背景テーマ・演出内容 |
 | :-: | :--- | :--- | :--- | :--- |
 | **1** | **シーン① ホーム画面** | `bg_pasture.jpg` | `HorseIllustration` (`standing_left`) | **のどかな牧場**: 白い木製フェンス（ラチ）、広がる緑の放牧地、遠くに見える山並みと青空 |
-| **2-A** | **シーン② 坂路調教** | `bg_uphill_course.jpg` | `HorseSpriteAnimation` (`training_gallop`, `uphill`) | **坂路調教コース**: 緩やかに上る直線走路、両脇の白ラチ、奥へ続く緑の木々や盛り土 |
-| **2-B** | **シーン② ウッドチップ** | `bg_woodchip_course.jpg` | `HorseSpriteAnimation` (`training_gallop`, `woodchip`) | **ウッドチップ調教コース**: 赤褐色のウッドチップ敷き走路、内外の白ラチ、周回コース景観 |
+| **2-A** | **シーン② 坂路調教** | `bg_uphill_course.jpg` | `HorseSpriteAnimation` (`training_gallop`, `uphill`) | **坂路調教コース（横向き・右方向登坂）**: 右向きに走る馬に合わせて左から右へ緩やかに登るサイドビュー走路、水平方向の白ラチ、緑のトレセン林 |
+| **2-B** | **シーン② ウッドチップ** | `bg_woodchip_course.jpg` | `HorseSpriteAnimation` (`training_gallop`, `woodchip`) | **ウッドチップ調教コース（横向き・右方向疾走）**: 右向きに走る馬に合わせて左から右へ真横に伸びる赤褐色ウッドチップ走路、水平の白ラチと生垣 |
 | **3** | **シーン③＆⑤-B 厩舎** | `bg_stable.jpg` | `HorseIllustration` (`training_complete`, `race_cooldown`) | **厩舎（馬房）**: 木の温もりを感じる清潔な馬房、敷き藁、柔らかい光が差し込む空間 |
-| **4-A** | **シーン④ 週末レース（芝）** | `bg_turf_race.jpg` | `HorseSpriteAnimation` (`race_gallop`, `turf` / `jump`) | **芝（ターフ）本馬場**: 鮮やかな本馬場ターフ、白い内ラチ、ハロン棒と遠景のスタンド |
-| **4-B** | **シーン④ 週末レース（ダート）** | `bg_dirt_race.jpg` | `HorseSpriteAnimation` (`race_gallop`, `dirt`) | **ダート本馬場**: 茶褐色のダート本馬場コース、白いラチ、青空とのコントラスト |
+| **4-A** | **シーン④ 週末レース（芝）** | `bg_turf_race.jpg` | `HorseSpriteAnimation` (`race_gallop`, `turf` / `jump`) | **芝（ターフ）本馬場（横向き・右方向直線）**: 右向きに全力疾走する馬に合わせて左から右へ真横に伸びるゼブラカット芝コース、水平の内ラチ・200mハロン棒・遠景スタンド |
+| **4-B** | **シーン④ 週末レース（ダート）** | `bg_dirt_race.jpg` | `HorseSpriteAnimation` (`race_gallop`, `dirt`) | **ダート本馬場（横向き・右方向直線）**: 右向きに全力疾走する馬に合わせて左から右へ真横に伸びる砂ダートコース、水平の内ラチ・200mハロン棒・ゴール板・遠景スタンド |
 | **5-A** | **シーン⑤-A レース勝利** | `bg_winners_circle.jpg` | `HorseIllustration` (`race_victory`) | **ウィナーズサークル**: 栄光のウイナーズサークル、緑の芝生と花壇、優勝ボードとスタンド席 |

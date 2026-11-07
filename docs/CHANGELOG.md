@@ -10,7 +10,7 @@
 ### Added
 - **競走馬シーン別背景イラスト素材制作と全6シーンへの背景合成組み込み ([#88](https://github.com/meshi-z/turf-talk/issues/88)):**
   - **シーン別背景イラストアセット（全7枚・1376×768px）の新規制作 (`src/assets/backgrounds/`):**
-    - 牧場パドック（`bg_pasture.jpg`）、坂路調教コース（`bg_uphill_course.jpg`）、ウッドチップ調教コース（`bg_woodchip_course.jpg`）、厩舎・馬房（`bg_stable.jpg`）、芝本馬場（`bg_turf_race.jpg`）、ダート本馬場（`bg_dirt_race.jpg`）、ウィナーズサークル（`bg_winners_circle.jpg`）の7種を制作・配置。
+    - 牧場パドック（`bg_pasture.jpg`）、坂路調教コース（`bg_uphill_course.jpg`：左→右への緩やかな登坂サイドビュー）、ウッドチップ調教コース（`bg_woodchip_course.jpg`：左→右への水平サイドビュー）、厩舎・馬房（`bg_stable.jpg`）、芝本馬場（`bg_turf_race.jpg`：左→右への水平サイドビュー直線）、ダート本馬場（`bg_dirt_race.jpg`：左→右への水平サイドビュー直線）、ウィナーズサークル（`bg_winners_circle.jpg`）の7種を制作・配置。
   - **背景アセット解決・静止画立ち絵のCanvas背景透過ユーティリティ実装 (`src/lib/horseAssets.ts`):**
     - `HORSE_BACKGROUND_FILE_MAP`, `getBackgroundImageUrl`, `resolveStaticSceneBackground`, `resolveGallopSceneBackground` によるシーン・コース・馬場別の背景URL解決を実装。
     - 静止画立ち絵（1376×768px）の白背景を、外周4辺からのフラッドフィルおよび手綱・首間のピンポイント閉領域シード（`STATIC_CLOSED_REGION_SEEDS`）によって白毛（`#F7F9FC`）の馬体を保護しつつ綺麗に透過する `applyStaticSceneFloodFillTransparency` を実装。
