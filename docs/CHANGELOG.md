@@ -9,6 +9,45 @@
 
 ---
 
+## [v0.18.1] - 2026-11-07
+
+### Fixed
+- **スプライトアニメーション透過処理の不具合修正（調教時の鞍周辺の白残り＆レース時の白毛胴体透過） ([#87](https://github.com/meshi-z/turf-talk/issues/87)):**
+  - **白ゼッケン保護領域の適正化 (`src/lib/horseAssets.ts`, `src/components/HorseSpriteAnimation.tsx`):**
+    - 平日調教アニメにおける白ゼッケン保護判定（`isProtectedWhiteSaddleCloth`）を、背中ライン（`Y=100px`）および黒鞍より下の実際の白ゼッケン内部座標（`X: 228..276, Y: 105..150`）に厳密化。
+    - 全毛色の調教アニメで鞍の周囲および背中より上の外側背景（`Y: 80..100`）が完全に透過されるよう修正。
+  - **閉領域シードのフレーム別ピンポイント座標化による白毛（`white`）被毛保護 (`src/lib/horseAssets.ts`):**
+    - 従来の広範囲グリッドシード走査を廃止し、全6コマの「手綱・首の間の三角形空間（`TRAINING_REINS_SEEDS` / `RACE_REINS_SEEDS`）」および「交差する後肢間の閉空間（`CROSSED_HIND_LEGS_SEEDS`、Frame 2・3のみ）」の中心座標のみを指定する方式に刷新。
+    - 白毛（`#F7F9FC` / `#F2F5FA`）の首・胴体・脚の内部に誤って透過シードが打たれる現象を解消し、週末レースおよび平日調教で白毛の馬体が透けずにソリッドに描画されるよう修正。
+  - **単体テストの拡充 (`tests/horse_assets.test.ts`):**
+    - 白ゼッケン保護境界判定、6フレーム分の閉領域ピンポイントシード定義、および白毛被毛保護・鞍上背景透過・閉領域透過を検証する単体テストを追加（全117テストPASS）。
+
+---
+
+## [v0.18.0] - 2026-11-07
+
+### Added
+- **競走馬イラスト・アニメーション素材のWebサービス組み込み（全6シーン × 毛色連動） ([#84](https://github.com/meshi-z/turf-talk/issues/84)):**
+  - **毛色マッピング・アセット解決ユーティリティの実装 (`src/lib/horseAssets.ts`):**
+    - JRA全8毛色（鹿毛、栗毛、黒鹿毛、芦毛、青鹿毛、青毛、栃栗毛、白毛）と英字キーのマッピングを定義。
+    - `import.meta.glob` によるVite静的アセット解決（GitHub Pages相対パス配信完全対応）。
+  - **競走馬スプライトアニメーションコンポーネントの実装 (`src/components/HorseSpriteAnimation.tsx`):**
+    - 6コマ（500×360px、3列×2行）の滑らかな連続再生（約11.7 FPS）。
+    - オフスクリーンCanvasによる事前背景透過処理（外周フラッドフィル＋手綱間・交差脚間の透過、白ゼッケン保護）。
+    - コース種別（坂路・ウッドチップ・芝ターフ）に応じた背景演出とスピードライン。
+  - **静止画立ち絵コンポーネントの実装 (`src/components/HorseIllustration.tsx`):**
+    - アスペクト比 1376:768 に準拠したレイアウトシフト（CLS）防止、角丸・枠線スタイリング共通コンポーネント。
+  - **全6シーンのWebサービス各画面組み込み:**
+    - **ホーム画面 (`src/components/HomeScreen.tsx`)**: 愛馬ステータスカード内の初期絵文字（🏇）を公式立ち絵（① `{coat}_standing_left.jpg`）へリプレイス。「🎲 命名」時の毛色再抽選にも即時連動。
+    - **調教画面 (`src/components/QuizScreen.tsx`)**: 上部プログレスバー直下に平日調教疾走アニメーション（② `{coat}_training_gallop.jpg`）を組み込み、坂路/ウッドチップ背景と調和。
+    - **調教結果画面 (`src/components/ResultScreen.tsx`)**: 調教完成立ち絵（③ `{coat}_training_complete.jpg`）を組み込み、「調教済」スタンプ演出と連動。
+    - **週末レース画面 (`src/components/RaceScreen.tsx`)**: 実況ステータスカード直下に週末レース全力疾走アニメーション（④ `{coat}_race_gallop.jpg`）を組み込み、首振り（ヘッドボブ）モーションを表示。
+    - **レース結果画面 (`src/components/RaceResultScreen.tsx`)**: 勝敗判定に応じ、1着勝利時（⑤-A `{coat}_race_victory.jpg`）と2着以下惜敗時（⑤-B `{coat}_race_cooldown.jpg`）を動的分岐表示。
+  - **テスト拡充 (`tests/horse_assets.test.ts`):**
+    - 全8毛色キーマッピング、全6シーンURL解決、全48アセットファイルの実在検証テストを追加（全69テストPASS）。
+
+---
+
 ## [v0.17.0] - 2026-11-02
 
 ### Added

@@ -262,6 +262,8 @@ export function App() {
             <QuizScreen
               questions={sessionQuestions}
               currentIndex={currentQuestionIndex}
+              horseColor={progress.careerHorse.color}
+              course={activeCourse}
               onAnswer={handleAnswerQuestion}
               onNext={handleNextQuestion}
               onCancel={handleCancelQuiz}
@@ -282,6 +284,7 @@ export function App() {
             <RaceScreen
               questions={raceQuestions}
               currentIndex={raceCurrentIndex}
+              horseColor={progress.careerHorse.color}
               initialHints={conditionTier.hintCount}
               raceInfo={currentWeekRace}
               onAnswer={handleAnswerRaceQuestion}

@@ -19,13 +19,15 @@ import {
   type RacePhase,
 } from '../lib/raceMode';
 import { eliminateOneWrongOption } from '../lib/conditionBonus';
-import type { CareerRouteRace } from '../types';
+import type { CareerRouteRace, HorseCoatColor } from '../types';
+import { HorseSpriteAnimation } from './HorseSpriteAnimation';
 import { SpeechButton } from './SpeechButton';
 import { SpeechControls } from './SpeechControls';
 
 interface RaceScreenProps {
   questions: PhraseItem[];
   currentIndex: number;
+  horseColor?: HorseCoatColor;
   initialHints?: number;
   raceInfo?: CareerRouteRace;
   onAnswer: (optionId: string, isCorrect: boolean) => void;
@@ -37,6 +39,7 @@ interface RaceScreenProps {
 export const RaceScreen: React.FC<RaceScreenProps> = ({
   questions,
   currentIndex,
+  horseColor,
   initialHints = 0,
   raceInfo,
   onAnswer,
@@ -159,6 +162,16 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
           {currentPhase.commentary}
         </p>
       </div>
+
+      {/* 週末レース全力疾走アニメーション（首振りモーション付き・濃紺ゼッケン1番） */}
+      {horseColor && (
+        <div className="mb-3">
+          <HorseSpriteAnimation
+            color={horseColor}
+            scene="race_gallop"
+          />
+        </div>
+      )}
 
       {/* 英文問題カード（基礎単語または実戦フレーズ） */}
       <div className="bg-white border-2 border-amber-600/30 rounded-2xl p-4 shadow-2xs mb-3">
