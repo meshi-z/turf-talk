@@ -417,7 +417,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         <div className="bg-[#FDF6E9] border border-[#D4A359] text-amber-950 rounded-xl p-3 shadow-xs flex items-center gap-2.5 text-xs">
           <span className="text-lg shrink-0">🥕</span>
           <div className="flex-1 leading-snug">
-            <strong className="block font-bold text-amber-950">ストリーク救済発動</strong>
+            <strong className="block font-bold text-amber-950">連続調教救済発動</strong>
             <span className="text-amber-900 text-[11px] font-racing-num">
               愛馬がにんじんを食べて調教記録を維持しました（連続{progress.streakDays}日継続中）。
             </span>

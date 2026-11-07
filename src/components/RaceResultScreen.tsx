@@ -192,7 +192,7 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
               愛馬の余力を温存してゴール。にんじんを獲得しました（所持数: {progress.carrotCount}個）
             </p>
             <p className="text-[10px] text-amber-100/90 mt-0.5">
-              平日に受講できない日があっても、自動でストリークを救済維持できます。
+              平日に調教できない日があっても、自動で連続調教記録を救済維持できます。
             </p>
           </div>
         </div>
