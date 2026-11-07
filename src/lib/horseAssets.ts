@@ -17,7 +17,7 @@ export type StaticHorseSceneType = Extract<
 >;
 
 /**
- * 背景イラスト種別（全7バリエーション）
+ * 背景イラスト種別（全8バリエーション）
  */
 export type HorseBackgroundType =
   | 'pasture'          // ① ホーム画面：のどかな牧場
@@ -26,7 +26,8 @@ export type HorseBackgroundType =
   | 'stable'           // ③ 調教完了 ＆ ⑤-B レース惜敗：厩舎（馬房）
   | 'turf_race'        // ④-A 週末レース：芝本馬場コース
   | 'dirt_race'        // ④-B 週末レース：ダート本馬場コース
-  | 'winners_circle';  // ⑤-A レース勝利：ウィナーズサークル
+  | 'winners_circle'   // ⑤-A レース勝利：ウィナーズサークル
+  | 'hall_of_fame';    // ⑥ 殿堂入りギャラリー：クラブハウス記念肖像フレーム
 
 export const HORSE_BACKGROUND_FILE_MAP: Record<HorseBackgroundType, string> = {
   pasture: 'bg_pasture.jpg',
@@ -36,6 +37,7 @@ export const HORSE_BACKGROUND_FILE_MAP: Record<HorseBackgroundType, string> = {
   turf_race: 'bg_turf_race.jpg',
   dirt_race: 'bg_dirt_race.jpg',
   winners_circle: 'bg_winners_circle.jpg',
+  hall_of_fame: 'bg_hall_of_fame.jpg',
 };
 
 /**

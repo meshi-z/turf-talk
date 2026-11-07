@@ -119,7 +119,7 @@ test('horse assets: verify all 48 asset files (8 coats * 6 scenes) exist on disk
   assert.strictEqual(verifiedCount, 48, 'Exactly 48 horse visual asset files must be verified');
 });
 
-test('background assets: verify all 7 scene background files exist and resolve correctly', () => {
+test('background assets: verify all 8 scene background files exist and resolve correctly', () => {
   const expectedBackgrounds: HorseBackgroundType[] = [
     'pasture',
     'uphill_course',
@@ -128,9 +128,10 @@ test('background assets: verify all 7 scene background files exist and resolve c
     'turf_race',
     'dirt_race',
     'winners_circle',
+    'hall_of_fame',
   ];
 
-  assert.strictEqual(Object.keys(HORSE_BACKGROUND_FILE_MAP).length, 7);
+  assert.strictEqual(Object.keys(HORSE_BACKGROUND_FILE_MAP).length, 8);
 
   const bgDir = path.resolve(process.cwd(), 'src/assets/backgrounds');
   assert.ok(fs.existsSync(bgDir), 'src/assets/backgrounds directory must exist');

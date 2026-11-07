@@ -8,11 +8,13 @@ import {
   STATIC_ILLUSTRATION_HEIGHT,
   applyStaticSceneFloodFillTransparency,
   type StaticHorseSceneType,
+  type HorseBackgroundType,
 } from '../lib/horseAssets';
 
 interface HorseIllustrationProps {
   color: HorseCoatColor;
   scene: StaticHorseSceneType;
+  backgroundOverride?: HorseBackgroundType;
   alt?: string;
   className?: string;
   priority?: boolean;
@@ -28,6 +30,7 @@ const SCENE_LABEL_MAP: Record<StaticHorseSceneType, string> = {
 export const HorseIllustration: FC<HorseIllustrationProps> = ({
   color,
   scene,
+  backgroundOverride,
   alt,
   className = '',
   priority = false,
@@ -37,7 +40,7 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
   const [hasCanvasError, setHasCanvasError] = useState(false);
 
   const imageUrl = getHorseImageUrl(color, scene);
-  const bgType = resolveStaticSceneBackground(scene);
+  const bgType = backgroundOverride ?? resolveStaticSceneBackground(scene);
   const bgImageUrl = getBackgroundImageUrl(bgType);
   const defaultAlt = `${color}の愛馬（${SCENE_LABEL_MAP[scene]}）`;
 
