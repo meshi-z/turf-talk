@@ -169,6 +169,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
           <HorseSpriteAnimation
             color={horseColor}
             scene="race_gallop"
+            raceSurface={raceInfo?.surface}
           />
         </div>
       )}
