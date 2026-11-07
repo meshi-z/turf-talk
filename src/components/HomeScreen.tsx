@@ -16,6 +16,12 @@ import {
   Crown,
   BookOpen,
   ChevronRight,
+  Gauge,
+  Zap,
+  Flag,
+  Award,
+  SlidersHorizontal,
+  AlertTriangle,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -109,10 +115,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   const [isRouteSelectorOpen, setIsRouteSelectorOpen] = useState(false);
 
   const conditionLabel = {
-    heavy: { text: '太め残り ↘', color: 'text-purple-700 bg-purple-50 border-purple-200' },
-    flat: { text: '普通 ➡', color: 'text-zinc-600 bg-zinc-100 border-zinc-200' },
-    up: { text: '好調 ↗', color: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
-    peak: { text: '絶好調 ⤴', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+    heavy: { text: '太め残り ↘', color: 'text-purple-900 bg-purple-100 border-purple-300' },
+    flat: { text: '普通 ➡', color: 'text-stone-700 bg-stone-100 border-stone-300' },
+    up: { text: '好調 ↗', color: 'text-[#0D3322] bg-emerald-100 border-emerald-300' },
+    peak: { text: '絶好調 ⤴', color: 'text-amber-950 bg-[#E6C762] border-[#C59B27]' },
   }[progress.condition];
 
   const totalPhrases = INITIAL_PHRASES.length;
@@ -164,27 +170,25 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
-      {/* 愛馬ステータスカード */}
-      <div className="bg-linear-to-br from-emerald-800 to-emerald-950 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
-
-
+      {/* 愛馬ステータスカード（パドック掲示板・サドルレザーステッチ仕様） */}
+      <div className="bg-linear-to-br from-[#123F2B] via-[#0D3322] to-[#082015] text-[#FAF8F3] rounded-2xl p-4 shadow-md border border-[#C59B27]/55 racing-stitch-border relative overflow-hidden">
         {/* キャリア世代 & ステージバッジ */}
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] font-bold tracking-wider bg-emerald-700/80 text-emerald-100 border border-emerald-500/40 px-2 py-0.5 rounded-full">
+            <span className="saddle-cloth-badge text-[10px] tracking-wider bg-[#FAF8F3] text-[#0D3322] border border-[#C59B27] px-2 py-0.5 font-racing-num">
               第{careerHorse.generation}世代
             </span>
-            <span className="text-[11px] font-extrabold bg-amber-400/95 text-amber-950 px-2.5 py-0.5 rounded-full shadow-2xs">
+            <span className="text-[11px] font-extrabold bg-linear-to-r from-[#E6C762] to-[#C59B27] text-[#1A1405] px-2.5 py-0.5 rounded-sm shadow-2xs tracking-wide">
               {careerStageLabel}
             </span>
           </div>
-          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border shadow-xs shrink-0 ${conditionLabel.color}`}>
+          <span className={`text-xs font-bold px-2.5 py-0.5 rounded-sm border shadow-xs shrink-0 ${conditionLabel.color}`}>
             {conditionLabel.text}
           </span>
         </div>
 
         {/* 馬名 & 毛色・ランダム生成・手動編集 */}
-        <div className="mt-1">
+        <div className="mt-1.5">
           {!isProfileLocked && isEditingName ? (
             <form onSubmit={handleSubmitNameEdit} className="space-y-1.5">
               <div className="flex items-center gap-1.5">
@@ -198,12 +202,12 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                   maxLength={MAX_HORSE_NAME_LENGTH}
                   aria-label="愛馬名を入力"
                   placeholder="馬名を入力 (カタカナ9文字 / 英字18文字以内)"
-                  className="flex-1 min-w-0 bg-emerald-950/90 border border-emerald-400/60 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white placeholder:text-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="flex-1 min-w-0 bg-[#071D13] border border-[#C59B27]/70 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white placeholder:text-emerald-300/50 focus:outline-none focus:ring-2 focus:ring-[#E6C762]"
                   autoFocus
                 />
                 <button
                   type="submit"
-                  className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold p-1.5 rounded-lg cursor-pointer shrink-0"
+                  className="bg-[#E6C762] hover:bg-[#D4B44E] text-stone-950 font-bold p-1.5 rounded-lg cursor-pointer shrink-0"
                   title="馬名を保存"
                   aria-label="馬名を保存"
                 >
@@ -212,7 +216,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={handleCancelNameEdit}
-                  className="bg-emerald-900 hover:bg-emerald-800 text-emerald-200 p-1.5 rounded-lg border border-emerald-600 cursor-pointer shrink-0"
+                  className="bg-[#164631] hover:bg-[#1E593F] text-emerald-100 p-1.5 rounded-lg border border-[#C59B27]/40 cursor-pointer shrink-0"
                   title="キャンセル"
                   aria-label="編集をキャンセル"
                 >
@@ -220,16 +224,17 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                 </button>
               </div>
               {nameError && (
-                <p role="alert" className="text-[11px] text-amber-300 font-semibold">
-                  ⚠️ {nameError}
+                <p role="alert" className="text-[11px] text-[#E6C762] font-semibold flex items-center gap-1">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{nameError}</span>
                 </p>
               )}
             </form>
           ) : (
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-xl font-bold text-white flex items-baseline gap-1.5 flex-wrap">
-                <span>{careerHorse.name}</span>
-                <span className="text-xs font-normal text-emerald-200">
+              <h2 className="text-xl font-bold text-[#FAF8F3] font-racing-serif flex items-baseline gap-1.5 flex-wrap">
+                <span className="tracking-wide">{careerHorse.name}</span>
+                <span className="font-sans text-xs font-normal text-[#C8D8CE]">
                   （{routeInfo.sexAgeLabel} / {careerHorse.color}）
                 </span>
               </h2>
@@ -239,11 +244,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                     <button
                       type="button"
                       onClick={onRegenerateHorseName}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-700/80 hover:bg-emerald-600/80 active:scale-95 text-emerald-100 border border-emerald-500/40 px-2 py-1 rounded-lg transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#164631] hover:bg-[#1E593F] active:scale-95 text-[#FAF8F3] border border-[#C59B27]/50 px-2 py-1 rounded-md transition-all cursor-pointer"
                       title="馬名と毛色をランダム再抽選"
                       aria-label="馬名と毛色をランダム再抽選"
                     >
-                      <Dices className="w-3.5 h-3.5 text-amber-300" />
+                      <Dices className="w-3.5 h-3.5 text-[#E6C762]" />
                       <span>命名</span>
                     </button>
                   )}
@@ -251,7 +256,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                     <button
                       type="button"
                       onClick={handleOpenNameEdit}
-                      className="inline-flex items-center justify-center bg-emerald-800/80 hover:bg-emerald-700/80 active:scale-95 text-emerald-200 border border-emerald-600/50 p-1.5 rounded-lg transition-all cursor-pointer"
+                      className="inline-flex items-center justify-center bg-[#164631] hover:bg-[#1E593F] active:scale-95 text-[#C8D8CE] border border-[#C59B27]/40 p-1.5 rounded-md transition-all cursor-pointer"
                       title="馬名を手動編集"
                       aria-label="馬名を手動編集"
                     >
@@ -264,8 +269,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           )}
         </div>
 
-        {/* 愛馬公式立ち絵（左向き・無装具） */}
-        <div className="mt-3 overflow-hidden rounded-xl border border-emerald-600/40 shadow-inner bg-emerald-950/40">
+        {/* 愛馬公式立ち絵（左向き・牧場パドック背景合成） */}
+        <div className="mt-3 overflow-hidden rounded-xl border border-[#C59B27]/50 shadow-inner bg-[#071D13]">
           <HorseIllustration
             color={careerHorse.color}
             scene="standing_left"
@@ -276,18 +281,18 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
 
         {/* 馬体重 & 今週の目標レース */}
-        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-emerald-700/50 text-xs">
+        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[#C59B27]/30 text-xs">
           <div>
-            <span className="text-emerald-300 block text-[10px]">馬体重</span>
-            <span className="text-base font-bold text-white">{progress.horseWeight} kg</span>
+            <span className="text-[#B8CEBF] block text-[10px] uppercase tracking-wider">馬体重 / Weight</span>
+            <span className="text-base font-bold text-[#FAF8F3] font-racing-num">{progress.horseWeight} kg</span>
           </div>
           <div>
-            <span className="text-emerald-300 block text-[10px]">
+            <span className="text-[#B8CEBF] block text-[10px] uppercase tracking-wider font-racing-num">
               Week {careerHorse.currentWeek} 目標レース
             </span>
-            <span className="text-sm font-bold text-white block truncate" title={`${currentWeekRace.raceName} (${currentWeekRace.distanceText})`}>
+            <span className="text-sm font-bold text-[#FAF8F3] font-racing-serif block truncate" title={`${currentWeekRace.raceName} (${currentWeekRace.distanceText})`}>
               {currentWeekRace.raceName}
-              <span className="text-[11px] font-normal text-emerald-200 ml-1">
+              <span className="font-sans font-racing-num text-[11px] font-normal text-[#E6C762] ml-1">
                 ({currentWeekRace.distanceText})
               </span>
             </span>
@@ -295,40 +300,40 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
 
         {/* キャリア路線（8大路線）表示 & 変更パネル */}
-        <div className="mt-2.5 pt-2.5 border-t border-emerald-700/40 text-xs">
+        <div className="mt-2.5 pt-2.5 border-t border-[#C59B27]/25 text-xs">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <Compass className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-              <span className="text-[11px] text-emerald-200 shrink-0">歩む路線:</span>
-              <strong className="text-white text-[11px] truncate">{routeInfo.name}</strong>
+              <Compass className="w-3.5 h-3.5 text-[#E6C762] shrink-0" />
+              <span className="text-[11px] text-[#C8D8CE] shrink-0">歩む路線:</span>
+              <strong className="text-[#FAF8F3] text-[11px] truncate">{routeInfo.name}</strong>
             </div>
             {!isProfileLocked && onUpdateCareerRoute ? (
               <button
                 type="button"
                 onClick={() => setIsRouteSelectorOpen((prev) => !prev)}
                 aria-expanded={isRouteSelectorOpen}
-                className="text-[10px] font-bold bg-emerald-900/90 hover:bg-emerald-700 text-emerald-200 border border-emerald-600/60 px-2 py-0.5 rounded-md transition-colors cursor-pointer shrink-0"
+                className="text-[10px] font-bold bg-[#164631] hover:bg-[#1F5C41] text-[#E6C762] border border-[#C59B27]/50 px-2 py-0.5 rounded-sm transition-colors cursor-pointer shrink-0"
               >
                 {isRouteSelectorOpen ? '閉じる' : '路線変更'}
               </button>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-300/90 shrink-0">
-                <Lock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#B8CEBF] shrink-0">
+                <Lock className="w-3 h-3 text-[#C59B27]" />
                 <span>確定済</span>
               </span>
             )}
           </div>
 
           {!isProfileLocked && (
-            <p className="mt-1.5 text-[10px] text-amber-200/95 flex items-center gap-1">
-              <span>💡</span>
+            <p className="mt-1.5 text-[10px] text-[#E6C762] flex items-center gap-1">
+              <Sparkles className="w-3 h-3 shrink-0" />
               <span>調教を開始すると馬名・毛色・路線が確定します</span>
             </p>
           )}
 
           {!isProfileLocked && isRouteSelectorOpen && onUpdateCareerRoute && (
-            <div className="mt-2 p-2 bg-emerald-950/85 border border-emerald-600/50 rounded-xl space-y-1.5">
-              <p className="text-[10px] text-emerald-300 font-semibold">
+            <div className="mt-2 p-2.5 bg-[#071D13]/95 border border-[#C59B27]/50 rounded-xl space-y-1.5">
+              <p className="text-[10px] text-[#E6C762] font-semibold">
                 挑戦するキャリア路線を選択（全8路線）:
               </p>
               <div className="grid grid-cols-2 gap-1">
@@ -344,14 +349,14 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                       }}
                       className={`text-left px-2 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer border ${
                         isSelected
-                          ? 'bg-amber-400 text-amber-950 font-extrabold border-amber-300 shadow-2xs'
-                          : 'bg-emerald-900/60 text-emerald-100 hover:bg-emerald-800/80 border-emerald-700/60'
+                          ? 'bg-[#E6C762] text-stone-950 font-extrabold border-[#C59B27] shadow-2xs'
+                          : 'bg-[#123A28] text-[#FAF8F3] hover:bg-[#194B34] border-[#C59B27]/30'
                       }`}
                     >
                       <span className="block truncate font-bold">{route.shortName}</span>
                       <span
                         className={`block text-[9px] truncate ${
-                          isSelected ? 'text-amber-900' : 'text-emerald-300/90'
+                          isSelected ? 'text-stone-800' : 'text-[#B8CEBF]'
                         }`}
                       >
                         最終: {route.races[3].raceName}
@@ -365,36 +370,43 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
 
         {/* 週間調教仕上がり & レースボーナス状況 */}
-        <div className="mt-2.5 pt-2.5 border-t border-emerald-700/40 text-[11px] text-emerald-100 flex items-center justify-between">
-          <span className="flex items-center gap-1">
-            <span>🏋️ 調教消化:</span>
+        <div className="mt-2.5 pt-2.5 border-t border-[#C59B27]/25 text-[11px] text-[#D8E6DD] flex items-center justify-between font-racing-num">
+          <span className="flex items-center gap-1.5">
+            <Gauge className="w-3.5 h-3.5 text-[#E6C762] shrink-0" />
+            <span>調教消化:</span>
             <strong className="text-white">{progress.weekdayTrainingDays} / 7日</strong>
           </span>
           {progress.weekdayTrainingDays >= 5 && (
-            <span className="text-amber-300 font-extrabold flex items-center gap-0.5">
-              <span>⚡</span> 愛馬の余力2回付与
+            <span className="text-[#E6C762] font-extrabold flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 fill-[#E6C762] shrink-0" />
+              <span>愛馬の余力2回付与</span>
             </span>
           )}
           {progress.weekdayTrainingDays >= 3 && progress.weekdayTrainingDays < 5 && (
-            <span className="text-emerald-200 font-bold flex items-center gap-0.5">
-              <span>⚡</span> 愛馬の余力1回付与
+            <span className="text-emerald-200 font-bold flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+              <span>愛馬の余力1回付与</span>
             </span>
           )}
           {progress.weekdayTrainingDays > 0 && progress.weekdayTrainingDays < 3 && (
-            <span className="text-emerald-300/80">余力なし (要3日以上)</span>
+            <span className="text-[#B8CEBF]">余力なし (要3日以上)</span>
           )}
           {progress.weekdayTrainingDays === 0 && (
-            <span className="text-purple-300 font-bold">⚠️ 太め残り注意</span>
+            <span className="text-amber-300 font-bold flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3 shrink-0" />
+              <span>太め残り注意</span>
+            </span>
           )}
         </div>
 
         {/* にんじんストック状況 */}
-        <div className="mt-2 pt-2 border-t border-emerald-700/30 text-[11px] text-emerald-100 flex items-center justify-between">
-          <span className="flex items-center gap-1">
-            <span>🥕 にんじんストック:</span>
-            <strong className="text-amber-200 font-bold">{progress.carrotCount} / 3個</strong>
+        <div className="mt-2 pt-2 border-t border-[#C59B27]/20 text-[11px] text-[#D8E6DD] flex items-center justify-between font-racing-num">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
+            <span>にんじんストック (🥕):</span>
+            <strong className="text-[#E6C762] font-bold">{progress.carrotCount} / 3個</strong>
           </span>
-          <span className="text-[10px] text-emerald-300">
+          <span className="text-[10px] text-[#B8CEBF]">
             {progress.carrotCount > 0 ? '未受講日を自動救済' : 'レースで余力を温存して獲得'}
           </span>
         </div>
@@ -402,11 +414,11 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
       {/* にんじん救済発動バナー（直近で救済された場合） */}
       {progress.lastCarrotUsedDate && (
-        <div className="bg-orange-50 border border-orange-200 text-orange-950 rounded-2xl p-3 shadow-xs flex items-center gap-2.5 text-xs">
-          <span className="text-xl">🥕</span>
+        <div className="bg-[#FDF6E9] border border-[#D4A359] text-amber-950 rounded-xl p-3 shadow-xs flex items-center gap-2.5 text-xs">
+          <span className="text-lg shrink-0">🥕</span>
           <div className="flex-1 leading-snug">
-            <strong className="block font-bold text-orange-900">ストリーク救済発動！</strong>
-            <span className="text-orange-800 text-[11px]">
+            <strong className="block font-bold text-amber-950">ストリーク救済発動</strong>
+            <span className="text-amber-900 text-[11px] font-racing-num">
               愛馬がにんじんを食べて調教記録を維持しました（連続{progress.streakDays}日継続中）。
             </span>
           </div>
@@ -415,17 +427,17 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
       {/* Week 4 完走済み・引退式セレモニー案内バナー */}
       {isReadyForRetirement && onOpenRetirement && (
-        <div className="bg-linear-to-r from-amber-800 via-amber-900 to-zinc-900 text-white rounded-2xl p-4 shadow-md border border-amber-400/50 space-y-3">
+        <div className="bg-linear-to-r from-[#4A2511] via-[#3A1C0C] to-[#1F1209] text-[#FAF8F3] rounded-2xl p-4 shadow-md border border-[#C59B27]/70 racing-stitch-border space-y-3">
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-xl shrink-0">
-              🌸
+            <div className="w-10 h-10 rounded-lg bg-[#C59B27]/20 border border-[#C59B27]/60 flex items-center justify-center shrink-0">
+              <Crown className="w-5 h-5 text-[#E6C762]" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider bg-[#E6C762] text-stone-950 px-2 py-0.5 rounded-xs font-racing-num">
                 Week 4 完走 • 引退式準備完了
               </span>
-              <h3 className="text-sm font-black text-white mt-1">
-                第{careerHorse.generation}世代「{careerHorse.name}」が全4週を駆け抜けました！
+              <h3 className="text-sm font-black text-[#FAF8F3] font-racing-serif mt-1">
+                第{careerHorse.generation}世代「{careerHorse.name}」が全4週を駆け抜けました
               </h3>
               <p className="text-[11px] text-amber-100/90 mt-0.5 leading-relaxed">
                 引退式セレモニーで二つ名（称号）を授与し、第{careerHorse.generation + 1}世代の新馬へバトンを繋ぎましょう。
@@ -435,10 +447,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           <button
             type="button"
             onClick={onOpenRetirement}
-            className="w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
+            className="w-full bg-linear-to-r from-[#E6C762] to-[#C59B27] hover:from-[#F0D475] hover:to-[#D4AA32] active:scale-[0.98] transition-all text-stone-950 font-black py-3 px-4 rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm cursor-pointer"
           >
-            <Crown className="w-4 h-4 fill-amber-950 shrink-0" />
-            <span>🌸 引退式セレモニーへ進む</span>
+            <Crown className="w-4 h-4 fill-stone-950 shrink-0" />
+            <span>引退式セレモニーへ進む</span>
           </button>
         </div>
       )}
@@ -446,161 +458,159 @@ export const HomeScreen: FC<HomeScreenProps> = ({
       {/* 週末レース出走バナー（土日限定でメイン表示。調教1回以上実施で解放、未調教時はロック案内を表示） */}
       {isWeekendMode ? (
         isNewbornWeekendPending ? (
-          <div className="bg-linear-to-br from-emerald-800 via-teal-900 to-zinc-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden border border-emerald-400/30">
-            <div className="absolute -right-6 -bottom-6 text-emerald-500/10 text-9xl font-black select-none pointer-events-none">
-              🌱
-            </div>
-
+          <div className="bg-linear-to-br from-[#123F2B] via-[#0D3322] to-[#081F15] text-[#FAF8F3] rounded-2xl p-5 shadow-lg relative overflow-hidden border border-[#C59B27]/50 racing-stitch-border">
             <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold bg-emerald-400 text-emerald-950 px-2.5 py-0.5 rounded-full shadow-xs">
-                <Sparkles className="w-3 h-3 fill-emerald-950" /> 新馬入厩 • 来週末デビュー！
+              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold bg-[#E6C762] text-stone-950 px-2.5 py-0.5 rounded-xs shadow-xs">
+                <Sparkles className="w-3 h-3 fill-stone-950" /> 新馬入厩 • 来週末デビュー
               </span>
-              <span className="text-xs text-emerald-200 font-semibold">{currentWeekRace.distanceText}</span>
+              <span className="text-xs text-[#E6C762] font-semibold font-racing-num">{currentWeekRace.distanceText}</span>
             </div>
 
-            <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
-              <Trophy className="w-6 h-6 text-emerald-300 shrink-0" />
+            <h3 className="text-xl font-bold text-[#FAF8F3] font-racing-serif flex items-center gap-2 mt-1">
+              <Trophy className="w-5 h-5 text-[#E6C762] shrink-0" />
               <span>週末・{currentWeekRace.raceName}（来週末デビュー戦）</span>
             </h3>
 
-            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-emerald-950/70 text-emerald-200 border border-emerald-500/30 px-2.5 py-0.5 rounded-md">
-              <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-[#071D13]/80 text-[#E6C762] border border-[#C59B27]/40 px-2.5 py-0.5 rounded-sm">
+              <Flag className="w-3 h-3 shrink-0" />
+              <span>出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
             </div>
 
-            <p className="text-xs text-emerald-100/90 mt-2 leading-relaxed">
-              第{careerHorse.generation}世代の新馬「{careerHorse.name}」が入厩しました！来週末のWeek 1デビュー戦（{currentWeekRace.raceName}）に向けて、まずは坂路調教で基礎体力をつけましょう。
+            <p className="text-xs text-[#D8E6DD] mt-2 leading-relaxed">
+              第{careerHorse.generation}世代の新馬「{careerHorse.name}」が入厩しました。来週末のWeek 1デビュー戦（{currentWeekRace.raceName}）に向けて、まずは調教で基礎体力をつけましょう。
             </p>
 
             <button
               type="button"
               disabled
-              className="mt-4 w-full bg-emerald-950/70 text-emerald-300/80 border border-emerald-600/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+              className="mt-4 w-full bg-[#071D13]/80 text-[#B8CEBF] border border-[#C59B27]/35 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
             >
-              <span>🌿 新馬入厩期間（デビュー戦は来週末）</span>
+              <span>新馬入厩期間（デビュー戦は来週末）</span>
             </button>
           </div>
         ) : progress.hasCompletedWeeklyRace ? (
-          <div className="bg-linear-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden border border-amber-400/30">
-            <div className="absolute -right-6 -bottom-6 text-amber-500/20 text-9xl font-black select-none pointer-events-none">
-              🏆
-            </div>
-
+          <div className="bg-linear-to-br from-[#4A2C0A] via-[#3B2106] to-[#241303] text-[#FAF8F3] rounded-2xl p-5 shadow-lg relative overflow-hidden border border-[#C59B27]/60 racing-stitch-border">
             <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full shadow-xs">
-                <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • Week {careerHorse.currentWeek}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#E6C762] text-stone-950 px-2.5 py-0.5 rounded-xs shadow-xs font-racing-num">
+                <Sparkles className="w-3 h-3 fill-stone-950" /> RACE DAY • Week {careerHorse.currentWeek}
               </span>
-              <span className="text-xs text-amber-200 font-semibold">{currentWeekRace.distanceText}</span>
+              <span className="text-xs text-[#E6C762] font-semibold font-racing-num">{currentWeekRace.distanceText}</span>
             </div>
 
-            <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
-              <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
+            <h3 className="text-xl font-bold text-[#FAF8F3] font-racing-serif flex items-center gap-2 mt-1">
+              <Trophy className="w-5 h-5 text-[#E6C762] shrink-0" />
               <span>週末・{currentWeekRace.raceName}</span>
             </h3>
 
-            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
-              <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-black/35 text-[#E6C762] border border-[#C59B27]/40 px-2.5 py-0.5 rounded-sm">
+              <Flag className="w-3 h-3 shrink-0" />
+              <span>出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
             </div>
 
             <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
-              今週の週末レースは出走完了しました！土日も坂路調教や復習を続けて、来週末の次走に向けて愛馬を仕上げましょう。
+              今週の週末レースは出走完了しました。土日も坂路・ウッドチップ調教や復習を続けて、来週末の次走に向けて愛馬を仕上げましょう。
             </p>
 
             <button
               type="button"
               disabled
-              className="mt-4 w-full bg-amber-950/70 text-amber-200/90 border border-amber-500/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+              className="mt-4 w-full bg-black/40 text-amber-200/90 border border-[#C59B27]/40 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
             >
-              <span>出走完了 🏁（次回出走は来週末）</span>
+              <Flag className="w-4 h-4 shrink-0" />
+              <span>出走完了（次回出走は来週末）</span>
             </button>
           </div>
         ) : careerHorse.hasTrained ? (
-          <div className="bg-linear-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden border border-amber-400/30">
-            <div className="absolute -right-6 -bottom-6 text-amber-500/20 text-9xl font-black select-none pointer-events-none">
-              🏆
-            </div>
-
+          <div className="bg-linear-to-br from-[#52300B] via-[#3E2307] to-[#261403] text-[#FAF8F3] rounded-2xl p-5 shadow-lg relative overflow-hidden border border-[#C59B27]/70 racing-stitch-border">
             <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-400 text-amber-950 px-2.5 py-0.5 rounded-full shadow-xs">
-                <Sparkles className="w-3 h-3 fill-amber-950" /> RACE DAY • Week {careerHorse.currentWeek}
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#E6C762] text-stone-950 px-2.5 py-0.5 rounded-xs shadow-xs font-racing-num">
+                <Sparkles className="w-3 h-3 fill-stone-950" /> RACE DAY • Week {careerHorse.currentWeek}
               </span>
-              <span className="text-xs text-amber-200 font-semibold">{currentWeekRace.distanceText}</span>
+              <span className="text-xs text-[#E6C762] font-semibold font-racing-num">{currentWeekRace.distanceText}</span>
             </div>
 
-            <h3 className="text-xl font-extrabold text-white flex items-center gap-2 mt-1">
-              <Trophy className="w-6 h-6 text-amber-300 shrink-0" />
+            <h3 className="text-xl font-bold text-[#FAF8F3] font-racing-serif flex items-center gap-2 mt-1">
+              <Trophy className="w-5 h-5 text-[#E6C762] shrink-0" />
               <span>週末・{currentWeekRace.raceName}</span>
             </h3>
 
-            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-amber-950/60 text-amber-200 border border-amber-400/30 px-2.5 py-0.5 rounded-md">
-              <span>🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
+            <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-bold bg-black/35 text-[#E6C762] border border-[#C59B27]/40 px-2.5 py-0.5 rounded-sm">
+              <Flag className="w-3 h-3 shrink-0" />
+              <span>出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
             </div>
 
             <p className="text-xs text-amber-100/90 mt-2 leading-relaxed">
-              坂路調教で培った英語力を実戦で試す時が来ました！今週の目標レース（週末1回限定）を完走して次のステージへ進もう。
+              日々の調教で培った英語力を本馬場で試す時が来ました。今週の目標レース（週末1回限定）を完走して次のステージへ進みましょう。
             </p>
 
             <button
               onClick={onStartRace}
-              className="mt-4 w-full bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all text-amber-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
+              className="mt-4 w-full bg-linear-to-r from-[#E6C762] to-[#C59B27] hover:from-[#F2D675] hover:to-[#D4AA32] active:scale-[0.98] transition-all text-stone-950 font-black py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer font-racing-num"
             >
-              <Trophy className="w-5 h-5 fill-amber-950" />
+              <Trophy className="w-5 h-5 fill-stone-950" />
               <span>{currentWeekRace.raceName}に出走する（5問）</span>
             </button>
           </div>
         ) : (
-          <div className="bg-linear-to-br from-zinc-800 via-zinc-850 to-zinc-900 text-white rounded-2xl p-4 shadow-md border border-zinc-700/60 relative overflow-hidden">
+          <div className="bg-linear-to-br from-stone-800 via-stone-850 to-stone-900 text-[#FAF8F3] rounded-2xl p-4 shadow-md border border-stone-600/70 relative overflow-hidden">
             <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-zinc-700/90 text-zinc-200 px-2.5 py-0.5 rounded-full border border-zinc-600/50">
-                <Lock className="w-3 h-3 text-amber-300 shrink-0" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-stone-700/90 text-stone-200 px-2.5 py-0.5 rounded-xs border border-stone-500/50">
+                <Lock className="w-3 h-3 text-[#E6C762] shrink-0" />
                 <span>週末レース出走 • ロック中</span>
               </span>
-              <span className="text-xs text-amber-300 font-semibold">{currentWeekRace.distanceText}</span>
+              <span className="text-xs text-[#E6C762] font-semibold font-racing-num">{currentWeekRace.distanceText}</span>
             </div>
 
-            <h3 className="text-base font-extrabold text-white flex items-center gap-1.5 mt-1">
-              <Trophy className="w-4 h-4 text-zinc-400 shrink-0" />
+            <h3 className="text-base font-bold text-[#FAF8F3] font-racing-serif flex items-center gap-1.5 mt-1">
+              <Trophy className="w-4 h-4 text-stone-400 shrink-0" />
               <span>週末・{currentWeekRace.raceName}（Week {careerHorse.currentWeek}）</span>
             </h3>
 
-            <p className="text-xs text-zinc-300 mt-2 leading-relaxed">
-              まずは下記の<strong>「坂路調教」を1回以上実施</strong>してください。調教を完了するとゲートが開き、週末レースに出走できるようになります。
+            <p className="text-xs text-stone-300 mt-2 leading-relaxed">
+              まずは下記の<strong>「坂路調教」または「ウッドチップ調教」を1回以上実施</strong>してください。調教を完了すると発走ゲートが開きます。
             </p>
           </div>
         )
       ) : null}
 
-      {/* 本日の調教ステータス */}
-      <div className="bg-white rounded-2xl border border-emerald-100 p-5 shadow-xs">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🌿</span>
-            <h3 className="font-bold text-emerald-950 text-base">
-              {isWeekendMode ? '週末の坂路調教メニュー' : '本日の調教メニュー'}
+      {/* 本日の調教ステータス（レーシングプログラム風カード） */}
+      <div className="bg-[#FFFDF9] rounded-2xl border border-[#D4C9B5] p-5 shadow-xs relative overflow-hidden">
+        {/* 上部レーシングゴールド装飾ライン */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-[#0D3322] via-[#C59B27] to-[#0D3322]" />
+
+        <div className="flex items-center justify-between mb-3 pt-0.5">
+          <div>
+            <span className="block text-[9px] font-extrabold uppercase tracking-widest text-[#8A6D1B]">
+              Daily Training Program
+            </span>
+            <h3 className="font-bold text-[#0D3322] font-racing-serif text-base">
+              {isWeekendMode ? '週末の調教メニュー' : '本日の調教メニュー'}
             </h3>
           </div>
-          <span className="text-xs text-zinc-500 font-medium flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5" /> 1日3問 (約1分)
+          <span className="text-xs text-stone-600 font-medium flex items-center gap-1 font-racing-num bg-[#F3EFE6] px-2 py-1 rounded-md border border-[#E2DAC9]">
+            <Calendar className="w-3.5 h-3.5 text-[#0D3322]" /> 1日3問 (約1分)
           </span>
         </div>
 
         {/* フレーズ習得プログレスバー */}
-        <div className="mb-4 bg-emerald-50/60 rounded-xl p-3 border border-emerald-100">
+        <div className="mb-4 bg-[#F5F1E6] rounded-xl p-3 border border-[#DFD6C5]">
           <div className="flex justify-between items-center text-xs mb-1.5">
-            <span className="font-semibold text-emerald-950 flex items-center gap-1">
-              <span>📖</span> 習得フレーズ
+            <span className="font-semibold text-[#0D3322] flex items-center gap-1.5">
+              <BookOpen className="w-3.5 h-3.5 text-[#0D3322]" />
+              <span>習得フレーズ・用語</span>
             </span>
-            <span className="font-bold text-emerald-800">
+            <span className="font-bold text-[#0D3322] font-racing-num">
               {learnedCount} / {totalPhrases} 問
               {progress.lapCount > 1 && (
-                <span className="ml-1 text-[11px] text-amber-700 font-semibold">
+                <span className="ml-1 text-[11px] text-[#8A6D1B] font-semibold">
                   ({progress.lapCount}周目)
                 </span>
               )}
             </span>
           </div>
-          <div className="w-full bg-emerald-200/50 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-[#DED6C6] rounded-full h-2 overflow-hidden">
             <div
-              className="bg-emerald-600 h-2 rounded-full transition-all duration-500"
+              className="bg-linear-to-r from-[#0D3322] to-[#1D6344] h-2 rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -615,16 +625,16 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
           if (isAllDone) {
             return (
-              <div className="mb-4 bg-emerald-50/90 border border-emerald-300 rounded-xl p-3.5 flex items-center gap-3 shadow-xs">
-                <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <Trophy className="w-5 h-5 text-amber-100" />
+              <div className="mb-4 bg-[#EEF5F0] border border-[#9EC5AC] rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+                <div className="w-10 h-10 rounded-lg bg-[#0D3322] text-[#E6C762] border border-[#C59B27] flex items-center justify-center shrink-0 shadow-xs">
+                  <Trophy className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
-                    <span>本日全コース制覇！🏆</span>
+                  <p className="font-bold text-[#0D3322] font-racing-serif text-sm">
+                    本日全コース制覇
                   </p>
-                  <p className="text-xs text-emerald-700 mt-0.5">
-                    坂路・ウッドチップの両調教を完全走破！さらに追加トレーニングで語彙を伸ばせます。
+                  <p className="text-xs text-stone-700 mt-0.5">
+                    坂路・ウッドチップの両調教を完全走破。追加トレーニングでさらに語彙を伸ばせます。
                   </p>
                 </div>
               </div>
@@ -633,16 +643,16 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
           if (progress.completedToday) {
             return (
-              <div className="mb-4 bg-emerald-50/80 border border-emerald-200 rounded-xl p-3.5 flex items-center gap-3 shadow-xs">
-                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <CheckCircle2 className="w-6 h-6" />
+              <div className="mb-4 bg-[#EEF5F0] border border-[#A9CDB6] rounded-xl p-3.5 flex items-center gap-3 shadow-2xs">
+                <div className="w-10 h-10 rounded-lg bg-[#0D3322] text-[#FAF8F3] flex items-center justify-center shrink-0 shadow-xs">
+                  <CheckCircle2 className="w-5 h-5 text-[#E6C762]" />
                 </div>
                 <div>
-                  <p className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
-                    <span>本日の調教ノルマ達成！💮</span>
+                  <p className="font-bold text-[#0D3322] font-racing-serif text-sm">
+                    本日の調教ノルマ達成
                   </p>
-                  <p className="text-xs text-emerald-700 mt-0.5">
-                    連続調教ストリークを維持しました！もう一方のコースも受講してさらに経験を積めます。
+                  <p className="text-xs text-stone-700 mt-0.5">
+                    連続調教ストリークを維持しました。もう一方のコースも受講してさらに経験を積めます。
                   </p>
                 </div>
               </div>
@@ -650,48 +660,51 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           }
 
           return (
-            <div className="mb-4 bg-amber-50/70 border border-amber-200 rounded-xl p-3.5">
-              <p className="font-bold text-amber-950 text-sm flex items-center gap-1.5">
+            <div className="mb-4 bg-[#FDF8EC] border border-[#E2C98A] rounded-xl p-3.5">
+              <p className="font-bold text-stone-900 text-sm flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-[#9A7418] shrink-0" />
                 <span>【{isWeekendMode ? '週末調整' : '本日の調教'}】 未完了</span>
               </p>
-              <p className="text-xs text-amber-800 mt-1">
+              <p className="text-xs text-stone-700 mt-1 leading-relaxed">
                 {isNewbornWeekendPending
-                  ? '💡 新馬入厩！まずはどちらかの調教で基礎体力をつけ、来週末のデビュー戦に備えましょう。'
+                  ? '新馬入厩期間です。まずはどちらかの調教で基礎体力をつけ、来週末のデビュー戦に備えましょう。'
                   : isWeekendMode && !careerHorse.hasTrained
-                  ? '💡 まずは調教で愛馬を仕上げよう！どちらか1コース完了で週末レースに出走できます。'
-                  : '🌿坂路 または 🪵ウッドチップ のどちらか1つ完了で本日の調教達成となります！'}
+                  ? 'まずは調教で愛馬を仕上げましょう。どちらか1コース完了で週末レースに出走できます。'
+                  : '第1コース（坂路）または 第2コース（ウッドチップ）のどちらか1つ完了で本日の調教達成となります。'}
               </p>
             </div>
           );
         })()}
 
-        {/* 2つの調教コース選択カード */}
+        {/* 2つの調教コース選択カード（ゼッケン番号バッジ付き） */}
         <div className="space-y-3">
-          {/* コース 1: 🌿 坂路調教（実戦フレーズ） */}
+          {/* コース 1: 坂路調教（実戦フレーズ） */}
           {(() => {
             const isDone = (progress.completedCoursesToday ?? []).includes('uphill') || (progress.completedToday && !(progress.completedCoursesToday ?? []).includes('woodchip'));
             return (
-              <div className="bg-emerald-50/40 border border-emerald-200/90 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-emerald-300">
+              <div className="bg-[#F6F9F6] border border-[#BDCEB9] rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-[#0D3322]/50">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-base">🌿</span>
-                      <h4 className="font-bold text-emerald-950 text-sm">
-                        坂路調教 <span className="text-xs font-normal text-emerald-700">（実戦フレーズ / 3問）</span>
+                  <div className="flex items-start gap-2.5">
+                    <span className="saddle-cloth-badge w-7 h-7 bg-[#0D3322] text-[#FAF8F3] border border-[#C59B27] text-xs shrink-0 mt-0.5">
+                      1
+                    </span>
+                    <div>
+                      <h4 className="font-bold text-[#0D3322] font-racing-serif text-sm">
+                        坂路調教 <span className="font-sans text-xs font-normal text-stone-600">（実戦フレーズ / 3問）</span>
                       </h4>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        勝利騎手インタビューや陣営コメント頻出の実戦英語表現
+                      </p>
                     </div>
-                    <p className="text-xs text-emerald-800/90 mt-1">
-                      勝利騎手インタビューや陣営コメント頻出の実戦英語表現
-                    </p>
                   </div>
                   <span
-                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-xs border ${
                       isDone
-                        ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                        : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                        ? 'bg-[#0D3322] text-[#E6C762] border-[#C59B27]'
+                        : 'bg-stone-100 text-stone-600 border-stone-300'
                     }`}
                   >
-                    {isDone ? '完了 💮' : '未完了'}
+                    {isDone ? '調教済' : '未完了'}
                   </span>
                 </div>
 
@@ -700,25 +713,25 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onStartExtraTraining('uphill')}
-                        className="flex-1 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-2 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                        className="flex-1 bg-[#0D3322] hover:bg-[#164B33] active:scale-[0.98] transition-all text-[#FAF8F3] font-bold py-2 px-3 rounded-lg shadow-xs border border-[#C59B27]/40 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#E6C762]" />
                         <span>追加（新3問）</span>
                       </button>
                       <button
                         onClick={() => onStartTraining('uphill')}
-                        className="bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2 px-3 rounded-lg border border-zinc-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                        className="bg-[#FFFDF9] hover:bg-stone-100 active:scale-[0.98] transition-all text-stone-700 font-bold py-2 px-3 rounded-lg border border-stone-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+                        <RotateCcw className="w-3.5 h-3.5 text-stone-500" />
                         <span>復習する</span>
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => onStartTraining('uphill')}
-                      className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-2.5 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      className="w-full bg-[#0D3322] hover:bg-[#164B33] active:scale-[0.98] transition-all text-[#FAF8F3] font-bold py-2.5 px-3 rounded-lg shadow-xs border border-[#C59B27]/50 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                     >
-                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <Play className="w-3.5 h-3.5 fill-[#E6C762] text-[#E6C762]" />
                       <span>坂路調教を始める（3問）</span>
                     </button>
                   )}
@@ -727,31 +740,33 @@ export const HomeScreen: FC<HomeScreenProps> = ({
             );
           })()}
 
-          {/* コース 2: 🪵 ウッドチップ調教（基礎単語・競馬用語） */}
+          {/* コース 2: ウッドチップ調教（基礎単語・競馬用語） */}
           {(() => {
             const isDone = (progress.completedCoursesToday ?? []).includes('woodchip');
             return (
-              <div className="bg-amber-50/40 border border-amber-200/90 rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-amber-300">
+              <div className="bg-[#FBF7F0] border border-[#DEC8A8] rounded-xl p-3.5 flex flex-col justify-between transition-all hover:border-[#6B3A1E]/50">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-base">🪵</span>
-                      <h4 className="font-bold text-amber-950 text-sm">
-                        ウッドチップ調教 <span className="text-xs font-normal text-amber-700">（基礎単語・競馬用語 / 3問）</span>
+                  <div className="flex items-start gap-2.5">
+                    <span className="saddle-cloth-badge w-7 h-7 bg-[#6B3A1E] text-[#FAF8F3] border border-[#C59B27] text-xs shrink-0 mt-0.5">
+                      2
+                    </span>
+                    <div>
+                      <h4 className="font-bold text-[#4A2511] font-racing-serif text-sm">
+                        ウッドチップ調教 <span className="font-sans text-xs font-normal text-stone-600">（基礎単語・競馬用語 / 3問）</span>
                       </h4>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        JRA公式海外競馬英和辞典に準拠した頻出基礎用語
+                      </p>
                     </div>
-                    <p className="text-xs text-amber-800/90 mt-1">
-                      JRA公式海外競馬英和辞典に準拠した頻出基礎用語
-                    </p>
                   </div>
                   <span
-                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                    className={`shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-xs border ${
                       isDone
-                        ? 'bg-amber-100 text-amber-800 border-amber-300'
-                        : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                        ? 'bg-[#6B3A1E] text-[#E6C762] border-[#C59B27]'
+                        : 'bg-stone-100 text-stone-600 border-stone-300'
                     }`}
                   >
-                    {isDone ? '完了 💮' : '未完了'}
+                    {isDone ? '調教済' : '未完了'}
                   </span>
                 </div>
 
@@ -760,25 +775,25 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onStartExtraTraining('woodchip')}
-                        className="flex-1 bg-amber-800 hover:bg-amber-900 active:scale-[0.98] transition-all text-white font-bold py-2 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                        className="flex-1 bg-[#6B3A1E] hover:bg-[#572E17] active:scale-[0.98] transition-all text-[#FAF8F3] font-bold py-2 px-3 rounded-lg shadow-xs border border-[#C59B27]/40 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#E6C762]" />
                         <span>追加（新3問）</span>
                       </button>
                       <button
                         onClick={() => onStartTraining('woodchip')}
-                        className="bg-white hover:bg-zinc-50 active:scale-[0.98] transition-all text-zinc-700 font-bold py-2 px-3 rounded-lg border border-zinc-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                        className="bg-[#FFFDF9] hover:bg-stone-100 active:scale-[0.98] transition-all text-stone-700 font-bold py-2 px-3 rounded-lg border border-stone-300 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                       >
-                        <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+                        <RotateCcw className="w-3.5 h-3.5 text-stone-500" />
                         <span>復習する</span>
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => onStartTraining('woodchip')}
-                      className="w-full bg-amber-800 hover:bg-amber-900 active:scale-[0.98] transition-all text-white font-bold py-2.5 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      className="w-full bg-[#6B3A1E] hover:bg-[#572E17] active:scale-[0.98] transition-all text-[#FAF8F3] font-bold py-2.5 px-3 rounded-lg shadow-xs border border-[#C59B27]/50 flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                     >
-                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <Play className="w-3.5 h-3.5 fill-[#E6C762] text-[#E6C762]" />
                       <span>ウッドチップ調教を始める（3問）</span>
                     </button>
                   )}
@@ -791,22 +806,23 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
       {/* 平日用の週末レース予告カード（平日の場合のみ表示） */}
       {!isWeekendMode ? (
-        <div className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-1.5">
-              <span className="text-base">🏆</span>
-              <h4 className="font-bold text-zinc-800 text-sm">
+        <div className="bg-[#F5F1E6] border border-[#D4C9B5] rounded-2xl p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-1 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Trophy className="w-4 h-4 text-[#9A7418] shrink-0" />
+              <h4 className="font-bold text-stone-900 font-racing-serif text-sm truncate">
                 週末・{currentWeekRace.raceName}（{currentWeekRace.distanceText}）
               </h4>
             </div>
-            <span className="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
+            <span className="text-[11px] font-bold bg-[#FFFDF9] text-[#6B3A1E] border border-[#C59B27]/60 px-2 py-0.5 rounded-xs shrink-0 font-racing-num">
               出走まで あと {daysUntilWeekend} 日
             </span>
           </div>
-          <p className="text-[11px] font-semibold text-amber-800 mt-1">
-            🎯 出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}
+          <p className="text-[11px] font-semibold text-[#6B3A1E] mt-1 flex items-center gap-1">
+            <Flag className="w-3 h-3 text-[#9A7418] shrink-0" />
+            <span>出題テーマ: {getRaceThemeLabel(currentWeekRace.themeCategory)}</span>
           </p>
-          <p className="text-xs text-zinc-600 leading-relaxed mt-1">
+          <p className="text-xs text-stone-600 leading-relaxed mt-1">
             平日の調教をこなすほど、週末レースでの好走確率や愛馬のコンディションがアップします（土日限定解放）。
           </p>
         </div>
@@ -817,27 +833,27 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         <button
           type="button"
           onClick={onOpenPhraseBook}
-          className="w-full bg-linear-to-r from-emerald-800 to-teal-900 hover:from-emerald-700 hover:to-teal-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-emerald-700/60 flex items-center justify-between gap-3 cursor-pointer text-left group"
+          className="w-full bg-linear-to-r from-[#0D3322] to-[#164B33] hover:from-[#12422C] hover:to-[#1B5B3E] active:scale-[0.99] transition-all text-[#FAF8F3] rounded-2xl p-4 shadow-sm border border-[#C59B27]/50 flex items-center justify-between gap-3 cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <BookOpen className="w-5 h-5 text-emerald-200" />
+            <div className="w-10 h-10 rounded-xl bg-[#FAF8F3]/10 border border-[#C59B27]/40 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <BookOpen className="w-5 h-5 text-[#E6C762]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h4 className="font-extrabold text-sm text-white">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-bold font-racing-serif text-sm text-[#FAF8F3]">
                   競馬英語フレーズ図鑑
                 </h4>
-                <span className="text-[10px] font-black bg-emerald-500/80 text-white px-2 py-0.5 rounded-full border border-emerald-400/40">
+                <span className="text-[10px] font-bold font-racing-num bg-[#071D13] text-[#E6C762] px-2 py-0.5 rounded-xs border border-[#C59B27]/50">
                   {progress.learnedPhraseIds?.length ?? 0} / {INITIAL_PHRASES.length} 習得
                 </span>
               </div>
-              <p className="text-xs text-emerald-100/80 mt-0.5">
+              <p className="text-xs text-[#C8D8CE] mt-0.5">
                 いつでも辞書代わりに検索・復習・発音確認（要復習マーク対応）
               </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-emerald-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-5 h-5 text-[#E6C762] shrink-0 group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
 
@@ -846,299 +862,303 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         <button
           type="button"
           onClick={onOpenHallOfFame}
-          className="w-full bg-linear-to-r from-amber-900 via-amber-950 to-zinc-900 hover:from-amber-800 hover:via-amber-900 hover:to-zinc-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-amber-700/50 flex items-center justify-between gap-3 cursor-pointer text-left group"
+          className="w-full bg-linear-to-r from-[#4A2511] via-[#381B0B] to-[#211006] hover:from-[#592D15] hover:to-[#2E1709] active:scale-[0.99] transition-all text-[#FAF8F3] rounded-2xl p-4 shadow-sm border border-[#C59B27]/55 flex items-center justify-between gap-3 cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <Trophy className="w-5 h-5 text-amber-300" />
+            <div className="w-10 h-10 rounded-xl bg-[#C59B27]/20 border border-[#C59B27]/50 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Trophy className="w-5 h-5 text-[#E6C762]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h4 className="font-extrabold text-sm text-white">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-bold font-racing-serif text-sm text-[#FAF8F3]">
                   殿堂入り愛馬ギャラリー
                 </h4>
-                <span className="text-[10px] font-black bg-amber-500/80 text-zinc-950 px-2 py-0.5 rounded-full border border-amber-300/40">
+                <span className="text-[10px] font-bold font-racing-num bg-[#E6C762] text-stone-950 px-2 py-0.5 rounded-xs">
                   {progress.hallOfFame?.length ?? 0} 頭 殿堂入り
                 </span>
               </div>
-              <p className="text-xs text-amber-100/80 mt-0.5">
+              <p className="text-xs text-amber-100/85 mt-0.5">
                 引退した歴代名馬の栄誉・二つ名・戦績アーカイブ
               </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-amber-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-5 h-5 text-[#E6C762] shrink-0 group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
 
       {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
       {isDevOrLocalhost() && (
-        <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
-        <div className="bg-zinc-100/80 rounded-xl p-2.5 border border-zinc-200/70 text-xs">
-          <div className="flex justify-between items-center mb-2">
-            <span className="font-bold text-zinc-700 flex items-center gap-1 text-[11px]">
-              <span>🛠️</span> 曜日モード切替 (デモ・検証用)
-            </span>
-            {debugDayOfWeek !== null && (
-              <button
-                onClick={() => onSetDebugDayOfWeek(null)}
-                className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
-              >
-                実日時に戻す
-              </button>
-            )}
-          </div>
-
-          {/* 月〜日 7つの曜日切り替えチップ */}
-          <div className="grid grid-cols-7 gap-1">
-            {ORDERED_DAYS.map((day) => {
-              const isSelected = effectiveDayOfWeek === day;
-              const isWeekendDay = day === 0 || day === 6;
-              return (
-                <button
-                  key={day}
-                  onClick={() => onSetDebugDayOfWeek(day)}
-                  className={`py-1.5 px-0.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
-                    isSelected
-                      ? isWeekendDay
-                        ? 'bg-amber-600 text-white shadow-xs ring-2 ring-amber-400'
-                        : 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
-                      : isWeekendDay
-                      ? 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'
-                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
-                  }`}
-                  title={`${DAY_NAMES_JA[day]}曜日に切り替え`}
-                >
-                  {DAY_NAMES_JA[day]}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-2 text-[10px] text-zinc-500 flex items-center justify-between">
-            <span>
-              現在: <strong className="text-zinc-800">{DAY_NAMES_JA[effectiveDayOfWeek]}曜日</strong>
-              {debugDayOfWeek !== null && (
-                <span className="text-amber-700 ml-1 font-semibold">(手動オーバーライド中)</span>
-              )}
-            </span>
-            <span
-              className={`font-semibold px-1.5 py-0.5 rounded-sm text-[9px] ${
-                isWeekendMode
-                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                  : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-              }`}
-            >
-              {isWeekendMode ? '🏆 週末レースモード' : '🌿 平日調教モード'}
-            </span>
-          </div>
-
-          {/* 週間調教日数 (0〜7日) シミュレート */}
-          <div className="mt-3 pt-2 border-t border-zinc-200/60">
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
-                <span>🏋️</span> 調教日数切替 (0〜7日)
+        <div className="mt-auto pt-4 border-t border-[#D8CEBE] space-y-2">
+          <div className="bg-[#EFECE4] rounded-xl p-2.5 border border-[#D4C9B5] text-xs">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-bold text-stone-700 flex items-center gap-1.5 text-[11px]">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#0D3322]" />
+                <span>曜日モード切替 (デモ・検証用)</span>
               </span>
-              {debugWeekdayDays !== null && (
+              {debugDayOfWeek !== null && (
                 <button
-                  onClick={() => onSetDebugWeekdayDays(null)}
-                  className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                  onClick={() => onSetDebugDayOfWeek(null)}
+                  className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
                 >
-                  実数に戻す
+                  実日時に戻す
                 </button>
               )}
             </div>
-            <div className="grid grid-cols-8 gap-1">
-              {[0, 1, 2, 3, 4, 5, 6, 7].map((d) => (
-                <button
-                  key={d}
-                  onClick={() => onSetDebugWeekdayDays(d)}
-                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
-                    effectiveWeekdayDays === d
-                      ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
-                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
-                  }`}
-                  title={`${d}日消化に切り替え`}
-                >
-                  {d}日
-                </button>
-              ))}
-            </div>
-          </div>
 
-          {/* キャリア週 (Week 1〜4) シミュレート & 毛色再抽選 */}
-          {onSetDebugCareerWeek && (
-            <div className="mt-3 pt-2 border-t border-zinc-200/60">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
-                  <span>🗓️</span> キャリア週切替 (Week 1〜4)
-                </span>
-                <div className="flex items-center gap-2">
-                  {onRerollCoatColor && (
-                    <button
-                      type="button"
-                      onClick={onRerollCoatColor}
-                      className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
-                    >
-                      🎨 毛色抽選 ({careerHorse.color})
-                    </button>
-                  )}
-                  {debugCareerWeek !== null && (
-                    <button
-                      onClick={() => onSetDebugCareerWeek(null)}
-                      className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
-                    >
-                      実週に戻す
-                    </button>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 gap-1">
-                {CAREER_WEEKS.map((w) => (
+            {/* 月〜日 7つの曜日切り替えチップ */}
+            <div className="grid grid-cols-7 gap-1">
+              {ORDERED_DAYS.map((day) => {
+                const isSelected = effectiveDayOfWeek === day;
+                const isWeekendDay = day === 0 || day === 6;
+                return (
                   <button
-                    key={w}
-                    onClick={() => onSetDebugCareerWeek(w)}
-                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
-                      careerHorse.currentWeek === w
-                        ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
-                        : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                    key={day}
+                    onClick={() => onSetDebugDayOfWeek(day)}
+                    className={`py-1.5 px-0.5 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+                      isSelected
+                        ? isWeekendDay
+                          ? 'bg-[#6B3A1E] text-white shadow-xs ring-2 ring-[#C59B27]'
+                          : 'bg-[#0D3322] text-white shadow-xs ring-2 ring-emerald-500'
+                        : isWeekendDay
+                        ? 'bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200'
+                        : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
                     }`}
-                    title={`Week ${w} に切り替え`}
+                    title={`${DAY_NAMES_JA[day]}曜日に切り替え`}
                   >
-                    Week {w}
+                    {DAY_NAMES_JA[day]}
                   </button>
-                ))}
-              </div>
-              {onOpenRetirement && (
-                <button
-                  type="button"
-                  onClick={onOpenRetirement}
-                  className="mt-2 w-full py-1.5 px-2 rounded-lg text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1"
-                >
-                  <span>🌸 引退式セレモニーを試す（世代交代デモ）</span>
-                </button>
-              )}
+                );
+              })}
             </div>
-          )}
 
-          {/* 週末レース出走状態 (未出走 / 出走済) シミュレート */}
-          {onSetDebugRaceCompleted && (
-            <div className="mt-3 pt-2 border-t border-zinc-200/60">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
-                  <span>🏁</span> 週末レース出走状態切替
-                </span>
-                {debugRaceCompleted !== null && (
-                  <button
-                    onClick={() => onSetDebugRaceCompleted(null)}
-                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
-                  >
-                    実状態に戻す
-                  </button>
+            <div className="mt-2 text-[10px] text-stone-600 flex items-center justify-between">
+              <span>
+                現在: <strong className="text-stone-900">{DAY_NAMES_JA[effectiveDayOfWeek]}曜日</strong>
+                {debugDayOfWeek !== null && (
+                  <span className="text-amber-800 ml-1 font-semibold">(手動オーバーライド中)</span>
                 )}
-              </div>
-              <div className="grid grid-cols-2 gap-1">
-                <button
-                  type="button"
-                  onClick={() => onSetDebugRaceCompleted(false)}
-                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
-                    !progress.hasCompletedWeeklyRace
-                      ? 'bg-emerald-700 text-white shadow-xs ring-2 ring-emerald-500'
-                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
-                  }`}
-                >
-                  未出走 (出走可能)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSetDebugRaceCompleted(true)}
-                  className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
-                    progress.hasCompletedWeeklyRace
-                      ? 'bg-amber-700 text-white shadow-xs ring-2 ring-amber-400'
-                      : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
-                  }`}
-                >
-                  出走済 🏁 (制限中)
-                </button>
-              </div>
+              </span>
+              <span
+                className={`font-semibold px-1.5 py-0.5 rounded-xs text-[9px] ${
+                  isWeekendMode
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                    : 'bg-emerald-100 text-[#0D3322] border border-emerald-300'
+                }`}
+              >
+                {isWeekendMode ? '週末レースモード' : '平日調教モード'}
+              </span>
             </div>
-          )}
 
-          {/* にんじん所持数 (0〜3個) シミュレート */}
-          {onSetDebugCarrotCount && (
-            <div className="mt-3 pt-2 border-t border-zinc-200/60">
+            {/* 週間調教日数 (0〜7日) シミュレート */}
+            <div className="mt-3 pt-2 border-t border-[#D8CEBE]">
               <div className="flex justify-between items-center mb-1.5">
-                <span className="font-bold text-zinc-700 text-[11px] flex items-center gap-1">
-                  <span>🥕</span> にんじん所持数切替 (0〜3個)
+                <span className="font-bold text-stone-700 text-[11px] flex items-center gap-1">
+                  <Gauge className="w-3.5 h-3.5 text-[#0D3322]" />
+                  <span>調教日数切替 (0〜7日)</span>
                 </span>
-                {debugCarrotCount !== null && (
+                {debugWeekdayDays !== null && (
                   <button
-                    onClick={() => onSetDebugCarrotCount(null)}
-                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-semibold cursor-pointer underline"
+                    onClick={() => onSetDebugWeekdayDays(null)}
+                    className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
                   >
                     実数に戻す
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-4 gap-1">
-                {[0, 1, 2, 3].map((c) => (
+              <div className="grid grid-cols-8 gap-1">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((d) => (
                   <button
-                    key={c}
-                    onClick={() => onSetDebugCarrotCount(c)}
-                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
-                      progress.carrotCount === c
-                        ? 'bg-orange-600 text-white shadow-xs ring-2 ring-orange-400'
-                        : 'bg-white text-zinc-700 hover:bg-zinc-50 border border-zinc-200'
+                    key={d}
+                    onClick={() => onSetDebugWeekdayDays(d)}
+                    className={`py-1 rounded text-xs font-bold font-racing-num transition-all text-center cursor-pointer ${
+                      effectiveWeekdayDays === d
+                        ? 'bg-[#0D3322] text-white shadow-xs ring-2 ring-emerald-500'
+                        : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
                     }`}
-                    title={`にんじん${c}個に切り替え`}
+                    title={`${d}日消化に切り替え`}
                   >
-                    🥕 {c}個
+                    {d}日
                   </button>
                 ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* 問題・解答一覧（デバッグ用）参照ボタン */}
-        {onOpenDebugQuestions && (
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={onOpenDebugQuestions}
-              className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-emerald-950 border border-emerald-600/40 shadow-2xs hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <span>📖</span>
-              <span>問題・解答一覧を表示（全120問・校正用）</span>
-            </button>
+            {/* キャリア週 (Week 1〜4) シミュレート & 毛色再抽選 */}
+            {onSetDebugCareerWeek && (
+              <div className="mt-3 pt-2 border-t border-[#D8CEBE]">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="font-bold text-stone-700 text-[11px] flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-[#0D3322]" />
+                    <span>キャリア週切替 (Week 1〜4)</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {onRerollCoatColor && (
+                      <button
+                        type="button"
+                        onClick={onRerollCoatColor}
+                        className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
+                      >
+                        毛色抽選 ({careerHorse.color})
+                      </button>
+                    )}
+                    {debugCareerWeek !== null && (
+                      <button
+                        onClick={() => onSetDebugCareerWeek(null)}
+                        className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
+                      >
+                        実週に戻す
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {CAREER_WEEKS.map((w) => (
+                    <button
+                      key={w}
+                      onClick={() => onSetDebugCareerWeek(w)}
+                      className={`py-1 rounded text-xs font-bold font-racing-num transition-all text-center cursor-pointer ${
+                        careerHorse.currentWeek === w
+                          ? 'bg-[#0D3322] text-white shadow-xs ring-2 ring-emerald-500'
+                          : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
+                      }`}
+                      title={`Week ${w} に切り替え`}
+                    >
+                      Week {w}
+                    </button>
+                  ))}
+                </div>
+                {onOpenRetirement && (
+                  <button
+                    type="button"
+                    onClick={onOpenRetirement}
+                    className="mt-2 w-full py-1.5 px-2 rounded-lg text-[11px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 transition-colors cursor-pointer flex items-center justify-center gap-1"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-800" />
+                    <span>引退式セレモニーを試す（世代交代デモ）</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* 週末レース出走状態 (未出走 / 出走済) シミュレート */}
+            {onSetDebugRaceCompleted && (
+              <div className="mt-3 pt-2 border-t border-[#D8CEBE]">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="font-bold text-stone-700 text-[11px] flex items-center gap-1">
+                    <Flag className="w-3.5 h-3.5 text-[#0D3322]" />
+                    <span>週末レース出走状態切替</span>
+                  </span>
+                  {debugRaceCompleted !== null && (
+                    <button
+                      onClick={() => onSetDebugRaceCompleted(null)}
+                      className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
+                    >
+                      実状態に戻す
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onSetDebugRaceCompleted(false)}
+                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                      !progress.hasCompletedWeeklyRace
+                        ? 'bg-[#0D3322] text-white shadow-xs ring-2 ring-emerald-500'
+                        : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
+                    }`}
+                  >
+                    未出走 (出走可能)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onSetDebugRaceCompleted(true)}
+                    className={`py-1 rounded text-xs font-bold transition-all text-center cursor-pointer ${
+                      progress.hasCompletedWeeklyRace
+                        ? 'bg-[#6B3A1E] text-white shadow-xs ring-2 ring-[#C59B27]'
+                        : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
+                    }`}
+                  >
+                    出走済 (制限中)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* にんじん所持数 (0〜3個) シミュレート */}
+            {onSetDebugCarrotCount && (
+              <div className="mt-3 pt-2 border-t border-[#D8CEBE]">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="font-bold text-stone-700 text-[11px] flex items-center gap-1">
+                    <span>🥕 にんじん所持数切替 (0〜3個)</span>
+                  </span>
+                  {debugCarrotCount !== null && (
+                    <button
+                      onClick={() => onSetDebugCarrotCount(null)}
+                      className="text-[10px] text-[#0D3322] hover:underline font-semibold cursor-pointer"
+                    >
+                      実数に戻す
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-4 gap-1">
+                  {[0, 1, 2, 3].map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => onSetDebugCarrotCount(c)}
+                      className={`py-1 rounded text-xs font-bold font-racing-num transition-all text-center cursor-pointer ${
+                        progress.carrotCount === c
+                          ? 'bg-amber-700 text-white shadow-xs ring-2 ring-amber-400'
+                          : 'bg-[#FFFDF9] text-stone-700 hover:bg-stone-100 border border-stone-300'
+                      }`}
+                      title={`にんじん${c}個に切り替え`}
+                    >
+                      🥕 {c}個
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
 
-        {onAddSampleHallOfFame && (
+          {/* 問題・解答一覧（デバッグ用）参照ボタン */}
+          {onOpenDebugQuestions && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onOpenDebugQuestions}
+                className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-[#FFFDF9] hover:bg-stone-100 text-[#0D3322] border border-[#0D3322]/30 shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[#0D3322]" />
+                <span>問題・解答一覧を表示（全120問・校正用）</span>
+              </button>
+            </div>
+          )}
+
+          {onAddSampleHallOfFame && (
             <div className="pt-1">
               <button
                 type="button"
                 onClick={onAddSampleHallOfFame}
-                className="w-full py-1.5 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-amber-900 border border-amber-600/40 shadow-2xs hover:border-amber-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full py-1.5 px-3 rounded-xl text-xs font-bold bg-[#FFFDF9] hover:bg-stone-100 text-[#6B3A1E] border border-[#C59B27]/50 shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>🏛️</span>
+                <Trophy className="w-3.5 h-3.5 text-[#9A7418]" />
                 <span>殿堂入りサンプル愛馬を追加（デバッグ用）</span>
               </button>
             </div>
           )}
 
-        {/* デモ用データリセットボタン */}
-        <div className="text-center pt-1">
-          <button
-            onClick={onResetForDemo}
-            className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-600 transition-colors py-1 px-2 rounded-sm cursor-pointer"
-          >
-            <RotateCcw className="w-3 h-3" />
-            <span>学習状態をリセット（最初から試す）</span>
-          </button>
+          {/* デモ用データリセットボタン */}
+          <div className="text-center pt-1">
+            <button
+              onClick={onResetForDemo}
+              className="inline-flex items-center gap-1 text-[11px] text-stone-500 hover:text-stone-700 transition-colors py-1 px-2 rounded-sm cursor-pointer"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>学習状態をリセット（最初から試す）</span>
+            </button>
+          </div>
         </div>
-      </div>
       )}
     </div>
   );
 };
-

@@ -2,58 +2,98 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%; /* 競馬の芝（Turf）を想起させるエメラルドグリーン */
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
+    /* レーシングプログラム・アイボリー & ブリティッシュ・レーシンググリーン基調 (Issue #90) */
+    --background: 40 33% 96%;          /* #FAF7F0 温かみのある出馬表アイボリー */
+    --foreground: 155 45% 10%;         /* #0E251B 深みのあるダークグリーンブラック */
+    --card: 42 45% 98%;                /* #FDFBF7 上質紙ホワイトアイボリー */
+    --card-foreground: 155 45% 10%;
+    --popover: 42 45% 98%;
+    --popover-foreground: 155 45% 10%;
+    --primary: 153 60% 16%;            /* #10412B ブリティッシュ・レーシンググリーン */
+    --primary-foreground: 43 60% 96%;
+    --secondary: 38 28% 91%;           /* #EFEADE サンドベージュ */
+    --secondary-foreground: 153 50% 14%;
+    --muted: 38 24% 92%;
+    --muted-foreground: 32 14% 38%;
+    --accent: 43 64% 48%;              /* #C89D2C クラシック・ブラスゴールド */
+    --accent-foreground: 155 45% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 42 45% 98%;
+    --border: 37 24% 83%;              /* #DDD5C7 クラシカルな紙枠線 */
+    --input: 37 24% 83%;
+    --ring: 153 60% 22%;
     --radius: 0.75rem;
+
+    /* 競馬ドメイン専用セマンティックトークン */
+    --racing-green-deep: #0D3322;
+    --racing-green-club: #13462F;
+    --racing-gold-brass: #C59B27;
+    --racing-gold-light: #E6C762;
+    --racing-leather: #6B3A1E;
+    --racing-ivory: #FAF8F3;
+    --racing-ivory-outer: #ECE6D8;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.1 70.6% 45.3%;
+    --background: 155 42% 7%;
+    --foreground: 40 30% 95%;
+    --card: 155 38% 10%;
+    --card-foreground: 40 30% 95%;
+    --popover: 155 38% 10%;
+    --popover-foreground: 40 30% 95%;
+    --primary: 43 64% 52%;
+    --primary-foreground: 155 45% 10%;
+    --secondary: 153 28% 16%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 153 25% 15%;
+    --muted-foreground: 38 16% 68%;
+    --accent: 43 64% 48%;
+    --accent-foreground: 155 45% 10%;
+    --destructive: 0 62.8% 35.6%;
+    --destructive-foreground: 40 30% 95%;
+    --border: 153 24% 20%;
+    --input: 153 24% 20%;
+    --ring: 43 64% 52%;
   }
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: hsl(var(--background));
+  background-color: var(--racing-ivory-outer);
   color: hsl(var(--foreground));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* 競馬プログラム・格調高いセリフ見出しタイポグラフィ (Issue #90) */
+.font-racing-serif {
+  font-family: "Georgia", "Times New Roman", "YuMincho", "Yu Mincho", "Hiragino Mincho ProN", "MS PMincho", serif;
+  letter-spacing: 0.02em;
+}
+
+/* 馬体重・距離・着順・スコア用の等幅数字 (Issue #90) */
+.font-racing-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* 馬具（サドルレザー）のステッチ風インナートリム */
+.racing-stitch-border {
+  outline: 1px dashed rgba(230, 199, 98, 0.36);
+  outline-offset: -5px;
+}
+
+/* ゼッケン（Saddle Cloth）風ナンバーバッジ */
+.saddle-cloth-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  border-radius: 0.375rem;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 /* アニメーション定義 (Issue #11) */
