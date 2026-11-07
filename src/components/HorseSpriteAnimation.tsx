@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, type FC } from 'react';
 import type { HorseCoatColor, TrainingCourse } from '../types';
-import { getHorseImageUrl } from '../lib/horseAssets';
+import {
+  getHorseImageUrl,
+  SPRITE_FRAME_WIDTH,
+  SPRITE_FRAME_HEIGHT,
+  SPRITE_TOTAL_FRAMES,
+  SPRITE_COLS,
+  applyFrameFloodFillTransparency,
+} from '../lib/horseAssets';
 
 interface HorseSpriteAnimationProps {
   color: HorseCoatColor;
@@ -9,20 +16,11 @@ interface HorseSpriteAnimationProps {
   className?: string;
 }
 
-const FRAME_WIDTH = 500;
-const FRAME_HEIGHT = 360;
-const TOTAL_FRAMES = 6;
-const COLS = 3;
+const FRAME_WIDTH = SPRITE_FRAME_WIDTH;
+const FRAME_HEIGHT = SPRITE_FRAME_HEIGHT;
+const TOTAL_FRAMES = SPRITE_TOTAL_FRAMES;
+const COLS = SPRITE_COLS;
 const FRAME_INTERVAL_MS = 85; // 約11.7 FPS（自然なギャロップ速度）
-
-// 外周および閉領域フラッドフィル用の判定
-function isWhiteLike(r: number, g: number, b: number): boolean {
-  return r >= 232 && g >= 232 && b >= 232;
-}
-
-function isBoundaryBlack(r: number, g: number, b: number): boolean {
-  return r < 70 && g < 70 && b < 70;
-}
 
 /**
  * 6コマのスプライトシートから各コマの白背景を透過した ImageData を作成する
@@ -46,83 +44,7 @@ function processTransparentFrames(image: HTMLImageElement, isTraining: boolean):
     ctx.drawImage(image, sx, sy, FRAME_WIDTH, FRAME_HEIGHT, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 
     const imgData = ctx.getImageData(0, 0, FRAME_WIDTH, FRAME_HEIGHT);
-    const data = imgData.data;
-    const visited = new Uint8Array(FRAME_WIDTH * FRAME_HEIGHT);
-
-    // フラッドフィル関数（キュー方式）
-    const floodFill = (startX: number, startY: number) => {
-      if (startX < 0 || startX >= FRAME_WIDTH || startY < 0 || startY >= FRAME_HEIGHT) return;
-      const startIdx = startY * FRAME_WIDTH + startX;
-      if (visited[startIdx]) return;
-
-      const pIdx = startIdx * 4;
-      if (!isWhiteLike(data[pIdx], data[pIdx + 1], data[pIdx + 2])) return;
-
-      const queue: number[] = [startIdx];
-      visited[startIdx] = 1;
-
-      while (queue.length > 0) {
-        const curr = queue.pop()!;
-        const cx = curr % FRAME_WIDTH;
-        const cy = Math.floor(curr / FRAME_WIDTH);
-        const cp = curr * 4;
-
-        // 白ゼッケン保護（平日調教時: X: 175..320, Y: 80..165）
-        if (isTraining && cx >= 175 && cx <= 320 && cy >= 80 && cy <= 165) {
-          continue;
-        }
-
-        // 透明化
-        data[cp + 3] = 0;
-
-        // 4近傍走査
-        const neighbors = [
-          cy > 0 ? (cy - 1) * FRAME_WIDTH + cx : -1,
-          cy < FRAME_HEIGHT - 1 ? (cy + 1) * FRAME_WIDTH + cx : -1,
-          cx > 0 ? cy * FRAME_WIDTH + (cx - 1) : -1,
-          cx < FRAME_WIDTH - 1 ? cy * FRAME_WIDTH + (cx + 1) : -1,
-        ];
-
-        for (const n of neighbors) {
-          if (n === -1 || visited[n]) continue;
-          const np = n * 4;
-          const nr = data[np];
-          const ng = data[np + 1];
-          const nb = data[np + 2];
-
-          // 黒主線や馬体色でなければ白背景として透過伝播
-          if (!isBoundaryBlack(nr, ng, nb) && isWhiteLike(nr, ng, nb)) {
-            visited[n] = 1;
-            queue.push(n);
-          }
-        }
-      }
-    };
-
-    // 1. 外周4辺の全ピクセルからフラッドフィル
-    for (let x = 0; x < FRAME_WIDTH; x++) {
-      floodFill(x, 0);
-      floodFill(x, FRAME_HEIGHT - 1);
-    }
-    for (let y = 0; y < FRAME_HEIGHT; y++) {
-      floodFill(0, y);
-      floodFill(FRAME_WIDTH - 1, y);
-    }
-
-    // 2. 閉領域シードのフラッドフィル（仕様書 Section 3-②）
-    // A. 首・手綱の間の三角形空間 (X: 355..430, Y: 70..140)
-    for (let x = 360; x <= 425; x += 5) {
-      for (let y = 75; y <= 135; y += 5) {
-        floodFill(x, y);
-      }
-    }
-
-    // B. 交差脚間の閉空間 (Y >= 180)
-    for (let x = 120; x <= 400; x += 8) {
-      for (let y = 185; y <= 340; y += 8) {
-        floodFill(x, y);
-      }
-    }
+    applyFrameFloodFillTransparency(imgData.data, FRAME_WIDTH, FRAME_HEIGHT, f, isTraining);
 
     frames.push(imgData);
   }
