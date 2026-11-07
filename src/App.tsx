@@ -10,6 +10,7 @@ import { RetirementScreen } from './components/RetirementScreen';
 import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
 import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { HallOfFameScreen } from './components/HallOfFameScreen';
+import { HelpGuideModal } from './components/HelpGuideModal';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
@@ -21,12 +22,23 @@ import {
 import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
+import { hasSeenHelpGuide, markHelpGuideSeen } from './lib/helpGuide';
 
 type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [activeCourse, setActiveCourse] = useState<TrainingCourse>('uphill');
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => !hasSeenHelpGuide());
+
+  const handleOpenHelp = () => {
+    setIsHelpOpen(true);
+  };
+
+  const handleCloseHelp = () => {
+    markHelpGuideSeen();
+    setIsHelpOpen(false);
+  };
   const {
     progress,
     recordTodayPhrases,
@@ -221,7 +233,7 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#ECE6D8] flex flex-col justify-start items-center text-stone-900 selection:bg-amber-200">
       <div className="w-full max-w-md bg-[#FAF8F3] min-h-screen flex flex-col border-x border-[#D8CEBE] shadow-xl">
-        <Header streakDays={progress.streakDays} />
+        <Header streakDays={progress.streakDays} onOpenHelp={handleOpenHelp} />
 
         <main className="flex-1 flex flex-col">
           {currentScreen === 'home' && (
@@ -339,8 +351,10 @@ export function App() {
           )}
         </main>
 
-        <Footer />
+        <Footer onOpenHelp={handleOpenHelp} />
       </div>
+
+      <HelpGuideModal isOpen={isHelpOpen} onClose={handleCloseHelp} />
     </div>
   );
 }
