@@ -26,10 +26,10 @@
 
 ### Changed
 - **UIデザインの「競馬感」向上とAI生成感からの脱却 ([#90](https://github.com/meshi-z/turf-talk/issues/90)):**
-  - **カラーパレット・タイポグラフィ・競馬場モチーフ定義の刷新 (`src/index.css`, `src/App.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx`):**
+  - **カラーパレット・タイポグラフィ・競馬場モチーフ定義の刷新 (`index.html`, `src/index.css`, `src/App.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx`):**
     - 背景色を冷たい汎用グレースケール（`zinc-50`/`100`）から温かみのあるレーシングプログラム・アイボリー（`#FAF8F3` / `#ECE6D8`）へ刷新。
     - 重厚なブリティッシュ・レーシンググリーン（`#0D3322`）、クラシック・ブラスゴールド（`#C59B27` / `#E6C762`）、サドルレザー（`#6B3A1E`）を基調としたクラブハウス風のヘッダー・フッター・カードデザインを導入。
-    - 格調高いセリフ見出し用クラス（`.font-racing-serif`）、馬体重・距離・着順・スコア用の等幅数字クラス（`.font-racing-num` / `tabular-nums`）、馬具ステッチ枠（`.racing-stitch-border`）、ゼッケン風バッジ（`.saddle-cloth-badge`）を定義。
+    - 欧文フォントを維持しつつ日本語ゴシック体を `Noto Sans JP`、日本語セリフ体を `Noto Serif JP`（`.font-racing-serif`）に統一し、馬体重・距離・着順・スコア用の等幅数字クラス（`.font-racing-num` / `tabular-nums`）、馬具ステッチ枠（`.racing-stitch-border`）、ゼッケン風バッジ（`.saddle-cloth-badge`）を定義。
   - **各画面の脱・絵文字過多と出馬表・ゼッケンモチーフの組み込み (`src/components/HomeScreen.tsx`, `src/components/QuizScreen.tsx`, `src/components/ResultScreen.tsx`, `src/components/RaceScreen.tsx`, `src/components/RaceResultScreen.tsx`):**
     - 愛馬ステータスカードをサドルレザーステッチ＆真鍮トリムのパドック掲示板仕様に刷新し、世代バッジをゼッケン風にデザイン。
     - 平日調教コース選択（第1コース：坂路、第2コース：ウッドチップ）およびクイズ・週末レースの4択選択肢（A/B/C/D）にゼッケン（Saddle Cloth）番号バッジを導入。

@@ -2,6 +2,9 @@
 
 @layer base {
   :root {
+    /* 英語フォントはシステム/欧文サンセリフを維持し、日本語ゴシック体を Noto Sans JP に統一 */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
+
     /* レーシングプログラム・アイボリー & ブリティッシュ・レーシンググリーン基調 (Issue #90) */
     --background: 40 33% 96%;          /* #FAF7F0 温かみのある出馬表アイボリー */
     --foreground: 155 45% 10%;         /* #0E251B 深みのあるダークグリーンブラック */
@@ -62,13 +65,13 @@ body {
   min-height: 100vh;
   background-color: var(--racing-ivory-outer);
   color: hsl(var(--foreground));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans JP", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 競馬プログラム・格調高いセリフ見出しタイポグラフィ (Issue #90) */
+/* 競馬プログラム・格調高いセリフ見出しタイポグラフィ（欧文セリフ + Noto Serif JP） (Issue #90) */
 .font-racing-serif {
-  font-family: "Georgia", "Times New Roman", "YuMincho", "Yu Mincho", "Hiragino Mincho ProN", "MS PMincho", serif;
+  font-family: "Georgia", "Times New Roman", "Noto Serif JP", serif;
   letter-spacing: 0.02em;
 }
 

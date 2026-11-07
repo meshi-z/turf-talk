@@ -28,9 +28,6 @@ export const Header: FC<HeaderProps> = ({ streakDays }) => {
         <div className="min-w-0">
           <h1 className="text-lg font-bold tracking-wide text-[#FAF8F3] font-racing-serif flex items-center gap-1.5 leading-none">
             <span>TurfTalk</span>
-            <span className="font-sans text-[9px] font-extrabold uppercase tracking-widest bg-[#C59B27]/25 text-[#E6C762] border border-[#C59B27]/50 px-1.5 py-0.5 rounded-xs shrink-0">
-              Paddock
-            </span>
           </h1>
           <p className="text-[10px] sm:text-[11px] text-[#C8D8CE] font-medium whitespace-nowrap mt-0.5 tracking-wider">
             競馬英語マイクロラーニング
