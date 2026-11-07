@@ -9,6 +9,34 @@
 
 ---
 
+## [v0.19.0] - 2026-11-07
+
+### Added
+- **競走馬シーン別背景イラスト素材制作と全6シーンへの背景合成組み込み ([#88](https://github.com/meshi-z/turf-talk/issues/88)):**
+  - **シーン別背景イラストアセット（全7枚・1376×768px）の新規制作 (`src/assets/backgrounds/`):**
+    - 牧場パドック（`bg_pasture.jpg`）、坂路調教コース（`bg_uphill_course.jpg`：左→右への緩やかな登坂サイドビュー）、ウッドチップ調教コース（`bg_woodchip_course.jpg`：左→右への水平サイドビュー）、厩舎・馬房（`bg_stable.jpg`）、芝本馬場（`bg_turf_race.jpg`：左→右への水平サイドビュー直線）、ダート本馬場（`bg_dirt_race.jpg`：左→右への水平サイドビュー直線）、ウィナーズサークル（`bg_winners_circle.jpg`）の7種を制作・配置。
+  - **背景アセット解決・静止画立ち絵のCanvas背景透過ユーティリティ実装 (`src/lib/horseAssets.ts`):**
+    - `HORSE_BACKGROUND_FILE_MAP`, `getBackgroundImageUrl`, `resolveStaticSceneBackground`, `resolveGallopSceneBackground` によるシーン・コース・馬場別の背景URL解決を実装。
+    - 静止画立ち絵（1376×768px）の白背景を、外周4辺からのフラッドフィルおよび手綱・首間のピンポイント閉領域シード（`STATIC_CLOSED_REGION_SEEDS`）によって白毛（`#F7F9FC`）の馬体を保護しつつ綺麗に透過する `applyStaticSceneFloodFillTransparency` を実装。
+  - **静止画立ち絵・スプライトアニメーションへの背景イラスト合成 (`src/components/HorseIllustration.tsx`, `src/components/HorseSpriteAnimation.tsx`, `src/components/RaceScreen.tsx`):**
+    - 静止画立ち絵（ホーム画面、調教完了画面、レース勝利/惜敗結果画面）の背面にシーン別背景イラストを配置し、オフスクリーンCanvasで背景透過した愛馬立ち絵を重ねて描画。
+    - 疾走スプライトアニメーション（平日調教の坂路/ウッドチップ、週末レースの芝/ダート）の背面にコース・馬場別サイドビュー背景イラストを合成し、週末レースでは出走レースの `surface`（`turf` / `dirt`）に応じて芝/ダート本馬場背景を自動切り替え。
+  - **単体テスト・仕様書の更新 (`tests/horse_assets.test.ts`, `docs/specs/horse-visual-assets.md`):**
+    - 全7種背景アセットの存在確認、シーン・馬場別マッピング、および静止画立ち絵フラッドフィル透過・白毛保護の単体テストを追加。
+
+### Changed
+- **UIデザインの「競馬感」向上とAI生成感からの脱却 ([#90](https://github.com/meshi-z/turf-talk/issues/90)):**
+  - **カラーパレット・タイポグラフィ・競馬場モチーフ定義の刷新 (`index.html`, `src/index.css`, `src/App.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx`):**
+    - 背景色を冷たい汎用グレースケール（`zinc-50`/`100`）から温かみのあるレーシングプログラム・アイボリー（`#FAF8F3` / `#ECE6D8`）へ刷新。
+    - 重厚なブリティッシュ・レーシンググリーン（`#0D3322`）、クラシック・ブラスゴールド（`#C59B27` / `#E6C762`）、サドルレザー（`#6B3A1E`）を基調としたクラブハウス風のヘッダー・フッター・カードデザインを導入。
+    - 欧文フォントを維持しつつ日本語ゴシック体を `Noto Sans JP`、日本語セリフ体を `Noto Serif JP`（`.font-racing-serif`）に統一し、馬体重・距離・着順・スコア用の等幅数字クラス（`.font-racing-num` / `tabular-nums`）、馬具ステッチ枠（`.racing-stitch-border`）、ゼッケン風バッジ（`.saddle-cloth-badge`）を定義。
+  - **各画面の脱・絵文字過多と出馬表・ゼッケンモチーフの組み込み (`src/components/HomeScreen.tsx`, `src/components/QuizScreen.tsx`, `src/components/ResultScreen.tsx`, `src/components/RaceScreen.tsx`, `src/components/RaceResultScreen.tsx`):**
+    - 愛馬ステータスカードをサドルレザーステッチ＆真鍮トリムのパドック掲示板仕様に刷新し、世代バッジをゼッケン風にデザイン。
+    - 平日調教コース選択（第1コース：坂路、第2コース：ウッドチップ）およびクイズ・週末レースの4択選択肢（A/B/C/D）にゼッケン（Saddle Cloth）番号バッジを導入。
+    - 見出しやボタンに多用されていた装飾絵文字を Lucide ベクターアイコンおよびゴールド装飾ラインに置き換え、情報階層と視認性を向上。
+
+---
+
 ## [v0.18.1] - 2026-11-07
 
 ### Fixed

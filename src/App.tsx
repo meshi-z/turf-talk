@@ -219,8 +219,8 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-100 flex flex-col justify-start items-center text-zinc-900 selection:bg-emerald-200">
-      <div className="w-full max-w-md bg-zinc-50 min-h-screen flex flex-col border-x border-zinc-200/60 shadow-lg">
+    <div className="min-h-screen bg-[#ECE6D8] flex flex-col justify-start items-center text-stone-900 selection:bg-amber-200">
+      <div className="w-full max-w-md bg-[#FAF8F3] min-h-screen flex flex-col border-x border-[#D8CEBE] shadow-xl">
         <Header streakDays={progress.streakDays} />
 
         <main className="flex-1 flex flex-col">

@@ -43,40 +43,42 @@ export const ResultScreen: FC<ResultScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full space-y-4">
-      {/* 完了ヘッダーカード & スタンプ演出 */}
-      <div className="bg-white rounded-2xl border border-emerald-100 p-6 text-center shadow-xs relative overflow-hidden">
-        <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full mb-3">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-          <span>本日の坂路調教 完了</span>
+      {/* 完了ヘッダーカード & スタンプ演出（公式調教時計表・レーシングプログラム仕様） */}
+      <div className="bg-[#FFFDF9] rounded-2xl border border-[#D4C9B5] p-6 text-center shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-[#0D3322] via-[#C59B27] to-[#0D3322]" />
+
+        <div className="inline-flex items-center gap-1.5 bg-[#EEF5F0] text-[#0D3322] border border-[#B4CEBD] text-xs font-bold px-3 py-1 rounded-xs mb-3">
+          <Sparkles className="w-3.5 h-3.5 text-[#9A7418]" />
+          <span>本日の調教メニュー 完了</span>
         </div>
 
-        <h2 className="text-2xl font-black text-emerald-950 mb-1">
-          {isPerfect ? '素晴らしい手応え！' : 'しっかり負荷をかけました！'}
+        <h2 className="text-2xl font-bold text-[#0D3322] font-racing-serif mb-1">
+          {isPerfect ? '素晴らしい手応え' : 'しっかり負荷をかけました'}
         </h2>
-        <p className="text-xs text-zinc-600 mb-5">
-          愛馬「{progress.horseName}」の息遣いも良く、海外挑戦へ前進しています。
+        <p className="text-xs text-stone-600 mb-5">
+          愛馬「{progress.horseName}」の息遣いも良く、週末のレースへ前進しています。
         </p>
 
-        {/* 💮 調教済ハンコ風スタンプ（アニメーション & 波紋演出） */}
+        {/* 調教済ハンコ風スタンプ（アニメーション & 波紋演出） */}
         <div className="inline-block relative py-2">
           {/* 着地時の波紋リング */}
-          <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border-2 border-red-500/40 pointer-events-none animate-stamp-ripple" />
-          
-          <div className="relative w-32 h-32 rounded-full border-4 border-double border-red-600 flex flex-col items-center justify-center p-2 text-red-600 select-none shadow-md animate-stamp-drop bg-white/40 backdrop-blur-2xs">
-            <div className="text-[10px] font-black tracking-widest border-b-2 border-red-500/80 pb-0.5 px-2">
-              美浦・栗東 坂路
+          <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border-2 border-red-600/40 pointer-events-none animate-stamp-ripple" />
+
+          <div className="relative w-32 h-32 rounded-full border-4 border-double border-red-700 flex flex-col items-center justify-center p-2 text-red-700 select-none shadow-md animate-stamp-drop bg-[#FFFDF9]/75 backdrop-blur-2xs">
+            <div className="text-[10px] font-black tracking-widest border-b-2 border-red-600/80 pb-0.5 px-2">
+              美浦・栗東 トレセン
             </div>
-            <div className="text-2xl font-black my-0.5 tracking-widest drop-shadow-2xs">
+            <div className="text-2xl font-black font-racing-serif my-0.5 tracking-widest drop-shadow-2xs">
               調教済
             </div>
-            <div className="text-[10px] font-bold border-t-2 border-red-500/80 pt-0.5 px-1 font-mono">
+            <div className="text-[10px] font-bold border-t-2 border-red-600/80 pt-0.5 px-1 font-mono font-racing-num">
               {todayDateString}
             </div>
           </div>
         </div>
 
-        {/* 調教完了立ち絵（右向き・無装具） */}
-        <div className="mt-4 max-w-[280px] mx-auto rounded-xl overflow-hidden border border-emerald-200/80 shadow-xs">
+        {/* 調教完了立ち絵（右向き・トレセン厩舎背景合成） */}
+        <div className="mt-4 max-w-[290px] mx-auto rounded-xl overflow-hidden border border-[#C59B27]/60 shadow-xs">
           <HorseIllustration
             color={progress.careerHorse.color}
             scene="training_complete"
@@ -85,17 +87,17 @@ export const ResultScreen: FC<ResultScreenProps> = ({
         </div>
 
         {/* スコア・ステータス変動 */}
-        <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-zinc-100 text-center">
-          <div className="bg-zinc-50 rounded-xl p-3">
-            <span className="text-[11px] text-zinc-500 block mb-0.5">調教正解率</span>
-            <span className="text-xl font-black text-emerald-800">
+        <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-[#E5DEC9] text-center">
+          <div className="bg-[#F5F1E6] rounded-xl p-3 border border-[#DFD6C5]">
+            <span className="text-[11px] text-stone-600 block mb-0.5">調教正解率</span>
+            <span className="text-xl font-black text-[#0D3322] font-racing-num">
               {score} / {totalQuestions}
             </span>
           </div>
-          <div className="bg-emerald-50/60 rounded-xl p-3">
-            <span className="text-[11px] text-emerald-700 block mb-0.5">愛馬の調子</span>
-            <span className="text-base font-bold text-emerald-950 flex items-center justify-center gap-1">
-              <TrendingUp className="w-4 h-4 text-emerald-600" />
+          <div className="bg-[#EEF5F0] rounded-xl p-3 border border-[#BDCEB9]">
+            <span className="text-[11px] text-[#0D3322] block mb-0.5">愛馬の調子</span>
+            <span className="text-base font-bold text-[#0D3322] flex items-center justify-center gap-1">
+              <TrendingUp className="w-4 h-4 text-[#0D3322]" />
               <span>上昇気流 ↗</span>
             </span>
           </div>
@@ -103,30 +105,34 @@ export const ResultScreen: FC<ResultScreenProps> = ({
       </div>
 
       {/* 本日の履修フレーズ振り返り */}
-      <div className="bg-white rounded-2xl border border-zinc-200/80 p-4 shadow-xs">
-        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">
-          Review / 本日の履修フレーズ
+      <div className="bg-[#FFFDF9] rounded-2xl border border-[#D4C9B5] p-4 shadow-xs">
+        <h3 className="text-xs font-extrabold text-[#8A6D1B] uppercase tracking-widest mb-3">
+          Training Review / 本日の履修フレーズ
         </h3>
         <div className="space-y-3">
           {answeredHistory.map((item, idx) => (
             <div
               key={item.phrase.id}
-              className="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-left"
+              className="p-3 rounded-xl bg-[#F7F4EC] border border-[#E2DAC9] text-left"
             >
               <div className="flex items-center justify-between gap-2 mb-1.5">
                 <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <span className="text-xs font-bold text-zinc-900 truncate">
+                  <span className="text-xs font-bold text-stone-900 font-racing-serif truncate">
                     {idx + 1}. “{item.phrase.phrase}”
                   </span>
                   <SpeechButton text={item.phrase.phrase} size="xs" />
                 </div>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
-                  item.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                }`}>
+                <span
+                  className={`text-[11px] font-bold px-2 py-0.5 rounded-xs shrink-0 border ${
+                    item.isCorrect
+                      ? 'bg-[#EEF5F0] text-[#0D3322] border-[#A9CDB6]'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}
+                >
                   {item.isCorrect ? '正解' : '要復習'}
                 </span>
               </div>
-              <p className="text-xs text-zinc-600 leading-snug">
+              <p className="text-xs text-stone-700 leading-snug">
                 {item.phrase.explanation}
               </p>
             </div>
@@ -137,9 +143,9 @@ export const ResultScreen: FC<ResultScreenProps> = ({
       {/* ホームへ戻るボタン */}
       <button
         onClick={onGoHome}
-        className="w-full bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] transition-all text-white font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer mt-auto"
+        className="w-full bg-[#0D3322] hover:bg-[#164B33] active:scale-[0.98] transition-all text-[#FAF8F3] border border-[#C59B27]/50 font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer mt-auto"
       >
-        <Home className="w-5 h-5" />
+        <Home className="w-5 h-5 text-[#E6C762]" />
         <span>厩舎（ホーム）へ戻る</span>
       </button>
     </div>

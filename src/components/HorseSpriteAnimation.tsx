@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import type { HorseCoatColor, TrainingCourse } from '../types';
 import {
   getHorseImageUrl,
+  getBackgroundImageUrl,
+  resolveGallopSceneBackground,
   SPRITE_FRAME_WIDTH,
   SPRITE_FRAME_HEIGHT,
   SPRITE_TOTAL_FRAMES,
@@ -13,6 +15,7 @@ interface HorseSpriteAnimationProps {
   color: HorseCoatColor;
   scene: 'training_gallop' | 'race_gallop';
   courseType?: TrainingCourse;
+  raceSurface?: 'turf' | 'dirt' | 'jump';
   className?: string;
 }
 
@@ -56,6 +59,7 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
   color,
   scene,
   courseType = 'uphill',
+  raceSurface = 'turf',
   className = '',
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -66,6 +70,8 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
 
   const imageUrl = getHorseImageUrl(color, scene);
   const isTraining = scene === 'training_gallop';
+  const bgType = resolveGallopSceneBackground(scene, courseType, raceSurface);
+  const bgImageUrl = getBackgroundImageUrl(bgType);
 
   // 画像のロードと透過フレームの生成
   useEffect(() => {
@@ -141,45 +147,52 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
 
   // 背景コーススタイルの決定
   const isRace = scene === 'race_gallop';
+  const isDirtRace = isRace && raceSurface === 'dirt';
   const isWoodchip = courseType === 'woodchip';
+
+  const courseLabel = isRace
+    ? isDirtRace
+      ? '本馬場ダート'
+      : '本馬場ターフ'
+    : isWoodchip
+    ? 'ウッドチップコース'
+    : '栗東・美浦坂路';
 
   return (
     <div
-      className={`relative w-full rounded-2xl overflow-hidden shadow-xs border select-none ${
-        isRace
-          ? 'bg-linear-to-r from-emerald-800 via-green-700 to-emerald-900 border-emerald-600/50'
+      className={`relative w-full rounded-2xl overflow-hidden shadow-sm border select-none ${
+        isDirtRace
+          ? 'bg-amber-950 border-amber-700/60'
+          : isRace
+          ? 'bg-emerald-950 border-emerald-700/60'
           : isWoodchip
-          ? 'bg-linear-to-r from-amber-900 via-stone-800 to-amber-950 border-amber-700/50'
-          : 'bg-linear-to-r from-emerald-900 via-teal-800 to-emerald-950 border-emerald-600/40'
+          ? 'bg-stone-900 border-amber-700/50'
+          : 'bg-emerald-950 border-emerald-700/50'
       } ${className}`}
-      style={{ minHeight: '110px' }}
+      style={{ minHeight: '120px' }}
     >
-      {/* 背景装飾: コース演出（ターフ／坂路／ウッドチップ） */}
+      {/* 背景イラストレイヤー（坂路 / ウッドチップ / 芝本馬場 / ダート本馬場） */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* コース地面 */}
-        <div
-          className={`absolute bottom-0 inset-x-0 h-9 ${
-            isRace
-              ? 'bg-linear-to-t from-emerald-950 to-emerald-600/70 border-t border-emerald-400/30'
-              : isWoodchip
-              ? 'bg-linear-to-t from-stone-950 to-amber-800/80 border-t border-amber-500/30'
-              : 'bg-linear-to-t from-zinc-950 to-teal-800/70 border-t border-emerald-400/20'
-          }`}
+        <img
+          src={bgImageUrl}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover object-center"
         />
 
-        {/* コースラチ・白線フェンス */}
-        <div className="absolute bottom-8 inset-x-0 h-1 bg-white/20 border-b border-white/40" />
+        {/* 馬体輪郭を引き立てる微細なコントラストオーバーレイ */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-black/15" />
 
         {/* スピードライン（疾走風エフェクト） */}
-        <div className="absolute inset-0 opacity-25">
-          <div className="w-full h-full bg-[repeating-linear-gradient(90deg,transparent,transparent_40px,rgba(255,255,255,0.15)_40px,rgba(255,255,255,0.15)_45px)] animate-pulse" />
+        <div className="absolute inset-0 opacity-20">
+          <div className="w-full h-full bg-[repeating-linear-gradient(90deg,transparent,transparent_40px,rgba(255,255,255,0.18)_40px,rgba(255,255,255,0.18)_45px)] animate-pulse" />
         </div>
       </div>
 
       {/* スプライトCanvas本体 */}
       <div className="relative z-10 flex items-center justify-center p-1.5 h-full">
         {isLoading && (
-          <div className="flex items-center justify-center text-xs text-white/80 py-8 gap-2">
+          <div className="flex items-center justify-center text-xs text-white/90 py-8 gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
             <span>愛馬スタンバイ中...</span>
           </div>
@@ -188,7 +201,7 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
           ref={canvasRef}
           width={FRAME_WIDTH}
           height={FRAME_HEIGHT}
-          className={`w-full max-w-[280px] sm:max-w-[320px] h-auto object-contain transition-opacity duration-300 ${
+          className={`w-full max-w-[290px] sm:max-w-[330px] h-auto object-contain transition-opacity duration-300 drop-shadow-[0_3px_5px_rgba(0,0,0,0.4)] ${
             isLoading ? 'opacity-0' : 'opacity-100'
           }`}
           aria-label={`${color}の愛馬疾走アニメーション`}
@@ -197,8 +210,8 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
 
       {/* コース情報バッジ */}
       <div className="absolute top-2 left-2 z-20 pointer-events-none">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/40 text-white/90 backdrop-blur-2xs border border-white/20 shadow-2xs">
-          {isRace ? '🏇 本馬場ターフ' : isWoodchip ? '🪵 ウッドチップコース' : '🌿 栗東・美浦坂路'}
+        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-sm bg-black/55 text-amber-100/95 backdrop-blur-2xs border border-amber-300/30 shadow-2xs tracking-wide">
+          {courseLabel}
         </span>
       </div>
     </div>

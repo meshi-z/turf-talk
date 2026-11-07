@@ -5,17 +5,26 @@ import path from 'node:path';
 import {
   HORSE_COAT_KEY_MAP,
   REVERSE_HORSE_COAT_KEY_MAP,
+  HORSE_BACKGROUND_FILE_MAP,
   getHorseImageUrl,
+  getBackgroundImageUrl,
+  resolveStaticSceneBackground,
+  resolveGallopSceneBackground,
   getCoatKey,
   SPRITE_FRAME_WIDTH,
   SPRITE_FRAME_HEIGHT,
   SPRITE_TOTAL_FRAMES,
+  STATIC_ILLUSTRATION_WIDTH,
+  STATIC_ILLUSTRATION_HEIGHT,
+  STATIC_CLOSED_REGION_SEEDS,
   TRAINING_REINS_SEEDS,
   RACE_REINS_SEEDS,
   CROSSED_HIND_LEGS_SEEDS,
   isProtectedWhiteSaddleCloth,
   applyFrameFloodFillTransparency,
+  applyStaticSceneFloodFillTransparency,
   type HorseSceneType,
+  type HorseBackgroundType,
 } from '../src/lib/horseAssets.ts';
 import type { HorseCoatColor } from '../src/types/index.ts';
 
@@ -108,6 +117,48 @@ test('horse assets: verify all 48 asset files (8 coats * 6 scenes) exist on disk
   }
 
   assert.strictEqual(verifiedCount, 48, 'Exactly 48 horse visual asset files must be verified');
+});
+
+test('background assets: verify all 7 scene background files exist and resolve correctly', () => {
+  const expectedBackgrounds: HorseBackgroundType[] = [
+    'pasture',
+    'uphill_course',
+    'woodchip_course',
+    'stable',
+    'turf_race',
+    'dirt_race',
+    'winners_circle',
+  ];
+
+  assert.strictEqual(Object.keys(HORSE_BACKGROUND_FILE_MAP).length, 7);
+
+  const bgDir = path.resolve(process.cwd(), 'src/assets/backgrounds');
+  assert.ok(fs.existsSync(bgDir), 'src/assets/backgrounds directory must exist');
+
+  for (const bgType of expectedBackgrounds) {
+    const fileName = HORSE_BACKGROUND_FILE_MAP[bgType];
+    assert.strictEqual(fileName, `bg_${bgType}.jpg`);
+
+    const url = getBackgroundImageUrl(bgType);
+    assert.ok(url.includes(fileName), `Background URL should contain ${fileName}, got: ${url}`);
+
+    const filePath = path.join(bgDir, fileName);
+    assert.ok(fs.existsSync(filePath), `Background asset file ${fileName} must exist`);
+    const stat = fs.statSync(filePath);
+    assert.ok(stat.size > 1000, `Background asset file ${fileName} should not be empty`);
+  }
+
+  // シーン別の背景マッピング検証
+  assert.strictEqual(resolveStaticSceneBackground('standing_left'), 'pasture');
+  assert.strictEqual(resolveStaticSceneBackground('training_complete'), 'stable');
+  assert.strictEqual(resolveStaticSceneBackground('race_victory'), 'winners_circle');
+  assert.strictEqual(resolveStaticSceneBackground('race_cooldown'), 'stable');
+
+  assert.strictEqual(resolveGallopSceneBackground('training_gallop', 'uphill'), 'uphill_course');
+  assert.strictEqual(resolveGallopSceneBackground('training_gallop', 'woodchip'), 'woodchip_course');
+  assert.strictEqual(resolveGallopSceneBackground('race_gallop', 'uphill', 'turf'), 'turf_race');
+  assert.strictEqual(resolveGallopSceneBackground('race_gallop', 'uphill', 'dirt'), 'dirt_race');
+  assert.strictEqual(resolveGallopSceneBackground('race_gallop', 'uphill', 'jump'), 'turf_race');
 });
 
 test('sprite transparency: white saddle cloth guard protects only actual cloth interior and never blocks area above saddle', () => {
@@ -222,4 +273,61 @@ test('sprite transparency: clears background around saddle in training and keeps
     assert.strictEqual(getAlpha(reinsSeed[0], reinsSeed[1]), 0, 'Reins closed space must be transparent');
     assert.strictEqual(getAlpha(legSeed[0], legSeed[1]), 0, 'Crossed legs closed space must be transparent');
   }
+});
+
+test('static scene transparency: clears outer background and reins holes while keeping white horse opaque', () => {
+  assert.strictEqual(STATIC_ILLUSTRATION_WIDTH, 1376);
+  assert.strictEqual(STATIC_ILLUSTRATION_HEIGHT, 768);
+  assert.strictEqual(STATIC_CLOSED_REGION_SEEDS.standing_left.length, 0);
+  assert.strictEqual(STATIC_CLOSED_REGION_SEEDS.training_complete.length, 0);
+  assert.strictEqual(STATIC_CLOSED_REGION_SEEDS.race_victory.length, 2);
+  assert.strictEqual(STATIC_CLOSED_REGION_SEEDS.race_cooldown.length, 2);
+
+  const w = STATIC_ILLUSTRATION_WIDTH;
+  const h = STATIC_ILLUSTRATION_HEIGHT;
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = 255;
+    data[i + 1] = 255;
+    data[i + 2] = 255;
+    data[i + 3] = 255;
+  }
+
+  // 白毛の胴体を模擬 (X: 400..900, Y: 200..500)
+  for (let y = 200; y <= 500; y++) {
+    for (let x = 400; x <= 900; x++) {
+      const idx = (y * w + x) * 4;
+      const isBorder = x === 400 || x === 900 || y === 200 || y === 500;
+      if (isBorder) {
+        data[idx] = 20;
+        data[idx + 1] = 17;
+        data[idx + 2] = 15;
+      } else {
+        data[idx] = 247;
+        data[idx + 1] = 249;
+        data[idx + 2] = 252;
+      }
+      data[idx + 3] = 255;
+    }
+  }
+
+  // race_victory の手綱間閉領域シード (1000, 257) を囲む黒主線ボックス
+  for (let y = 250; y <= 264; y++) {
+    for (let x = 992; x <= 1008; x++) {
+      const idx = (y * w + x) * 4;
+      const isBorder = x === 992 || x === 1008 || y === 250 || y === 264;
+      if (isBorder) {
+        data[idx] = 20;
+        data[idx + 1] = 17;
+        data[idx + 2] = 15;
+      }
+    }
+  }
+
+  applyStaticSceneFloodFillTransparency(data, w, h, 'race_victory');
+
+  const getAlpha = (x: number, y: number) => data[(y * w + x) * 4 + 3];
+  assert.strictEqual(getAlpha(50, 50), 0, 'Outer background must be transparent');
+  assert.strictEqual(getAlpha(650, 350), 255, 'White horse body must remain opaque');
+  assert.strictEqual(getAlpha(1000, 257), 0, 'Reins closed hole must be transparent');
 });
