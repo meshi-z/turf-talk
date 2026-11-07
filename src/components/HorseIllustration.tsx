@@ -25,13 +25,6 @@ const SCENE_LABEL_MAP: Record<StaticHorseSceneType, string> = {
   race_cooldown: 'レース惜敗・息整え立ち絵',
 };
 
-const SCENE_LOCATION_BADGE_MAP: Record<StaticHorseSceneType, string> = {
-  standing_left: '牧場パドック',
-  training_complete: 'トレセン厩舎',
-  race_victory: 'ウィナーズサークル',
-  race_cooldown: 'クールダウン馬房',
-};
-
 export const HorseIllustration: FC<HorseIllustrationProps> = ({
   color,
   scene,
@@ -160,12 +153,6 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
         />
       )}
 
-      {/* シーンロケーションラベル */}
-      <div className="absolute top-2 left-2 z-20 pointer-events-none">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-sm bg-black/50 text-amber-100/95 backdrop-blur-2xs border border-amber-300/30 shadow-2xs tracking-wide">
-          {SCENE_LOCATION_BADGE_MAP[scene]}
-        </span>
-      </div>
     </div>
   );
 };
