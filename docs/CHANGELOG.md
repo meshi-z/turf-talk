@@ -8,6 +8,17 @@
 ## [Unreleased]
 
 ### Changed
+- **競馬用語フレーズ図鑑・殿堂入りギャラリー・引退式画面の競馬デザイン統一 ([#107](https://github.com/meshi-z/turf-talk/issues/107)):**
+  - **競馬用語フレーズ図鑑画面 (`src/components/PhraseBookScreen.tsx`):**
+    - 背景・フィルター・フレーズカードをレーシングプログラム・アイボリー（`#FAF8F3` / `#FFFDF9`）およびクラシックゴールド枠（`#D4C9B5` / `#C59B27`）に統一。
+    - 見出しと英語フレーズにセリフ体（`.font-racing-serif`）、習得数・達成率・通番に等幅数字（`.font-racing-num`）を適用。
+    - コース表示の絵文字（`🌿` / `🪵`）をゼッケン番号バッジ（`.saddle-cloth-badge`：`1` 坂路、`2` ウッドチップ）に刷新し、フィルターやカード内の装飾絵文字を Lucide ベクターアイコン（`CheckCircle2`, `Clock`, `Star`, `Volume2`, `Radio`, `Lightbulb`, `Award`）に置換。
+  - **殿堂入りギャラリー画面 (`src/components/HallOfFameScreen.tsx`):**
+    - 統計サマリーバナーをブリティッシュ・レーシンググリーン（`#0D3322`）＆馬具ステッチ枠（`.racing-stitch-border`）のクラブハウス顕彰ボード仕様に刷新。
+    - 歴代愛馬カードをクラブハウス記念プレート風デザイン（`#FFFDF9` 背景、`.saddle-cloth-badge` 世代バッジ、`.font-racing-serif` 二つ名・馬名、`.font-racing-num` 通算成績）に統一し、空状態や戦績の装飾絵文字を `Crown` / `Trophy` ベクターアイコンに置換。
+  - **引退式・次世代継承画面 (`src/components/RetirementScreen.tsx`):**
+    - 引退式セレモニーヘッダーの巨大な透かし絵文字（`👑`）を廃止し、サドルレザー＆ブラスゴールド（`#4A2511`〜`#1F0F06`）＋馬具ステッチ枠（`.racing-stitch-border`）の重厚な記念額装デザインに刷新。
+    - 4週間戦績ボードをアイボリー調に、次世代愛馬指名カードをブリティッシュ・レーシンググリーン＋ステッチ枠に統一し、ボタンや見出しの絵文字（`🎖️`, `🌱`, `🎲`）をベクターアイコン（`Flag`, `Sparkles`, `Dices`）に置換。
 - **愛馬イラストコンポーネント（HorseIllustration）のロケーション名オーバーレイの削除 ([#106](https://github.com/meshi-z/turf-talk/issues/106)):**
   - ホーム画面（牧場パドック）、調教完了画面（トレセン厩舎）、レース結果画面（ウィナーズサークル／クールダウン馬房）の愛馬立ち絵の左上に表示されていたロケーション名バッジ（`SCENE_LOCATION_BADGE_MAP`）を削除。
   - 背景イラストの雰囲気でシチュエーションが十分に伝わるため、文字オーバーレイを排して背景と愛馬立ち絵のみをクリアに表示し、画面の視覚的没入感とデザインの洗練度を向上。

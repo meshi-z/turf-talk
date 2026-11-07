@@ -15,6 +15,11 @@ import {
   CheckCircle2,
   Clock,
   Sparkles,
+  Volume2,
+  Radio,
+  Lightbulb,
+  Award,
+  X,
 } from 'lucide-react';
 import { SpeechButton } from './SpeechButton';
 import { SpeechControls } from './SpeechControls';
@@ -83,7 +88,7 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
 
   const bookmarkCount = bookmarkedSet.size;
 
-  // フィルタリング処理（#89の構成を踏襲・拡張）
+  // フィルタリング処理
   const filteredPhrases = useMemo(() => {
     return INITIAL_PHRASES.filter((item) => {
       const isLearned = learnedSet.has(item.id);
@@ -121,24 +126,24 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
   }, [statusFilter, courseFilter, categoryFilter, searchQuery, learnedSet, bookmarkedSet]);
 
   return (
-    <div className="flex-1 flex flex-col bg-zinc-100 min-h-screen text-zinc-900 pb-12">
+    <div className="flex-1 flex flex-col bg-[#FAF8F3] min-h-screen text-stone-900 pb-12">
       {/* 上部固定ヘッダー */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xs border-b border-zinc-200 px-3 sm:px-4 py-2.5 shadow-xs">
+      <header className="sticky top-14 z-40 bg-[#FAF8F3]/95 backdrop-blur-xs border-b border-[#D8CEBE] px-3 sm:px-4 py-2.5 shadow-2xs">
         <div className="flex items-center justify-between gap-2 max-w-md mx-auto w-full">
           <button
             onClick={onBackToHome}
-            className="inline-flex items-center gap-1 text-xs font-bold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 px-2 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1 text-xs font-bold text-stone-600 hover:text-stone-900 hover:bg-stone-200/60 px-2 py-1 rounded-lg transition-colors cursor-pointer shrink-0"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>ホーム（厩舎）へ</span>
           </button>
 
           <div className="text-right min-w-0">
-            <h1 className="text-sm font-black text-emerald-950 flex items-center justify-end gap-1 truncate">
-              <BookOpen className="w-4 h-4 text-emerald-600 shrink-0" />
+            <h1 className="text-sm font-bold text-[#0D3322] font-racing-serif flex items-center justify-end gap-1.5 truncate">
+              <BookOpen className="w-4 h-4 text-[#9A7418] shrink-0" />
               <span>競馬英語フレーズ図鑑</span>
             </h1>
-            <p className="text-[10px] text-zinc-500 font-medium">
+            <p className="text-[10px] text-stone-600 font-medium font-racing-num">
               {filteredPhrases.length} 件表示（全 {totalCount} 問）
             </p>
           </div>
@@ -146,43 +151,52 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
       </header>
 
       {/* 習得進捗サマリーカード */}
-      <div className="bg-linear-to-b from-white to-emerald-50/30 border-b border-emerald-100/80 px-4 py-3.5 shadow-2xs">
+      <div className="bg-linear-to-b from-[#FFFDF9] to-[#F5F1E6] border-b border-[#D8CEBE] px-4 py-3.5 shadow-2xs">
         <div className="max-w-md mx-auto w-full">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-bold text-emerald-950 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-bold text-[#0D3322] font-racing-serif flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#9A7418]" />
               <span>総合マスター進捗</span>
             </span>
-            <span className="text-xs font-black text-emerald-800">
+            <span className="text-xs font-black text-[#0D3322] font-racing-num">
               {learnedTotalCount} / {totalCount} 問 ({progressPercent}%)
             </span>
           </div>
 
           {/* プログレスバー */}
-          <div className="w-full bg-zinc-200/80 h-2.5 rounded-full overflow-hidden mb-2.5">
+          <div className="w-full bg-[#DED6C6] h-2.5 rounded-full overflow-hidden mb-2.5">
             <div
-              className="bg-emerald-600 h-full rounded-full transition-all duration-300 ease-out"
+              className="bg-linear-to-r from-[#0D3322] to-[#1D6344] h-full rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
           {/* コース別 & ブックマーク進捗バッジ */}
           <div className="grid grid-cols-3 gap-1.5 text-center text-[11px]">
-            <div className="bg-white/80 rounded-lg p-1.5 border border-emerald-100">
-              <span className="text-[10px] text-zinc-500 block">🌿 坂路実戦</span>
-              <span className="font-extrabold text-emerald-900">
+            <div className="bg-[#FFFDF9] rounded-lg p-1.5 border border-[#BDCEB9]">
+              <span className="text-[10px] text-stone-600 flex items-center justify-center gap-1">
+                <span className="saddle-cloth-badge w-3.5 h-3.5 bg-[#0D3322] text-[#FAF8F3] text-[8px]">1</span>
+                <span>坂路実戦</span>
+              </span>
+              <span className="font-extrabold text-[#0D3322] font-racing-num block mt-0.5">
                 {uphillLearned} / {uphillTotal}
               </span>
             </div>
-            <div className="bg-white/80 rounded-lg p-1.5 border border-emerald-100">
-              <span className="text-[10px] text-zinc-500 block">🪵 ウッド単語</span>
-              <span className="font-extrabold text-amber-900">
+            <div className="bg-[#FFFDF9] rounded-lg p-1.5 border border-[#DEC8A8]">
+              <span className="text-[10px] text-stone-600 flex items-center justify-center gap-1">
+                <span className="saddle-cloth-badge w-3.5 h-3.5 bg-[#6B3A1E] text-[#FAF8F3] text-[8px]">2</span>
+                <span>ウッド単語</span>
+              </span>
+              <span className="font-extrabold text-[#6B3A1E] font-racing-num block mt-0.5">
                 {woodchipLearned} / {woodchipTotal}
               </span>
             </div>
-            <div className="bg-white/80 rounded-lg p-1.5 border border-amber-100">
-              <span className="text-[10px] text-amber-800 block">⭐ 要復習</span>
-              <span className="font-extrabold text-amber-950">
+            <div className="bg-[#FFFDF9] rounded-lg p-1.5 border border-[#E2C98A]">
+              <span className="text-[10px] text-[#8A6D1B] flex items-center justify-center gap-1">
+                <Star className="w-3 h-3 fill-[#C59B27] text-[#9A7418]" />
+                <span>要復習</span>
+              </span>
+              <span className="font-extrabold text-stone-900 font-racing-num block mt-0.5">
                 {bookmarkCount} 件
               </span>
             </div>
@@ -190,111 +204,117 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
         </div>
       </div>
 
-      {/* 検索 & フィルターエリア（#89の構成を踏襲・拡張） */}
-      <div className="bg-white border-b border-zinc-200/80 px-3 sm:px-4 py-3 shadow-2xs">
+      {/* 検索 & フィルターエリア */}
+      <div className="bg-[#FFFDF9] border-b border-[#D8CEBE] px-3 sm:px-4 py-3 shadow-2xs">
         <div className="max-w-md mx-auto w-full space-y-2.5">
           {/* 検索インプット */}
           <div className="relative">
-            <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="英語、日本語訳、解説、シチュエーションを検索..."
-              className="w-full pl-9 pr-8 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-xl text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white shadow-2xs"
+              className="w-full pl-9 pr-8 py-2 text-xs bg-[#F7F4EC] border border-[#D4C9B5] rounded-xl text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#0D3322] focus:bg-[#FFFDF9] shadow-2xs"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
                 title="検索をクリア"
+                aria-label="検索をクリア"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* 習得状態フィルター（すべて / 習得済 / 未習得 / ⭐ 要復習） */}
-          <div className="grid grid-cols-4 gap-1 text-[11px] font-bold">
+          {/* 習得状態フィルター（すべて / 習得済 / 未習得 / 要復習） */}
+          <div className="grid grid-cols-4 gap-1 text-[11px] font-bold font-racing-num">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer border ${
                 statusFilter === 'all'
-                  ? 'bg-zinc-800 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  ? 'bg-stone-800 text-[#FAF8F3] border-stone-800 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
               すべて
             </button>
             <button
               onClick={() => setStatusFilter('learned')}
-              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer border inline-flex items-center justify-center gap-1 ${
                 statusFilter === 'learned'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  ? 'bg-[#0D3322] text-[#FAF8F3] border-[#C59B27]/60 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
-              ✅ 習得済 ({learnedTotalCount})
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>習得済 ({learnedTotalCount})</span>
             </button>
             <button
               onClick={() => setStatusFilter('unlearned')}
-              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer border inline-flex items-center justify-center gap-1 ${
                 statusFilter === 'unlearned'
-                  ? 'bg-amber-700 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  ? 'bg-[#6B3A1E] text-[#FAF8F3] border-[#C59B27]/60 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
-              ⏳ 未習得 ({totalCount - learnedTotalCount})
+              <Clock className="w-3 h-3 shrink-0" />
+              <span>未習得 ({totalCount - learnedTotalCount})</span>
             </button>
             <button
               onClick={() => setStatusFilter('bookmarked')}
-              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1.5 px-1 rounded-lg transition-all text-center cursor-pointer border inline-flex items-center justify-center gap-1 ${
                 statusFilter === 'bookmarked'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600'
+                  ? 'bg-[#C59B27] text-stone-950 border-[#9A7418] shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
-              ⭐ 要復習 ({bookmarkCount})
+              <Star className="w-3 h-3 shrink-0" />
+              <span>要復習 ({bookmarkCount})</span>
             </button>
           </div>
 
           {/* コース種別選択チップ */}
-          <div className="grid grid-cols-3 gap-1.5 text-xs font-bold">
+          <div className="grid grid-cols-3 gap-1.5 text-xs font-bold font-racing-num">
             <button
               onClick={() => setCourseFilter('all')}
-              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer border ${
                 courseFilter === 'all'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                  ? 'bg-[#0D3322] text-[#FAF8F3] border-[#C59B27]/60 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
               全コース
             </button>
             <button
               onClick={() => setCourseFilter('phrase')}
-              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer border inline-flex items-center justify-center gap-1.5 ${
                 courseFilter === 'phrase'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                  ? 'bg-[#0D3322] text-[#FAF8F3] border-[#C59B27]/60 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
-              🌿 坂路 ({uphillTotal})
+              <span className="saddle-cloth-badge w-4 h-4 bg-[#0D3322] text-[#FAF8F3] text-[9px] border border-[#C59B27]">1</span>
+              <span>坂路 ({uphillTotal})</span>
             </button>
             <button
               onClick={() => setCourseFilter('vocabulary')}
-              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer ${
+              className={`py-1 px-2 rounded-lg transition-all text-center cursor-pointer border inline-flex items-center justify-center gap-1.5 ${
                 courseFilter === 'vocabulary'
-                  ? 'bg-emerald-700 text-white shadow-xs'
-                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                  ? 'bg-[#6B3A1E] text-[#FAF8F3] border-[#C59B27]/60 shadow-xs'
+                  : 'bg-[#F3EFE6] hover:bg-[#EAE3D5] text-stone-700 border-[#D8CEBE]'
               }`}
             >
-              🪵 ウッド ({woodchipTotal})
+              <span className="saddle-cloth-badge w-4 h-4 bg-[#6B3A1E] text-[#FAF8F3] text-[9px] border border-[#C59B27]">2</span>
+              <span>ウッド ({woodchipTotal})</span>
             </button>
           </div>
 
           {/* カテゴリ選択チップ */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[11px] scrollbar-none">
-            <span className="text-zinc-400 shrink-0 flex items-center gap-0.5 mr-0.5">
+            <span className="text-stone-500 shrink-0 flex items-center gap-0.5 mr-0.5">
               <Filter className="w-3 h-3" />
             </span>
             {(
@@ -311,10 +331,10 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                 <button
                   key={cat.key}
                   onClick={() => setCategoryFilter(cat.key)}
-                  className={`px-2 py-0.5 rounded-full font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                  className={`px-2.5 py-0.5 rounded-sm font-semibold whitespace-nowrap transition-colors cursor-pointer border ${
                     isSelected
-                      ? 'bg-zinc-800 text-white'
-                      : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                      ? 'bg-[#0D3322] text-[#E6C762] border-[#C59B27]'
+                      : 'bg-[#F3EFE6] text-stone-700 border-[#D8CEBE] hover:bg-[#EAE3D5]'
                   }`}
                 >
                   {cat.label}
@@ -324,9 +344,10 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
           </div>
 
           {/* 音声発音設定バー */}
-          <div className="flex items-center justify-between pt-1 border-t border-zinc-100 text-[11px] text-zinc-500">
-            <span className="font-semibold text-zinc-600 flex items-center gap-1">
-              <span>🔊</span> 発音設定:
+          <div className="flex items-center justify-between pt-1.5 border-t border-[#E5DEC9] text-[11px] text-stone-600">
+            <span className="font-semibold text-stone-700 flex items-center gap-1">
+              <Volume2 className="w-3.5 h-3.5 text-[#0D3322]" />
+              <span>発音設定:</span>
             </span>
             <SpeechControls />
           </div>
@@ -336,9 +357,11 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
       {/* フレーズカード一覧リスト */}
       <main className="flex-1 p-3 sm:p-4 max-w-md mx-auto w-full space-y-3">
         {filteredPhrases.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-zinc-200 p-8 text-center text-zinc-500">
-            <p className="text-sm font-bold">該当するフレーズが見つかりませんでした。</p>
-            <p className="text-xs text-zinc-400 mt-1">
+          <div className="bg-[#FFFDF9] rounded-2xl border border-[#D4C9B5] p-8 text-center text-stone-600">
+            <p className="text-sm font-bold font-racing-serif text-stone-800">
+              該当するフレーズが見つかりませんでした
+            </p>
+            <p className="text-xs text-stone-500 mt-1">
               検索キーワードやフィルター条件を変更してお試しください。
             </p>
           </div>
@@ -360,42 +383,42 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
             return (
               <div
                 key={item.id}
-                className={`bg-white rounded-2xl border transition-all shadow-2xs overflow-hidden ${
+                className={`bg-[#FFFDF9] rounded-2xl border transition-all shadow-2xs overflow-hidden ${
                   isBookmarked
-                    ? 'border-amber-300 ring-1 ring-amber-300/60'
-                    : 'border-zinc-200/90'
+                    ? 'border-[#C59B27] ring-1 ring-[#C59B27]/60'
+                    : 'border-[#D4C9B5]'
                 }`}
               >
                 {/* カードヘッダー */}
-                <div className="bg-zinc-50/90 border-b border-zinc-200/70 px-3.5 py-2 flex items-center justify-between gap-2">
+                <div className="bg-[#F5F1E6] border-b border-[#DFD6C5] px-3.5 py-2 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-200/80 text-zinc-700">
+                    <span className="text-[10px] font-mono font-racing-num font-bold px-1.5 py-0.5 rounded-xs bg-[#E6DFD1] text-stone-800">
                       #{index + 1}
                     </span>
 
                     {/* 習得状態バッジ */}
                     {isLearned ? (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-xs bg-[#0D3322] text-[#E6C762] border border-[#C59B27]">
+                        <CheckCircle2 className="w-3 h-3 text-[#E6C762]" />
                         <span>習得済</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500 border border-zinc-200">
-                        <Clock className="w-3 h-3 text-zinc-400" />
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-xs bg-stone-200/80 text-stone-600 border border-stone-300">
+                        <Clock className="w-3 h-3 text-stone-500" />
                         <span>未習得</span>
                       </span>
                     )}
 
                     <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm border ${
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-xs border ${
                         isVocab
-                          ? 'bg-amber-50 text-amber-900 border-amber-200'
-                          : 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                          ? 'bg-[#FBF5E9] text-[#6B3A1E] border-[#DEC49A]'
+                          : 'bg-[#EEF5F0] text-[#0D3322] border-[#B4CEBD]'
                       }`}
                     >
-                      {isVocab ? '🪵 単語' : '🌿 フレーズ'}
+                      {isVocab ? '基礎単語' : '実戦フレーズ'}
                     </span>
-                    <span className="text-[10px] text-zinc-500">
+                    <span className="text-[10px] text-stone-600 font-medium">
                       {categoryLabel}
                     </span>
                   </div>
@@ -408,12 +431,12 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                     title={isBookmarked ? '要復習から外す' : '要復習・お気に入りに追加'}
                     className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                       isBookmarked
-                        ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
-                        : 'text-zinc-400 hover:text-amber-500 hover:bg-zinc-100'
+                        ? 'text-[#9A7418] bg-[#FDF6E2] hover:bg-[#F8EBC7]'
+                        : 'text-stone-400 hover:text-[#9A7418] hover:bg-stone-200/50'
                     }`}
                   >
                     <Star
-                      className={`w-4 h-4 ${isBookmarked ? 'fill-amber-400 text-amber-500' : ''}`}
+                      className={`w-4 h-4 ${isBookmarked ? 'fill-[#C59B27] text-[#9A7418]' : ''}`}
                     />
                   </button>
                 </div>
@@ -421,20 +444,20 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                 {/* カード本文 */}
                 <div className="p-3.5 space-y-2.5">
                   {/* シチュエーション */}
-                  <div className="text-[11px] text-zinc-600 bg-zinc-50/70 border border-zinc-200/60 rounded-lg px-2.5 py-1 flex items-start gap-1">
-                    <span className="shrink-0 text-xs">🎙️</span>
+                  <div className="text-[11px] text-stone-700 bg-[#F7F4EC] border border-[#E2DAC9] rounded-lg px-2.5 py-1 flex items-start gap-1.5">
+                    <Radio className="w-3.5 h-3.5 text-[#0D3322] shrink-0 mt-0.5" />
                     <span className="leading-snug">{item.situation}</span>
                   </div>
 
                   {/* 英語表現 & 発音ボタン */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-base sm:text-lg font-black text-zinc-900 leading-snug tracking-tight">
+                      <h2 className="text-base sm:text-lg font-bold text-stone-900 font-racing-serif leading-snug tracking-tight">
                         “{item.phrase}”
                       </h2>
                       {item.literalTranslation && (
-                        <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-                          <span className="font-semibold text-zinc-400 mr-1">直訳:</span>
+                        <p className="text-[11px] text-stone-500 mt-0.5 leading-snug">
+                          <span className="font-semibold text-stone-600 mr-1">直訳:</span>
                           {item.literalTranslation}
                         </p>
                       )}
@@ -443,17 +466,18 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                   </div>
 
                   {/* 正解の日本語意味 */}
-                  <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-xl p-2.5 text-xs text-emerald-950 font-bold flex items-start gap-1.5">
-                    <span className="text-emerald-700 shrink-0">🎯</span>
+                  <div className="bg-[#EEF6F0] border border-[#A9CDB6] rounded-xl p-2.5 text-xs text-[#0D3322] font-bold flex items-start gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#0D3322] shrink-0 mt-0.5" />
                     <span className="leading-snug">{correctOption?.text}</span>
                   </div>
 
                   {/* 解説 */}
-                  <div className="bg-amber-50/60 border border-amber-200/70 rounded-xl p-2.5 text-xs text-amber-950 leading-relaxed">
-                    <p className="font-bold text-[11px] text-amber-900 flex items-center gap-1 mb-0.5">
-                      <span>💡</span> ワンポイント解説
+                  <div className="bg-[#FBF7F0] border border-[#DEC8A8] rounded-xl p-2.5 text-xs text-stone-900 leading-relaxed">
+                    <p className="font-bold text-[11px] text-[#6B3A1E] flex items-center gap-1 mb-0.5">
+                      <Lightbulb className="w-3.5 h-3.5 text-[#9A7418] shrink-0" />
+                      <span>ワンポイント解説</span>
                     </p>
-                    <p className="text-[11px] text-zinc-700 leading-relaxed">
+                    <p className="text-[11px] text-stone-700 leading-relaxed">
                       {item.explanation}
                     </p>
                   </div>
@@ -461,23 +485,25 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                   {/* 初習得パートナー馬 */}
                   {isLearned ? (
                     partnerHorse ? (
-                      <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-900">
-                          <span className="text-sm">🐴</span>
+                      <div className="bg-[#F5F1E6] border border-[#D8CEBE] rounded-xl p-2.5 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#0D3322]">
+                          <Award className="w-3.5 h-3.5 text-[#9A7418] shrink-0" />
                           <span>初習得パートナー:</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-400 text-zinc-950 shadow-2xs">
+                          <span className="saddle-cloth-badge text-[10px] px-1.5 py-0.5 bg-[#0D3322] text-[#FAF8F3] border border-[#C59B27] font-racing-num">
                             第{partnerHorse.generation}世代
                           </span>
-                          <span className="font-extrabold text-zinc-900 text-xs">{partnerHorse.name}</span>
+                          <span className="font-bold text-stone-900 font-racing-serif text-xs">
+                            {partnerHorse.name}
+                          </span>
                           <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.borderClass ?? 'border-zinc-300'
+                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border ${
+                              COAT_COLOR_THEMES[partnerHorse.color]?.borderClass ?? 'border-stone-300'
                             } ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.bgClass ?? 'bg-zinc-100'
+                              COAT_COLOR_THEMES[partnerHorse.color]?.bgClass ?? 'bg-stone-100'
                             } ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.textClass ?? 'text-zinc-700'
+                              COAT_COLOR_THEMES[partnerHorse.color]?.textClass ?? 'text-stone-700'
                             }`}
                           >
                             {partnerHorse.color}
@@ -486,13 +512,13 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                       </div>
                     ) : null
                   ) : (
-                    <div className="bg-zinc-50 border border-dashed border-zinc-200/90 rounded-xl p-2 flex items-center justify-between text-[11px] text-zinc-600">
-                      <div className="flex items-center gap-1 font-medium text-zinc-600">
-                        <span>🐴</span>
+                    <div className="bg-[#F7F4EC] border border-dashed border-[#D4C9B5] rounded-xl p-2 flex items-center justify-between text-[11px] text-stone-600">
+                      <div className="flex items-center gap-1 font-medium text-stone-700">
+                        <Award className="w-3.5 h-3.5 text-stone-500 shrink-0" />
                         <span>パートナー:</span>
                       </div>
-                      <span className="text-zinc-600 font-medium">
-                        第{progress.careerHorse.generation}世代「{progress.careerHorse.name}」と調教で習得しよう！
+                      <span className="text-stone-700 font-medium">
+                        第{progress.careerHorse.generation}世代「{progress.careerHorse.name}」と調教で習得しよう
                       </span>
                     </div>
                   )}
