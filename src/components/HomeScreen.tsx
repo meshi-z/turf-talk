@@ -14,6 +14,8 @@ import {
   Compass,
   Lock,
   Crown,
+  BookOpen,
+  ChevronRight,
 } from 'lucide-react';
 import { INITIAL_PHRASES } from '../data/phrases';
 import {
@@ -33,6 +35,7 @@ import {
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
 import { HorseIllustration } from './HorseIllustration';
+import { isDevOrLocalhost } from '../lib/environment';
 
 interface HomeScreenProps {
   progress: UserProgress;
@@ -60,6 +63,10 @@ interface HomeScreenProps {
   onSetDebugCareerWeek?: (week: CareerWeek | null) => void;
   debugRaceCompleted?: boolean | null;
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
+  onOpenDebugQuestions?: () => void;
+  onOpenPhraseBook?: () => void;
+  onOpenHallOfFame?: () => void;
+  onAddSampleHallOfFame?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -91,6 +98,10 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onSetDebugCareerWeek,
   debugRaceCompleted = null,
   onSetDebugRaceCompleted,
+  onOpenDebugQuestions,
+  onOpenPhraseBook,
+  onOpenHallOfFame,
+  onAddSampleHallOfFame,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -801,8 +812,67 @@ export const HomeScreen: FC<HomeScreenProps> = ({
         </div>
       ) : null}
 
-      {/* デバッグ・デモ用曜日切り替えコントロール */}
-      <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
+      {/* フレーズ図鑑への導線カード */}
+      {onOpenPhraseBook && (
+        <button
+          type="button"
+          onClick={onOpenPhraseBook}
+          className="w-full bg-linear-to-r from-emerald-800 to-teal-900 hover:from-emerald-700 hover:to-teal-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-emerald-700/60 flex items-center justify-between gap-3 cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <BookOpen className="w-5 h-5 text-emerald-200" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-sm text-white">
+                  競馬英語フレーズ図鑑
+                </h4>
+                <span className="text-[10px] font-black bg-emerald-500/80 text-white px-2 py-0.5 rounded-full border border-emerald-400/40">
+                  {progress.learnedPhraseIds?.length ?? 0} / {INITIAL_PHRASES.length} 習得
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100/80 mt-0.5">
+                いつでも辞書代わりに検索・復習・発音確認（要復習マーク対応）
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-emerald-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      )}
+
+      {/* 殿堂入りギャラリーへの導線カード */}
+      {onOpenHallOfFame && (
+        <button
+          type="button"
+          onClick={onOpenHallOfFame}
+          className="w-full bg-linear-to-r from-amber-900 via-amber-950 to-zinc-900 hover:from-amber-800 hover:via-amber-900 hover:to-zinc-800 active:scale-[0.99] transition-all text-white rounded-2xl p-4 shadow-sm border border-amber-700/50 flex items-center justify-between gap-3 cursor-pointer text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <Trophy className="w-5 h-5 text-amber-300" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-extrabold text-sm text-white">
+                  殿堂入り愛馬ギャラリー
+                </h4>
+                <span className="text-[10px] font-black bg-amber-500/80 text-zinc-950 px-2 py-0.5 rounded-full border border-amber-300/40">
+                  {progress.hallOfFame?.length ?? 0} 頭 殿堂入り
+                </span>
+              </div>
+              <p className="text-xs text-amber-100/80 mt-0.5">
+                引退した歴代名馬の栄誉・二つ名・戦績アーカイブ
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-amber-300 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </button>
+      )}
+
+      {/* デバッグ・デモ用コントロール（開発環境・localhost限定表示） */}
+      {isDevOrLocalhost() && (
+        <div className="mt-auto pt-4 border-t border-zinc-200/60 space-y-2">
         <div className="bg-zinc-100/80 rounded-xl p-2.5 border border-zinc-200/70 text-xs">
           <div className="flex justify-between items-center mb-2">
             <span className="font-bold text-zinc-700 flex items-center gap-1 text-[11px]">
@@ -1029,6 +1099,33 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           )}
         </div>
 
+        {/* 問題・解答一覧（デバッグ用）参照ボタン */}
+        {onOpenDebugQuestions && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={onOpenDebugQuestions}
+              className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-emerald-950 border border-emerald-600/40 shadow-2xs hover:border-emerald-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>📖</span>
+              <span>問題・解答一覧を表示（全120問・校正用）</span>
+            </button>
+          </div>
+        )}
+
+        {onAddSampleHallOfFame && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onAddSampleHallOfFame}
+                className="w-full py-1.5 px-3 rounded-xl text-xs font-bold bg-white hover:bg-zinc-50 text-amber-900 border border-amber-600/40 shadow-2xs hover:border-amber-500 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🏛️</span>
+                <span>殿堂入りサンプル愛馬を追加（デバッグ用）</span>
+              </button>
+            </div>
+          )}
+
         {/* デモ用データリセットボタン */}
         <div className="text-center pt-1">
           <button
@@ -1040,6 +1137,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 };

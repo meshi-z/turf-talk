@@ -2,6 +2,8 @@
  * 午前4時（28時）更新ロジックおよび論理日付・ストリーク計算ユーティリティ
  */
 
+import type { DayOfWeek } from './dayMode';
+
 export const DAY_CUTOFF_HOUR = 4; // 午前4時（28時）切り替え
 
 /**
@@ -136,3 +138,21 @@ export function isWeeklyRaceCompletedForWeek(
   return lastRaceWeekMonday === currentMonday;
 }
 
+/**
+ * 週の月曜日 ('YYYY-MM-DD') と曜日 (DayOfWeek: 0:日曜, 1:月曜, ..., 6:土曜) から、
+ * その曜日に対応する論理日付文字列 ('YYYY-MM-DD') を算出
+ * 例: baseMonday='2026-10-12', dayOfWeek=1 (月曜) -> '2026-10-12'
+ * 例: baseMonday='2026-10-12', dayOfWeek=5 (金曜) -> '2026-10-16'
+ * 例: baseMonday='2026-10-12', dayOfWeek=0 (日曜) -> '2026-10-18'
+ */
+export function getDateStringForDayOfWeek(baseMonday: string, dayOfWeek: DayOfWeek): string {
+  const [y, m, d] = baseMonday.split('-').map(Number);
+  const utcDate = new Date(Date.UTC(y, m - 1, d));
+  const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  utcDate.setUTCDate(utcDate.getUTCDate() + offset);
+
+  const year = utcDate.getUTCFullYear();
+  const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(utcDate.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}

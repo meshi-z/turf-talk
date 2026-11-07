@@ -21,6 +21,8 @@ import {
 import { eliminateOneWrongOption } from '../lib/conditionBonus';
 import type { CareerRouteRace, HorseCoatColor } from '../types';
 import { HorseSpriteAnimation } from './HorseSpriteAnimation';
+import { SpeechButton } from './SpeechButton';
+import { SpeechControls } from './SpeechControls';
 
 interface RaceScreenProps {
   questions: PhraseItem[];
@@ -173,7 +175,7 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
 
       {/* 英文問題カード（基礎単語または実戦フレーズ） */}
       <div className="bg-white border-2 border-amber-600/30 rounded-2xl p-4 shadow-2xs mb-3">
-        <div className="flex items-center justify-between mb-1.5 gap-2 flex-wrap">
+        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
               {currentItem.type === 'vocabulary' ? 'TARGET VOCABULARY' : 'TARGET PHRASE'}
@@ -188,13 +190,14 @@ export const RaceScreen: React.FC<RaceScreenProps> = ({
               {currentItem.type === 'vocabulary' ? '🪵 基礎単語' : '🌿 実戦フレーズ'}
             </span>
           </div>
-          <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 truncate max-w-[200px]">
-            {currentItem.situation}
-          </span>
+          <SpeechControls compact />
         </div>
-        <blockquote className="text-xl font-extrabold text-zinc-900 leading-snug tracking-tight">
-          “{currentItem.phrase}”
-        </blockquote>
+        <div className="flex items-start justify-between gap-3">
+          <blockquote className="text-xl font-extrabold text-zinc-900 leading-snug tracking-tight flex-1">
+            “{currentItem.phrase}”
+          </blockquote>
+          <SpeechButton text={currentItem.phrase} size="sm" showLabel label="発音" />
+        </div>
       </div>
 
       {/* 問いかけ & 調教ヒントボタン */}

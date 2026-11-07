@@ -1,31 +1,31 @@
 {
   "name": "turf-talk",
   "private": true,
-  "version": "0.13.0",
+  "version": "0.18.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "node --experimental-strip-types --test tests/verify_phrases.test.ts tests/daily_rotation.test.ts tests/sound.test.ts tests/version.test.ts tests/day_mode.test.ts tests/race_mode.test.ts tests/condition_bonus.test.ts tests/streak_logical_date.test.ts tests/carrot_streak_bonus.test.ts tests/extra_training.test.ts tests/career_cycle.test.ts tests/weekend_race_unlock.test.ts tests/weekend_generation_transition.test.ts tests/woodchip_training.test.ts tests/horse_assets.test.ts",
+    "test": "node --experimental-strip-types --test tests/verify_phrases.test.ts tests/daily_rotation.test.ts tests/sound.test.ts tests/version.test.ts tests/day_mode.test.ts tests/race_mode.test.ts tests/condition_bonus.test.ts tests/streak_logical_date.test.ts tests/carrot_streak_bonus.test.ts tests/extra_training.test.ts tests/career_cycle.test.ts tests/weekend_race_unlock.test.ts tests/weekend_generation_transition.test.ts tests/woodchip_training.test.ts tests/environment.test.ts tests/debug_day_sync.test.ts tests/speech.test.ts tests/phrase_book.test.ts tests/hall_of_fame.test.ts tests/phrase_partner.test.ts tests/horse_assets.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.61.0",
+    "lucide-react": "^1.64.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "oxlint": "^1.89.0",
+    "oxlint": "^1.90.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.5"
   }

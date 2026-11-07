@@ -7,6 +7,9 @@ import { ResultScreen } from './components/ResultScreen';
 import { RaceScreen } from './components/RaceScreen';
 import { RaceResultScreen } from './components/RaceResultScreen';
 import { RetirementScreen } from './components/RetirementScreen';
+import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
+import { PhraseBookScreen } from './components/PhraseBookScreen';
+import { HallOfFameScreen } from './components/HallOfFameScreen';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
@@ -19,7 +22,7 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -34,6 +37,8 @@ export function App() {
     rerollHorseCoatColor,
     retireCurrentHorse,
     resetProgressForDemo,
+    addSampleHallOfFameForDemo,
+    toggleBookmarkPhrase,
     todayString,
     appMode,
     effectiveDayOfWeek,
@@ -246,6 +251,10 @@ export function App() {
               onSetDebugCareerWeek={setDebugCareerWeek}
               debugRaceCompleted={debugRaceCompleted}
               onSetDebugRaceCompleted={setDebugRaceCompleted}
+              onOpenDebugQuestions={() => setCurrentScreen('debug-questions')}
+              onOpenPhraseBook={() => setCurrentScreen('phrase-book')}
+              onOpenHallOfFame={() => setCurrentScreen('hall-of-fame')}
+              onAddSampleHallOfFame={addSampleHallOfFameForDemo}
             />
           )}
 
@@ -306,6 +315,25 @@ export function App() {
                 setLastCareerAdvance(null);
                 setCurrentScreen('home');
               }}
+              onBackToHome={handleGoHome}
+            />
+          )}
+
+          {currentScreen === 'debug-questions' && (
+            <DebugQuestionsScreen onBackToHome={handleGoHome} />
+          )}
+
+          {currentScreen === 'phrase-book' && (
+            <PhraseBookScreen
+              progress={progress}
+              onBackToHome={handleGoHome}
+              onToggleBookmark={toggleBookmarkPhrase}
+            />
+          )}
+
+          {currentScreen === 'hall-of-fame' && (
+            <HallOfFameScreen
+              hallOfFame={progress.hallOfFame ?? []}
               onBackToHome={handleGoHome}
             />
           )}

@@ -4,6 +4,8 @@ import { Check, X, ArrowRight, Lightbulb, ChevronLeft } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import type { HorseCoatColor, TrainingCourse } from '../types';
 import { HorseSpriteAnimation } from './HorseSpriteAnimation';
+import { SpeechButton } from './SpeechButton';
+import { SpeechControls } from './SpeechControls';
 
 interface QuizScreenProps {
   questions: PhraseItem[];
@@ -101,12 +103,18 @@ export const QuizScreen: React.FC<QuizScreenProps> = ({
 
       {/* 英文フレーズカード */}
       <div className="bg-white border-2 border-emerald-700/20 rounded-2xl p-4 shadow-2xs mb-3">
-        <p className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase mb-1">
-          Target Phrase
-        </p>
-        <blockquote className="text-xl font-extrabold text-zinc-900 leading-snug tracking-tight">
-          “{currentItem.phrase}”
-        </blockquote>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <p className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase">
+            Target Phrase
+          </p>
+          <SpeechControls compact />
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <blockquote className="text-xl font-extrabold text-zinc-900 leading-snug tracking-tight flex-1">
+            “{currentItem.phrase}”
+          </blockquote>
+          <SpeechButton text={currentItem.phrase} size="sm" showLabel label="発音" />
+        </div>
       </div>
 
       {/* 問いかけ */}

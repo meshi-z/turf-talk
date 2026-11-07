@@ -5,6 +5,7 @@ import { TrendingUp, Home, Sparkles } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { getLogicalDate } from '../lib/logicalDate';
 import { HorseIllustration } from './HorseIllustration';
+import { SpeechButton } from './SpeechButton';
 
 interface ResultScreenProps {
   score: number;
@@ -112,11 +113,14 @@ export const ResultScreen: FC<ResultScreenProps> = ({
               key={item.phrase.id}
               className="p-3 rounded-xl bg-zinc-50 border border-zinc-100 text-left"
             >
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-xs font-bold text-zinc-900">
-                  {idx + 1}. “{item.phrase.phrase}”
-                </span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <span className="text-xs font-bold text-zinc-900 truncate">
+                    {idx + 1}. “{item.phrase.phrase}”
+                  </span>
+                  <SpeechButton text={item.phrase.phrase} size="xs" />
+                </div>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
                   item.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                 }`}>
                   {item.isCorrect ? '正解' : '要復習'}
