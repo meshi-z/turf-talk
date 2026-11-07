@@ -1,12 +1,13 @@
 import { useState, type FC } from 'react';
-import { Flame, Volume2, VolumeX } from 'lucide-react';
+import { Flame, HelpCircle, Volume2, VolumeX } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 
 interface HeaderProps {
   streakDays: number;
+  onOpenHelp: () => void;
 }
 
-export const Header: FC<HeaderProps> = ({ streakDays }) => {
+export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
   const [soundEnabled, setSoundEnabled] = useState(() => soundManager.isEnabled());
 
   const handleToggleSound = () => {
@@ -43,6 +44,7 @@ export const Header: FC<HeaderProps> = ({ streakDays }) => {
         </div>
 
         <button
+          type="button"
           onClick={handleToggleSound}
           aria-label={soundEnabled ? 'サウンドをミュートにする' : 'サウンドを有効にする'}
           title={soundEnabled ? 'サウンドON' : 'サウンドOFF'}
@@ -53,6 +55,16 @@ export const Header: FC<HeaderProps> = ({ streakDays }) => {
           ) : (
             <VolumeX className="w-4 h-4 text-[#8DA597]" />
           )}
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenHelp}
+          aria-label="使い方ガイドを開く"
+          title="使い方ガイド"
+          className="p-1.5 rounded-md text-[#C8D8CE] hover:text-[#FAF8F3] hover:bg-[#184D36] border border-transparent hover:border-[#C59B27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
+        >
+          <HelpCircle className="w-4 h-4 text-[#E6C762]" />
         </button>
       </div>
     </header>
