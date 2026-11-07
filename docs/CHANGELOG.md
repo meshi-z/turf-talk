@@ -5,7 +5,18 @@
 
 ---
 
-## [Unreleased]
+## [v0.20.0] - 2026-11-07
+
+### Added
+- **殿堂入りギャラリー専用背景イラスト制作と歴代愛馬イラスト表示の実装 ([#108](https://github.com/meshi-z/turf-talk/issues/108)):**
+  - **殿堂入り専用背景イラストアセット（`bg_hall_of_fame.jpg`、1376×768px）の新規制作 (`src/assets/backgrounds/bg_hall_of_fame.jpg`):**
+    - アンティーク・マホガニー木枠、ブリティッシュ・レーシンググリーンの別珍（ベルベット）ライナー、クラシック・ブラスゴールドの3重モールディングおよび上部ピクチャーライトを備えた「クラブハウス記念肖像フレーム」背景を制作。
+    - フレーム内部の背景は黄金色の夕경（ゴールデンアワー）トーンに設計し、白毛（`#F7F9FC`）から青毛（`#2C2F35`）までJRA全8毛色のシルエットが高いコントラストで美しく際立つよう調整。
+  - **背景オーバーライド機構と歴代愛馬カードの記念肖像画表示 (`src/lib/horseAssets.ts`, `src/components/HorseIllustration.tsx`, `src/components/HallOfFameScreen.tsx`):**
+    - `HorseBackgroundType` に `'hall_of_fame'`（全8種）を追加し、`HorseIllustration` コンポーネントに任意の背景を指定できる `backgroundOverride?: HorseBackgroundType` プロパティを追加。
+    - 殿堂入りギャラリー（`HallOfFameScreen`）の各愛馬カードに `<HorseIllustration color={horse.color} scene="standing_left" backgroundOverride="hall_of_fame" />` を組み込み、引退した歴代パートナー馬の毛色別立ち絵を額装ポートレートとして表示。
+  - **単体テスト・仕様書の更新 (`tests/horse_assets.test.ts`, `docs/specs/horse-visual-assets.md`):**
+    - 全8種背景アセットの存在確認およびURL解決テストを更新。
 
 ### Changed
 - **競馬用語フレーズ図鑑・殿堂入りギャラリー・引退式画面の競馬デザイン統一 ([#107](https://github.com/meshi-z/turf-talk/issues/107)):**

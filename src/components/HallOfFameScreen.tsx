@@ -1,5 +1,6 @@
 import { useState, type FC } from 'react';
 import type { HallOfFameHorse } from '../types';
+import { HorseIllustration } from './HorseIllustration';
 import {
   calculateHallOfFameStats,
   sortHallOfFame,
@@ -244,6 +245,16 @@ export const HallOfFameScreen: FC<HallOfFameScreenProps> = ({ hallOfFame, onBack
 
                 {/* カードボディ */}
                 <div className="p-4 space-y-3">
+                  {/* 歴代愛馬・殿堂入り記念肖像画（毛色別立ち絵 × 殿堂入り専用額装背景） */}
+                  <div className="rounded-xl overflow-hidden border border-[#C59B27]/65 shadow-xs">
+                    <HorseIllustration
+                      color={horse.color}
+                      scene="standing_left"
+                      backgroundOverride="hall_of_fame"
+                      alt={`${horse.name}（${horse.color}・${horse.titleName}）の殿堂入り記念肖像画`}
+                    />
+                  </div>
+
                   {/* 主要実績グリッド */}
                   <div className="grid grid-cols-2 gap-2 text-center">
                     <div className="bg-[#F5F1E6] border border-[#DFD6C5] rounded-xl p-2.5">
