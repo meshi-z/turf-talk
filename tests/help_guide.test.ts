@@ -6,6 +6,7 @@ import {
   hasSeenHelpGuide,
   markHelpGuideSeen,
 } from '../src/lib/helpGuide.ts';
+import { MAX_CARROTS } from '../src/lib/carrotBonus.ts';
 
 describe('Help guide definitions & onboarding storage (helpGuide.ts)', () => {
   it('defines 5 ordered guide steps with complete metadata and highlights', () => {
@@ -34,6 +35,13 @@ describe('Help guide definitions & onboarding storage (helpGuide.ts)', () => {
       }
       assert.ok(step.tip.length > 0, 'tip must not be empty');
     });
+
+    const raceStep = HELP_GUIDE_STEPS.find((s) => s.id === 'weekend-race');
+    assert.ok(raceStep);
+    const reservesHighlight = raceStep.highlights[1];
+    const carrotHighlight = raceStep.highlights[2];
+    assert.ok(reservesHighlight.description.includes('最大2回'));
+    assert.ok(carrotHighlight.description.includes(`最大${MAX_CARROTS}本`));
   });
 
   it('tracks onboarding seen flag accurately in storage', () => {
