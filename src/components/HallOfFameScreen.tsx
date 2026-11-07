@@ -8,7 +8,6 @@ import {
   generateHallOfFameShareText,
   downloadHallOfFameCard,
   copyShareTextToClipboard,
-  COAT_COLOR_THEMES,
   type HallOfFameSortOption,
 } from '../lib/hallOfFame';
 import {
@@ -202,7 +201,6 @@ export const HallOfFameScreen: FC<HallOfFameScreenProps> = ({ hallOfFame, onBack
             const isCopied = copiedHorseId === horse.id;
             const isDownloading = downloadingHorseId === horse.id;
             const twitterUrl = generateHallOfFameTwitterUrl(horse);
-            const colorTheme = COAT_COLOR_THEMES[horse.color] ?? COAT_COLOR_THEMES['鹿毛'];
 
             return (
               <div
@@ -219,9 +217,7 @@ export const HallOfFameScreen: FC<HallOfFameScreenProps> = ({ hallOfFame, onBack
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-black/35 text-[#E6C762] border border-[#C59B27]/35">
                         {horse.routeName}
                       </span>
-                      <span
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-xs border ${colorTheme.borderClass} ${colorTheme.bgClass} ${colorTheme.textClass} bg-[#FFFDF9]`}
-                      >
+                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-xs bg-black/35 text-[#FAF8F3] border border-[#C59B27]/40">
                         {horse.color}
                       </span>
                     </div>

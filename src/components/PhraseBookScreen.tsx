@@ -24,7 +24,6 @@ import {
 import { SpeechButton } from './SpeechButton';
 import { SpeechControls } from './SpeechControls';
 import { resolvePhrasePartner } from '../lib/phrasePartner';
-import { COAT_COLOR_THEMES } from '../lib/hallOfFame';
 
 interface PhraseBookScreenProps {
   progress: UserProgress;
@@ -497,15 +496,7 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
                           <span className="font-bold text-stone-900 font-racing-serif text-xs">
                             {partnerHorse.name}
                           </span>
-                          <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-xs border ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.borderClass ?? 'border-stone-300'
-                            } ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.bgClass ?? 'bg-stone-100'
-                            } ${
-                              COAT_COLOR_THEMES[partnerHorse.color]?.textClass ?? 'text-stone-700'
-                            }`}
-                          >
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-xs bg-[#FFFDF9] text-stone-800 border border-[#C59B27]/50">
                             {partnerHorse.color}
                           </span>
                         </div>
