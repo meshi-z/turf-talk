@@ -62,8 +62,8 @@
 
 ### Phase 4: v2.0.0 (Cloud & Admin) - Cloud Backend & Admin Platform
 * **スコープ:**
-  * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築
-  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装
+  * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築（Issue #116 完了）
+  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装（Issue #117 完了）
   * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）およびオフラインキャッシュ対応
   * [データモデル] 管理者検索・集計高速化のためのサマリーフィールド（消化数、消化率、通算勝率、最終アクティブ日時）自動更新の実装
   * [コンテンツ管理] フレーズマスターの動的配信（静的マスター＋Firestore動的マージ方式）の実装

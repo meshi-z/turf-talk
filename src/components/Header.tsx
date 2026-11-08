@@ -1,13 +1,16 @@
 import { useState, type FC } from 'react';
-import { Flame, HelpCircle, Volume2, VolumeX } from 'lucide-react';
+import { Flame, HelpCircle, Volume2, VolumeX, Cloud, ShieldCheck } from 'lucide-react';
 import { soundManager } from '../lib/sound';
+import type { AppUser } from '../hooks/useAuth';
 
 interface HeaderProps {
   streakDays: number;
+  user?: AppUser | null;
   onOpenHelp: () => void;
+  onOpenAuth?: () => void;
 }
 
-export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
+export const Header: FC<HeaderProps> = ({ streakDays, user, onOpenHelp, onOpenAuth }) => {
   const [soundEnabled, setSoundEnabled] = useState(() => soundManager.isEnabled());
 
   const handleToggleSound = () => {
@@ -15,6 +18,8 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
     soundManager.setEnabled(nextVal);
     setSoundEnabled(nextVal);
   };
+
+  const isLinked = user && !user.isAnonymous;
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-3 sm:px-4 h-14 bg-[#0D3322] text-amber-50 border-b-2 border-[#C59B27]/80 shadow-md">
@@ -44,6 +49,26 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
           <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#E6C762] fill-[#C59B27] shrink-0" />
           <span>{streakDays}日連続</span>
         </div>
+
+        {/* アカウント連携・バックアップボタン */}
+        {onOpenAuth && (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            aria-label={isLinked ? 'アカウント連携状況を確認' : 'データをクラウドに連携・バックアップ'}
+            title={isLinked ? `${user?.displayName || '馬主'} (連携済み)` : 'ゲストプレイ中（バックアップ未連携）'}
+            className="relative p-1.5 rounded-md text-[#C8D8CE] hover:text-[#FAF8F3] hover:bg-[#184D36] border border-transparent hover:border-[#C59B27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            {isLinked ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <>
+                <Cloud className="w-4 h-4 text-[#E6C762]" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400 ring-1 ring-[#0D3322]" />
+              </>
+            )}
+          </button>
+        )}
 
         <button
           type="button"

@@ -11,6 +11,8 @@ import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
 import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { HallOfFameScreen } from './components/HallOfFameScreen';
 import { HelpGuideModal } from './components/HelpGuideModal';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './hooks/useAuth';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
@@ -30,6 +32,15 @@ export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [activeCourse, setActiveCourse] = useState<TrainingCourse>('uphill');
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => !hasSeenHelpGuide());
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const {
+    user,
+    isLoading: isAuthLoading,
+    authError,
+    loginWithGoogle,
+    loginWithTwitter,
+    signOut: handleSignOut,
+  } = useAuth();
 
   const handleOpenHelp = () => {
     setIsHelpOpen(true);
@@ -233,7 +244,12 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#ECE6D8] flex flex-col justify-start items-center text-stone-900 selection:bg-amber-200">
       <div className="w-full max-w-md bg-[#FAF8F3] min-h-screen flex flex-col border-x border-[#D8CEBE] shadow-xl">
-        <Header streakDays={progress.streakDays} onOpenHelp={handleOpenHelp} />
+        <Header
+          streakDays={progress.streakDays}
+          user={user}
+          onOpenHelp={handleOpenHelp}
+          onOpenAuth={() => setIsAuthOpen(true)}
+        />
 
         <main className="flex-1 flex flex-col">
           {currentScreen === 'home' && (
@@ -355,6 +371,16 @@ export function App() {
       </div>
 
       <HelpGuideModal isOpen={isHelpOpen} onClose={handleCloseHelp} />
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        user={user}
+        isLoading={isAuthLoading}
+        authError={authError}
+        onLoginGoogle={loginWithGoogle}
+        onLoginTwitter={loginWithTwitter}
+        onSignOut={handleSignOut}
+      />
     </div>
   );
 }
