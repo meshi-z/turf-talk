@@ -36,12 +36,19 @@ import {
   changeHorseNameIfUnlocked,
   changeHorseRouteIfUnlocked,
   retireAndSpawnNextGeneration,
+  getCurrentWeekRaceInfo,
 } from '../lib/careerCycle';
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 import { recordNewPhrasePartners } from '../lib/phrasePartner';
 import { validateAndSanitizeProgress } from '../lib/securityValidator.ts';
+import {
+  logTrainingCompleted,
+  logRaceCompleted,
+  logHorseRetired,
+  logPhraseBookmarked,
+} from '../lib/analytics.ts';
 import {
   fetchUserProgressFromFirestore,
   saveUserProgressToFirestore,
@@ -348,6 +355,11 @@ export function useTrainingProgress(userId?: string | null) {
         phrasePartners: nextPhrasePartners,
       };
     });
+    logTrainingCompleted({
+      course,
+      score: _score,
+      learnedCount: correctPhraseIds.length,
+    });
   };
 
   /**
@@ -391,6 +403,18 @@ export function useTrainingProgress(userId?: string | null) {
     if (debugRaceCompleted !== null) {
       setDebugRaceCompleted(true);
     }
+
+    const raceInfo = getCurrentWeekRaceInfo(horseForRace.routeId, activeWeek);
+    const placementNumber = score === 5 ? 1 : score === 4 ? 2 : score >= 2 ? 6 - score : 6;
+    logRaceCompleted({
+      grade: raceInfo.grade,
+      raceName: raceInfo.raceName,
+      placement: placementNumber,
+      placementText: placement.rankText,
+      horseName: horseForRace.name,
+      routeId: horseForRace.routeId,
+      score,
+    });
 
     return {
       feedback,
@@ -464,6 +488,8 @@ export function useTrainingProgress(userId?: string | null) {
   const toggleBookmarkPhrase = (phraseId: string) => {
     setProgress((prev) => {
       const current = prev.bookmarkedPhraseIds ?? [];
+      const willBookmark = !current.includes(phraseId);
+      logPhraseBookmarked({ phraseId, isBookmarked: willBookmark });
       const next = current.includes(phraseId)
         ? current.filter((id) => id !== phraseId)
         : [...current, phraseId];
@@ -493,6 +519,14 @@ export function useTrainingProgress(userId?: string | null) {
         nextOverrides
       );
       const existingHoF = Array.isArray(prev.hallOfFame) ? prev.hallOfFame : [];
+      const epithet = retiredRecord.titles && retiredRecord.titles.length > 0 ? retiredRecord.titles[0] : '';
+      logHorseRetired({
+        generation: prev.careerHorse.generation,
+        totalWins: retiredRecord.wins,
+        hallOfFame: retiredRecord.wins >= 2,
+        epithet,
+        careerWeeks: prev.careerHorse.currentWeek,
+      });
 
       return {
         ...prev,

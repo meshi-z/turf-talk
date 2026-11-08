@@ -216,6 +216,9 @@ Googleの無料BIツール「Looker Studio」を用いて以下のダッシュ�
 | **ユーザー継続率 (リテンション)** | ・翌日継続率 (Day 1)、週間継続率 (Day 7)、月間継続率 (Day 30)<br>・ストリーク維持ユーザーの割合<br>・にんじん所持・消費ペース | 新規獲得後の離脱ポイント（初週レース前など）の特定とUI改善。 |
 | **競走馬成績 ＆ 路線動向** | ・選択路線（クラシック・短距離・ダート等）の人気分布<br>・クラス別勝率、G1制覇率<br>・殿堂入り達成率 | ゲームバランス（難易度・余力ヒント数・各路線のライバル強度）の調整。 |
 
+※ 各指標を算出するための標準 BigQuery SQL クエリは [`docs/specs/analytics-queries.sql`](file:///c:/Users/meshi/git/turf-talk/docs/specs/analytics-queries.sql) に定義されています。
+※ クライアント側計測モジュールは [`src/lib/analytics.ts`](file:///c:/Users/meshi/git/turf-talk/src/lib/analytics.ts) として実装されており、Node環境やオフライン時も例外を発生させず安全に動作します。
+
 ---
 
 ## 6. コスト・スケーラビリティ要件
