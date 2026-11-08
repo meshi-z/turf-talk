@@ -41,6 +41,7 @@ import {
 } from '../lib/careerCycle';
 import { getRaceThemeLabel } from '../lib/raceMode';
 import { HorseIllustration } from './HorseIllustration';
+import { PwaInstallBanner } from './PwaInstallBanner';
 import { isDevOrLocalhost } from '../lib/environment';
 
 interface HomeScreenProps {
@@ -170,6 +171,8 @@ export const HomeScreen: FC<HomeScreenProps> = ({
 
   return (
     <div className="flex-1 flex flex-col p-4 space-y-4 max-w-md mx-auto w-full">
+      {/* PWA インストール案内バナー */}
+      <PwaInstallBanner />
       {/* 愛馬ステータスカード（パドック掲示板・サドルレザーステッチ仕様） */}
       <div className="bg-linear-to-br from-[#123F2B] via-[#0D3322] to-[#082015] text-[#FAF8F3] rounded-2xl p-4 shadow-md border border-[#C59B27]/55 racing-stitch-border relative overflow-hidden">
         {/* キャリア世代 & ステージバッジ */}
