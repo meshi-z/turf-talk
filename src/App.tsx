@@ -10,9 +10,13 @@ import { RetirementScreen } from './components/RetirementScreen';
 import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
 import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { HallOfFameScreen } from './components/HallOfFameScreen';
+import { AdminDashboardScreen } from './components/AdminDashboardScreen';
 import { HelpGuideModal } from './components/HelpGuideModal';
+import { AuthModal } from './components/AuthModal';
+import { useAuth } from './hooks/useAuth';
+import { usePhrases } from './hooks/usePhrases';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
-import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
+import type { PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
 import {
   selectDailyPhrases,
@@ -23,13 +27,24 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 import { hasSeenHelpGuide, markHelpGuideSeen } from './lib/helpGuide';
+import { isAdminUser } from './lib/adminService';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame' | 'admin';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [activeCourse, setActiveCourse] = useState<TrainingCourse>('uphill');
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => !hasSeenHelpGuide());
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const {
+    user,
+    isLoading: isAuthLoading,
+    authError,
+    loginWithGoogle,
+    loginWithTwitter,
+    signOut: handleSignOut,
+    deleteAccount: handleDeleteAccount,
+  } = useAuth();
 
   const handleOpenHelp = () => {
     setIsHelpOpen(true);
@@ -69,7 +84,8 @@ export function App() {
     setDebugRaceCompleted,
     conditionTier,
     markRaceCompleted,
-  } = useTrainingProgress();
+  } = useTrainingProgress(user?.uid);
+  const { phrases } = usePhrases();
 
   const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
   const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);
@@ -78,10 +94,10 @@ export function App() {
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
   const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
     if (progress.todayPhraseIds.length > 0) {
-      const existing = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
+      const existing = getPhrasesByIds(phrases, progress.todayPhraseIds);
       if (existing.length > 0) return existing;
     }
-    return selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString, 3, 'uphill').questions;
+    return selectDailyPhrases(phrases, progress.learnedPhraseIds, todayString, 3, 'uphill').questions;
   });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -100,13 +116,13 @@ export function App() {
 
     // 本日の調教が完了している場合（復習モード）、または既に本日の出題フレーズが決定している場合
     if (targetTodayIds.length > 0) {
-      questions = getPhrasesByIds(INITIAL_PHRASES, targetTodayIds);
+      questions = getPhrasesByIds(phrases, targetTodayIds);
     }
 
     // まだ本日の出題セットがない場合は選出して記録
     if (questions.length === 0) {
       const selected = selectDailyPhrases(
-        INITIAL_PHRASES,
+        phrases,
         progress.learnedPhraseIds,
         todayString,
         3,
@@ -129,7 +145,7 @@ export function App() {
   const handleStartExtraTraining = (course: TrainingCourse = 'uphill') => {
     setActiveCourse(course);
     const selected = selectExtraTrainingPhrases(
-      INITIAL_PHRASES,
+      phrases,
       progress.learnedPhraseIds,
       3,
       course
@@ -161,7 +177,7 @@ export function App() {
         .filter((item) => item.isCorrect)
         .map((item) => item.phrase.id);
       const sessionPhraseIds = sessionQuestions.map((q) => q.id);
-      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds, activeCourse);
+      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds, activeCourse, phrases.length);
       setCurrentScreen('result');
     }
   };
@@ -185,7 +201,7 @@ export function App() {
     if (progress.hasCompletedWeeklyRace) return;
     soundManager.playGateOpen();
     const questions = selectRaceQuestions(
-      INITIAL_PHRASES,
+      phrases,
       progress.learnedPhraseIds,
       currentWeekRace.themeCategory
     );
@@ -233,7 +249,14 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#ECE6D8] flex flex-col justify-start items-center text-stone-900 selection:bg-amber-200">
       <div className="w-full max-w-md bg-[#FAF8F3] min-h-screen flex flex-col border-x border-[#D8CEBE] shadow-xl">
-        <Header streakDays={progress.streakDays} onOpenHelp={handleOpenHelp} />
+        <Header
+          streakDays={progress.streakDays}
+          user={user}
+          onOpenHelp={handleOpenHelp}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenAdmin={() => setCurrentScreen('admin')}
+          isAdmin={isAdminUser(user)}
+        />
 
         <main className="flex-1 flex flex-col">
           {currentScreen === 'home' && (
@@ -266,7 +289,9 @@ export function App() {
               onOpenDebugQuestions={() => setCurrentScreen('debug-questions')}
               onOpenPhraseBook={() => setCurrentScreen('phrase-book')}
               onOpenHallOfFame={() => setCurrentScreen('hall-of-fame')}
+              onOpenAdmin={() => setCurrentScreen('admin')}
               onAddSampleHallOfFame={addSampleHallOfFameForDemo}
+              totalPhrases={phrases.length}
             />
           )}
 
@@ -340,6 +365,7 @@ export function App() {
               progress={progress}
               onBackToHome={handleGoHome}
               onToggleBookmark={toggleBookmarkPhrase}
+              phrases={phrases}
             />
           )}
 
@@ -349,12 +375,26 @@ export function App() {
               onBackToHome={handleGoHome}
             />
           )}
+          {currentScreen === 'admin' && (
+            <AdminDashboardScreen onBackToHome={handleGoHome} />
+          )}
         </main>
 
         <Footer onOpenHelp={handleOpenHelp} />
       </div>
 
       <HelpGuideModal isOpen={isHelpOpen} onClose={handleCloseHelp} />
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        user={user}
+        isLoading={isAuthLoading}
+        authError={authError}
+        onLoginGoogle={loginWithGoogle}
+        onLoginTwitter={loginWithTwitter}
+        onSignOut={handleSignOut}
+        onDeleteAccount={handleDeleteAccount}
+      />
     </div>
   );
 }

@@ -1,13 +1,25 @@
 import { useState, type FC } from 'react';
-import { Flame, HelpCircle, Volume2, VolumeX } from 'lucide-react';
+import { Flame, HelpCircle, Volume2, VolumeX, Cloud, ShieldCheck } from 'lucide-react';
 import { soundManager } from '../lib/sound';
+import type { AppUser } from '../hooks/useAuth';
 
 interface HeaderProps {
   streakDays: number;
+  user?: AppUser | null;
   onOpenHelp: () => void;
+  onOpenAuth?: () => void;
+  onOpenAdmin?: () => void;
+  isAdmin?: boolean;
 }
 
-export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
+export const Header: FC<HeaderProps> = ({
+  streakDays,
+  user,
+  onOpenHelp,
+  onOpenAuth,
+  onOpenAdmin,
+  isAdmin,
+}) => {
   const [soundEnabled, setSoundEnabled] = useState(() => soundManager.isEnabled());
 
   const handleToggleSound = () => {
@@ -15,6 +27,8 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
     soundManager.setEnabled(nextVal);
     setSoundEnabled(nextVal);
   };
+
+  const isLinked = user && !user.isAnonymous;
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-3 sm:px-4 h-14 bg-[#0D3322] text-amber-50 border-b-2 border-[#C59B27]/80 shadow-md">
@@ -45,6 +59,26 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
           <span>{streakDays}日連続</span>
         </div>
 
+        {/* アカウント連携・バックアップボタン */}
+        {onOpenAuth && (
+          <button
+            type="button"
+            onClick={onOpenAuth}
+            aria-label={isLinked ? 'アカウント連携状況を確認' : 'データをクラウドに連携・バックアップ'}
+            title={isLinked ? `${user?.displayName || '馬主'} (連携済み)` : 'ゲストプレイ中（バックアップ未連携）'}
+            className="relative p-1.5 rounded-md text-[#C8D8CE] hover:text-[#FAF8F3] hover:bg-[#184D36] border border-transparent hover:border-[#C59B27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            {isLinked ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <>
+                <Cloud className="w-4 h-4 text-[#E6C762]" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400 ring-1 ring-[#0D3322]" />
+              </>
+            )}
+          </button>
+        )}
+
         <button
           type="button"
           onClick={handleToggleSound}
@@ -58,6 +92,19 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
             <VolumeX className="w-4 h-4 text-[#8DA597]" />
           )}
         </button>
+
+        {/* 管理者ダッシュボードボタン（管理者のみ表示） */}
+        {isAdmin && onOpenAdmin && (
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            aria-label="管理者ダッシュボードを開く"
+            title="管理者ダッシュボード"
+            className="p-1.5 rounded-md text-[#E6C762] hover:text-[#FAF8F3] hover:bg-[#184D36] border border-[#C59B27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            <span className="text-sm leading-none">🛠️</span>
+          </button>
+        )}
 
         <button
           type="button"

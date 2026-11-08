@@ -29,6 +29,7 @@ interface PhraseBookScreenProps {
   progress: UserProgress;
   onBackToHome: () => void;
   onToggleBookmark: (phraseId: string) => void;
+  phrases?: PhraseItem[];
 }
 
 type StatusFilter = 'all' | 'learned' | 'unlearned' | 'bookmarked';
@@ -46,6 +47,7 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
   progress,
   onBackToHome,
   onToggleBookmark,
+  phrases = INITIAL_PHRASES,
 }) => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [courseFilter, setCourseFilter] = useState<CourseFilter>('all');
@@ -63,33 +65,33 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
   );
 
   // 全体・コース別の習得進捗計算
-  const totalCount = INITIAL_PHRASES.length;
+  const totalCount = phrases.length;
   const learnedTotalCount = learnedSet.size;
   const progressPercent = Math.round((learnedTotalCount / totalCount) * 100);
 
   const uphillTotal = useMemo(
-    () => INITIAL_PHRASES.filter((p) => (p.type ?? 'phrase') === 'phrase').length,
+    () => phrases.filter((p) => (p.type ?? 'phrase') === 'phrase').length,
     []
   );
   const uphillLearned = useMemo(
-    () => INITIAL_PHRASES.filter((p) => (p.type ?? 'phrase') === 'phrase' && learnedSet.has(p.id)).length,
-    [learnedSet]
+    () => phrases.filter((p) => (p.type ?? 'phrase') === 'phrase' && learnedSet.has(p.id)).length,
+    [phrases, learnedSet]
   );
 
   const woodchipTotal = useMemo(
-    () => INITIAL_PHRASES.filter((p) => p.type === 'vocabulary').length,
+    () => phrases.filter((p) => p.type === 'vocabulary').length,
     []
   );
   const woodchipLearned = useMemo(
-    () => INITIAL_PHRASES.filter((p) => p.type === 'vocabulary' && learnedSet.has(p.id)).length,
-    [learnedSet]
+    () => phrases.filter((p) => p.type === 'vocabulary' && learnedSet.has(p.id)).length,
+    [phrases, learnedSet]
   );
 
   const bookmarkCount = bookmarkedSet.size;
 
   // フィルタリング処理
   const filteredPhrases = useMemo(() => {
-    return INITIAL_PHRASES.filter((item) => {
+    return phrases.filter((item) => {
       const isLearned = learnedSet.has(item.id);
       const isBookmarked = bookmarkedSet.has(item.id);
       const itemType: PhraseType = item.type ?? 'phrase';
@@ -122,7 +124,7 @@ export const PhraseBookScreen: FC<PhraseBookScreenProps> = ({
 
       return true;
     });
-  }, [statusFilter, courseFilter, categoryFilter, searchQuery, learnedSet, bookmarkedSet]);
+  }, [phrases, statusFilter, courseFilter, categoryFilter, searchQuery, learnedSet, bookmarkedSet]);
 
   return (
     <div className="flex-1 flex flex-col bg-[#FAF8F3] min-h-screen text-stone-900 pb-12">

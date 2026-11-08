@@ -62,12 +62,13 @@
 
 ### Phase 4: v2.0.0 (Cloud & Admin) - Cloud Backend & Admin Platform
 * **スコープ:**
-  * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築
-  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装
-  * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）およびオフラインキャッシュ対応
-  * [データモデル] 管理者検索・集計高速化のためのサマリーフィールド（消化数、消化率、通算勝率、最終アクティブ日時）自動更新の実装
-  * [コンテンツ管理] フレーズマスターの動的配信（静的マスター＋Firestore動的マージ方式）の実装
-  * [分析・運用] Firebase Analytics × BigQuery 連携および Looker Studio 管理者ダッシュボード（消化率分布・コンテンツ枯渇予測・問題難易度分析・リテンション）の構築
-  * [管理者機能] 管理者権限によるユーザー別・競走馬別ステータス一覧の閲覧基盤
+  * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築（Issue #116 完了）
+  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装（Issue #117 完了）
+  * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）およびオフラインキャッシュ対応（Issue #118 完了）
+  * [データモデル] 管理者検索・集計高速化のためのサマリーフィールド（消化数、消化率、通算勝率、最終アクティブ日時）自動更新の実装（Issue #118 完了）
+  * [コンテンツ管理] フレーズマスターの動的配信（静的マスター＋Firestore動的マージ方式）の実装（Issue #119 完了）
+  * [分析・運用] Firebase Analytics × BigQuery 連携および Looker Studio 管理者ダッシュボード（消化率分布・コンテンツ枯渇予測・問題難易度分析・リテンション）の構築（Issue #120 完了）
+  * [管理者機能] 管理者権限によるユーザー別・競走馬別ステータス一覧の閲覧基盤（Issue #121 完了）
+  * [セキュリティ] Firebase App Check と Firestore セキュリティルールによるデータ改ざん防止・健全性担保（Issue #102 完了）
 * **非スコープ:** リアルタイムWebSocket通信、自前RDBサーバーの常時稼働
   * [UI/UX] レスポンシブ最適化、全体のデザインポリッシュ

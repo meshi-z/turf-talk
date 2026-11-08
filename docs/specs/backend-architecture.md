@@ -56,7 +56,15 @@ flowchart TD
 3. **X (Twitter) SSO**:
    - `TwitterAuthProvider` によるOAuth連携（競馬ファンのコミュニティ親和性に対応）。
 
-### 2.2 アカウント昇格（Link With Credential）
+### 2.2 User ID (UID) の生成仕様とセキュリティ
+- **UIDの生成**:
+  - Firebase Authentication の UID は、ユーザーの個人情報（メール、名前、パスワード等）から生成されるものではなく、**暗号学的に安全な疑似乱数生成器（CSPRNG）によって生成される28文字のランダムな英数字文字列**です。
+  - 個人情報を一切含まず、推測不可能な独立した識別子であるため、そのままFirestoreのドキュメントキーとして安全に使用できます。
+- **パスワードレス運用とハッシュ化**:
+  - 本サービスは SSO（OAuth 2.0 / OIDC）および匿名認証に特化するため、自前のパスワードを一切保持・管理しません（パスワード漏洩リスクが原理的にゼロ）。
+  - ※なお、Firebase Auth 基盤内部では Google 独自の高強度 `scrypt`（暗号学的Salt + メモリハードなストレッチング）により認証情報が保護されています。
+
+### 2.3 アカウント昇格（Link With Credential）
 - 匿名状態で利用していたユーザーが「バックアップ」「機種変更」「他端末同期」を希望した際、`linkWithPopup` を実行。
 - **既存の `uid` およびFirestoreに蓄積された調教履歴・愛馬データ・ストリークを100%維持したまま**、GoogleまたはXのアカウントと紐付けを完了する。
 
@@ -91,6 +99,8 @@ export interface UserDocument {
   createdAt: FirebaseFirestore.Timestamp;
   updatedAt: FirebaseFirestore.Timestamp;
   lastActiveAt: FirebaseFirestore.Timestamp; // 最終アクセス日時
+  isDeleted: boolean;                        // 退会・論理削除フラグ（通常: false, 退会時: true）
+  deletedAt: string | null;                  // 退会日時（復旧対応・離脱分析用）
 
   // ── 管理者用・一覧検索用サマリー項目 (集計・ソートの高速化) ──
   learnedCount: number;         // 履修済み問題数 (learnedPhraseIds.length)
@@ -127,7 +137,18 @@ export interface UserDocument {
 }
 ```
 
-### 3.3 セキュリティルール (`firestore.rules`)
+### 3.3 セキュリティルール & 改ざん防止仕様 (`firestore.rules` & App Check)
+Issue #102 の対応方針に基づき、クライアント単体の難読化に依存せず、クラウド側のサーバーサイド検証とクライアント整合性検証でデータの健全性を担保します。
+
+1. **Firestore セキュリティルール (`firestore.rules`)**:
+   - 本人のみ読み書き許可 (`request.auth.uid == userId`)
+   - データの整合性検証（にんじん上限 `carrotCount <= 3`、不自然なスコア急増の拒否）
+2. **Firebase App Check**:
+   - Firebase Hosting と連携し、reCAPTCHA Enterprise / v3 を用いて正規の TurfTalk Web アプリ以外からの不正リクエストを遮断。
+3. **クラウド正本リコンサイル**:
+   - ローカル側（DevTools等）で値が変更されても、クラウド側データ（Firestore）を正本として同期・上書き復元。
+4. **開発環境の自由度確保**:
+   - `import.meta.env.DEV` や localhost でのデバッグメニュー操作時は、開発用ルールまたはローカルバイパスを適用。
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -146,6 +167,15 @@ service cloud.firestore {
   }
 }
 ```
+
+---
+
+### 3.4 論理削除ポリシー (Soft Delete Specification)
+ユーザーが退会手続きを行った場合でも、以下の理由から Firestore ドキュメントの物理削除（`deleteDoc`）は行わず、**論理削除（`isDeleted: true`）** としてデータを永久保持します。
+1. **誤操作・問い合わせ時のデータ復元**:
+   - ユーザーから「誤って退会してしまったため復旧したい」という問い合わせがあった際、管理者が `isDeleted: false` に戻すことで進捗と愛馬データを完全復元可能。
+2. **プラットフォーム全体の累計実績の保持**:
+   - サービス全体の総問題消化数、総レース数などの実績値が欠損せず、BigQuery での統計・チャーン分析に活用可能。
 
 ---
 
@@ -185,6 +215,9 @@ Googleの無料BIツール「Looker Studio」を用いて以下のダッシュ�
 | **問題クオリティ・難易度分析** | ・フレーズごとの正答率一覧（昇順/降順）<br>・問題ごとの平均解答所要時間<br>・復習ブックマーク追加頻度 | 正答率が20%未満の問題の解説改訂、または選択肢の誤認・タイポ検知。 |
 | **ユーザー継続率 (リテンション)** | ・翌日継続率 (Day 1)、週間継続率 (Day 7)、月間継続率 (Day 30)<br>・ストリーク維持ユーザーの割合<br>・にんじん所持・消費ペース | 新規獲得後の離脱ポイント（初週レース前など）の特定とUI改善。 |
 | **競走馬成績 ＆ 路線動向** | ・選択路線（クラシック・短距離・ダート等）の人気分布<br>・クラス別勝率、G1制覇率<br>・殿堂入り達成率 | ゲームバランス（難易度・余力ヒント数・各路線のライバル強度）の調整。 |
+
+※ 各指標を算出するための標準 BigQuery SQL クエリは [`docs/specs/analytics-queries.sql`](file:///c:/Users/meshi/git/turf-talk/docs/specs/analytics-queries.sql) に定義されています。
+※ クライアント側計測モジュールは [`src/lib/analytics.ts`](file:///c:/Users/meshi/git/turf-talk/src/lib/analytics.ts) として実装されており、Node環境やオフライン時も例外を発生させず安全に動作します。
 
 ---
 

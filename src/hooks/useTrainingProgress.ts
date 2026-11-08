@@ -36,11 +36,23 @@ import {
   changeHorseNameIfUnlocked,
   changeHorseRouteIfUnlocked,
   retireAndSpawnNextGeneration,
+  getCurrentWeekRaceInfo,
 } from '../lib/careerCycle';
 import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 import { recordNewPhrasePartners } from '../lib/phrasePartner';
+import { validateAndSanitizeProgress } from '../lib/securityValidator.ts';
+import {
+  logTrainingCompleted,
+  logRaceCompleted,
+  logHorseRetired,
+  logPhraseBookmarked,
+} from '../lib/analytics.ts';
+import {
+  fetchUserProgressFromFirestore,
+  saveUserProgressToFirestore,
+} from '../lib/firestoreSync.ts';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
@@ -79,7 +91,7 @@ const SIMULATED_WEEKDAY_DAYS_BY_DAY: Record<DayOfWeek, number> = {
   0: 5,
 };
 
-export function useTrainingProgress() {
+export function useTrainingProgress(userId?: string | null) {
   const [progress, setProgress] = useState<UserProgress>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -117,7 +129,7 @@ export function useTrainingProgress() {
           typeof parsed.lastRaceWeekMonday === 'string' ? parsed.lastRaceWeekMonday : null;
         const completedWeeklyRace = isWeeklyRaceCompletedForWeek(lastRaceWeekMonday, today);
 
-        return {
+        return validateAndSanitizeProgress({
           ...DEFAULT_PROGRESS,
           ...parsed,
           horseName: migratedHorse.name,
@@ -145,7 +157,7 @@ export function useTrainingProgress() {
           hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
           bookmarkedPhraseIds: Array.isArray(parsed.bookmarkedPhraseIds) ? parsed.bookmarkedPhraseIds : [],
           phrasePartners: parsed.phrasePartners && typeof parsed.phrasePartners === 'object' ? parsed.phrasePartners : {},
-        };
+        }).sanitized;
       }
     } catch {
       // LocalStorage読み取り失敗時のフォールバック
@@ -162,13 +174,42 @@ export function useTrainingProgress() {
   const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
   const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
 
+  // 初回マウントまたは userId 変更時の Firestore クラウドデータ同期
+  useEffect(() => {
+    if (!userId) return;
+
+    let isMounted = true;
+    (async () => {
+      try {
+        const { progress: cloudProgress, isDeleted } = await fetchUserProgressFromFirestore(userId);
+        if (isMounted && cloudProgress && !isDeleted) {
+          setProgress((prev) => ({
+            ...prev,
+            ...validateAndSanitizeProgress(cloudProgress).sanitized,
+          }));
+        }
+      } catch (err) {
+        console.warn('[useTrainingProgress] Initial cloud sync failed:', err);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
     } catch {
       // 保存エラーは無視
     }
-  }, [progress]);
+    if (userId) {
+      saveUserProgressToFirestore(userId, progress).catch((err) => {
+        console.warn('[useTrainingProgress] Background cloud sync failed:', err);
+      });
+    }
+  }, [progress, userId]);
 
   const actualTodayStr = getLogicalDateString();
   const currentMonday = getLogicalWeekMonday(actualTodayStr);
@@ -239,7 +280,8 @@ export function useTrainingProgress() {
     _score: number,
     correctPhraseIds: string[] = [],
     sessionPhraseIds: string[] = [],
-    course: TrainingCourse = 'uphill'
+    course: TrainingCourse = 'uphill',
+    totalPhrasesCount?: number
   ) => {
     const today = effectiveTodayString;
     const todayMonday = getLogicalWeekMonday(today);
@@ -263,7 +305,7 @@ export function useTrainingProgress() {
         prev.learnedPhraseIds,
         prev.lapCount,
         correctPhraseIds,
-        INITIAL_PHRASES.length
+        totalPhrasesCount ?? INITIAL_PHRASES.length
       );
 
       const nextTodayPhraseIds =
@@ -313,6 +355,11 @@ export function useTrainingProgress() {
         phrasePartners: nextPhrasePartners,
       };
     });
+    logTrainingCompleted({
+      course,
+      score: _score,
+      learnedCount: correctPhraseIds.length,
+    });
   };
 
   /**
@@ -356,6 +403,18 @@ export function useTrainingProgress() {
     if (debugRaceCompleted !== null) {
       setDebugRaceCompleted(true);
     }
+
+    const raceInfo = getCurrentWeekRaceInfo(horseForRace.routeId, activeWeek);
+    const placementNumber = score === 5 ? 1 : score === 4 ? 2 : score >= 2 ? 6 - score : 6;
+    logRaceCompleted({
+      grade: raceInfo.grade,
+      raceName: raceInfo.raceName,
+      placement: placementNumber,
+      placementText: placement.rankText,
+      horseName: horseForRace.name,
+      routeId: horseForRace.routeId,
+      score,
+    });
 
     return {
       feedback,
@@ -429,6 +488,8 @@ export function useTrainingProgress() {
   const toggleBookmarkPhrase = (phraseId: string) => {
     setProgress((prev) => {
       const current = prev.bookmarkedPhraseIds ?? [];
+      const willBookmark = !current.includes(phraseId);
+      logPhraseBookmarked({ phraseId, isBookmarked: willBookmark });
       const next = current.includes(phraseId)
         ? current.filter((id) => id !== phraseId)
         : [...current, phraseId];
@@ -458,6 +519,14 @@ export function useTrainingProgress() {
         nextOverrides
       );
       const existingHoF = Array.isArray(prev.hallOfFame) ? prev.hallOfFame : [];
+      const epithet = retiredRecord.titles && retiredRecord.titles.length > 0 ? retiredRecord.titles[0] : '';
+      logHorseRetired({
+        generation: prev.careerHorse.generation,
+        totalWins: retiredRecord.wins,
+        hallOfFame: retiredRecord.wins >= 2,
+        epithet,
+        careerWeeks: prev.careerHorse.currentWeek,
+      });
 
       return {
         ...prev,
