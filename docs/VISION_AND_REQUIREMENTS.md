@@ -62,3 +62,6 @@
 6. **アプリアイコン・ファビコン & SEO・メタ情報:**
    * マルチサイズ `favicon.ico`（32×32 / 48×48）、SVG アイコン、Apple Touch Icon（180×180）、PWA アイコン（192×192 / 512×512、maskable 対応）および Web App Manifest を整備。
    * 検索エンジン・SNS シェア向けの `description`, `keywords`, OGP / Twitter Card メタタグおよびアクセシビリティ準拠（200%ズーム許可）のビューポート設定を提供。
+7. **PWA（Progressive Web App）& オフラインキャッシュ:**
+   * Service Worker による全アセット（静的ファイル・競走馬立ち絵・疾走アニメ・背景・Google Fonts）のオフラインキャッシュ構築。
+   * 混雑した競馬場や地下鉄などのオフライン環境でも完全動作。スマホホーム画面への追加バナーおよび iOS Safari 向け手順案内モーダルを提供。

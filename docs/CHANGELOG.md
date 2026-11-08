@@ -5,6 +5,24 @@
 
 ---
 
+## [v0.23.0] - 2026-11-08
+
+### Added
+- **PWA対応（オフライン動作・ホーム画面追加）の実装 ([#18](https://github.com/meshi-z/turf-talk/issues/18)):**
+  - **`vite-plugin-pwa` の導入と Service Worker によるオフラインキャッシュ構築 (`vite.config.ts`, `package.json`, `tsconfig.app.json`):**
+    - Vite 8 対応の `vite-plugin-pwa` を導入し、`registerType: 'autoUpdate'` によるバックグラウンド自動キャッシュ更新を設定。
+    - 全静的アセット（HTML/JS/CSS）、競走馬立ち絵（全48枚）、疾走スプライトアニメーション、背景イラスト（全7種）、アイコン・ファビコン類を網羅するプリキャッシュ（Workbox）を構築。
+    - Google Fonts（`fonts.googleapis.com` / `fonts.gstatic.com`）のランタイムキャッシュ（CacheFirst / StaleWhileRevalidate、最長1年キャッシュ）を設定し、混雑した競馬場や地下鉄などのオフライン環境でも完全な表示・学習動作を担保。
+  - **スマホホーム画面への追加（PWAインストール）バナーおよび iOS Safari 向け手順案内モーダルの実装 (`src/lib/pwa.ts`, `src/components/PwaInstallBanner.tsx`, `src/components/HomeScreen.tsx`, `src/components/Footer.tsx`):**
+    - `beforeinstallprompt` イベント捕捉、スタンドアロンモード（インストール済み）判定、iOS 判定、LocalStorage 閉じるフラグ管理を行う PWA ユーティリティ・フック（`usePwaInstall`）を実装。
+    - ホーム画面（`HomeScreen`）上部にクラシック競馬デザインの PWA インストール案内バナーを配置。
+    - `beforeinstallprompt` 非対応の iOS Safari 向けに、共有ボタンからの「ホーム画面に追加」2ステップ解説ダイアログ（`PwaIosInstallModal`）を提供。
+    - 一度バナーを閉じたユーザーでもいつでも再案内を開けるよう、フッター（`Footer`）に「アプリを追加」導線を設置。
+  - **単体テストの追加 (`tests/pwa.test.ts`):**
+    - スタンドアロン判定、iOS デバイス判定、LocalStorage 永続化、`vite.config.ts` PWA 設定、およびビルド成果物（`dist/sw.js`, `dist/registerSW.js`）の整合性を検証する単体テストを追加。
+
+---
+
 ## [v0.22.0] - 2026-11-08
 
 ### Added
