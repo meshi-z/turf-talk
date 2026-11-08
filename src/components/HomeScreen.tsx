@@ -72,6 +72,7 @@ interface HomeScreenProps {
   onSetDebugRaceCompleted?: (completed: boolean | null) => void;
   onOpenDebugQuestions?: () => void;
   onOpenPhraseBook?: () => void;
+  totalPhrases?: number;
   onOpenHallOfFame?: () => void;
   onAddSampleHallOfFame?: () => void;
 }
@@ -109,6 +110,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onOpenPhraseBook,
   onOpenHallOfFame,
   onAddSampleHallOfFame,
+  totalPhrases: customTotalPhrases,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(progress.careerHorse.name);
@@ -122,7 +124,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
     peak: { text: '絶好調 ⤴', color: 'text-amber-950 bg-[#E6C762] border-[#C59B27]' },
   }[progress.condition];
 
-  const totalPhrases = INITIAL_PHRASES.length;
+  const totalPhrases = customTotalPhrases ?? INITIAL_PHRASES.length;
   const learnedCount = progress.learnedPhraseIds.length;
   const progressPercent = Math.min(100, Math.round((learnedCount / totalPhrases) * 100));
 
@@ -848,7 +850,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
                   競馬英語フレーズ図鑑
                 </h4>
                 <span className="text-[10px] font-bold font-racing-num bg-[#071D13] text-[#E6C762] px-2 py-0.5 rounded-xs border border-[#C59B27]/50">
-                  {progress.learnedPhraseIds?.length ?? 0} / {INITIAL_PHRASES.length} 習得
+                  {progress.learnedPhraseIds?.length ?? 0} / {totalPhrases} 習得
                 </span>
               </div>
               <p className="text-xs text-[#C8D8CE] mt-0.5">

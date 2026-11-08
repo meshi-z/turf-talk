@@ -13,8 +13,9 @@ import { HallOfFameScreen } from './components/HallOfFameScreen';
 import { HelpGuideModal } from './components/HelpGuideModal';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './hooks/useAuth';
+import { usePhrases } from './hooks/usePhrases';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
-import { INITIAL_PHRASES, type PhraseItem } from './data/phrases';
+import type { PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
 import {
   selectDailyPhrases,
@@ -82,6 +83,7 @@ export function App() {
     conditionTier,
     markRaceCompleted,
   } = useTrainingProgress(user?.uid);
+  const { phrases } = usePhrases();
 
   const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
   const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);
@@ -90,10 +92,10 @@ export function App() {
   // 今日の調教セッション用（日付シードと履修履歴から日替わり選出 & 選択肢シャッフル）
   const [sessionQuestions, setSessionQuestions] = useState<PhraseItem[]>(() => {
     if (progress.todayPhraseIds.length > 0) {
-      const existing = getPhrasesByIds(INITIAL_PHRASES, progress.todayPhraseIds);
+      const existing = getPhrasesByIds(phrases, progress.todayPhraseIds);
       if (existing.length > 0) return existing;
     }
-    return selectDailyPhrases(INITIAL_PHRASES, progress.learnedPhraseIds, todayString, 3, 'uphill').questions;
+    return selectDailyPhrases(phrases, progress.learnedPhraseIds, todayString, 3, 'uphill').questions;
   });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -112,13 +114,13 @@ export function App() {
 
     // 本日の調教が完了している場合（復習モード）、または既に本日の出題フレーズが決定している場合
     if (targetTodayIds.length > 0) {
-      questions = getPhrasesByIds(INITIAL_PHRASES, targetTodayIds);
+      questions = getPhrasesByIds(phrases, targetTodayIds);
     }
 
     // まだ本日の出題セットがない場合は選出して記録
     if (questions.length === 0) {
       const selected = selectDailyPhrases(
-        INITIAL_PHRASES,
+        phrases,
         progress.learnedPhraseIds,
         todayString,
         3,
@@ -141,7 +143,7 @@ export function App() {
   const handleStartExtraTraining = (course: TrainingCourse = 'uphill') => {
     setActiveCourse(course);
     const selected = selectExtraTrainingPhrases(
-      INITIAL_PHRASES,
+      phrases,
       progress.learnedPhraseIds,
       3,
       course
@@ -173,7 +175,7 @@ export function App() {
         .filter((item) => item.isCorrect)
         .map((item) => item.phrase.id);
       const sessionPhraseIds = sessionQuestions.map((q) => q.id);
-      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds, activeCourse);
+      markTrainingCompleted(score, correctPhraseIds, sessionPhraseIds, activeCourse, phrases.length);
       setCurrentScreen('result');
     }
   };
@@ -197,7 +199,7 @@ export function App() {
     if (progress.hasCompletedWeeklyRace) return;
     soundManager.playGateOpen();
     const questions = selectRaceQuestions(
-      INITIAL_PHRASES,
+      phrases,
       progress.learnedPhraseIds,
       currentWeekRace.themeCategory
     );
@@ -284,6 +286,7 @@ export function App() {
               onOpenPhraseBook={() => setCurrentScreen('phrase-book')}
               onOpenHallOfFame={() => setCurrentScreen('hall-of-fame')}
               onAddSampleHallOfFame={addSampleHallOfFameForDemo}
+              totalPhrases={phrases.length}
             />
           )}
 
@@ -357,6 +360,7 @@ export function App() {
               progress={progress}
               onBackToHome={handleGoHome}
               onToggleBookmark={toggleBookmarkPhrase}
+              phrases={phrases}
             />
           )}
 

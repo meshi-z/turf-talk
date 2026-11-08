@@ -273,7 +273,8 @@ export function useTrainingProgress(userId?: string | null) {
     _score: number,
     correctPhraseIds: string[] = [],
     sessionPhraseIds: string[] = [],
-    course: TrainingCourse = 'uphill'
+    course: TrainingCourse = 'uphill',
+    totalPhrasesCount?: number
   ) => {
     const today = effectiveTodayString;
     const todayMonday = getLogicalWeekMonday(today);
@@ -297,7 +298,7 @@ export function useTrainingProgress(userId?: string | null) {
         prev.learnedPhraseIds,
         prev.lapCount,
         correctPhraseIds,
-        INITIAL_PHRASES.length
+        totalPhrasesCount ?? INITIAL_PHRASES.length
       );
 
       const nextTodayPhraseIds =
