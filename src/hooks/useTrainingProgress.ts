@@ -41,6 +41,7 @@ import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 import { recordNewPhrasePartners } from '../lib/phrasePartner';
+import { validateAndSanitizeProgress } from '../lib/securityValidator.ts';
 import {
   fetchUserProgressFromFirestore,
   saveUserProgressToFirestore,
@@ -121,7 +122,7 @@ export function useTrainingProgress(userId?: string | null) {
           typeof parsed.lastRaceWeekMonday === 'string' ? parsed.lastRaceWeekMonday : null;
         const completedWeeklyRace = isWeeklyRaceCompletedForWeek(lastRaceWeekMonday, today);
 
-        return {
+        return validateAndSanitizeProgress({
           ...DEFAULT_PROGRESS,
           ...parsed,
           horseName: migratedHorse.name,
@@ -149,7 +150,7 @@ export function useTrainingProgress(userId?: string | null) {
           hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
           bookmarkedPhraseIds: Array.isArray(parsed.bookmarkedPhraseIds) ? parsed.bookmarkedPhraseIds : [],
           phrasePartners: parsed.phrasePartners && typeof parsed.phrasePartners === 'object' ? parsed.phrasePartners : {},
-        };
+        }).sanitized;
       }
     } catch {
       // LocalStorage読み取り失敗時のフォールバック
@@ -177,7 +178,7 @@ export function useTrainingProgress(userId?: string | null) {
         if (isMounted && cloudProgress && !isDeleted) {
           setProgress((prev) => ({
             ...prev,
-            ...cloudProgress,
+            ...validateAndSanitizeProgress(cloudProgress).sanitized,
           }));
         }
       } catch (err) {
