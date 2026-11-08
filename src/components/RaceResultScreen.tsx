@@ -1,4 +1,4 @@
-import { useEffect, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
 import {
@@ -12,6 +12,8 @@ import {
   Crown,
   Gauge,
   Lightbulb,
+  Share2,
+  Copy,
 } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { HorseIllustration } from './HorseIllustration';
@@ -24,6 +26,7 @@ import {
   type CareerRaceAdvanceResult,
 } from '../lib/careerCycle';
 import { SpeechButton } from './SpeechButton';
+import { generateRaceShareText, generateTwitterShareUrl, copyShareTextToClipboard } from '../lib/share';
 
 interface RaceResultScreenProps {
   score: number;
@@ -59,6 +62,29 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
 
   const placement: RacePlacement = calculateRacePlacement(score, completedWeek);
   const feedback: RaceFeedback = calculateRaceFeedback(score, progress.horseWeight, progress.condition);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const placementRank = placement.type === '1st' ? 1 : placement.type === '2nd' ? 2 : placement.type === 'board' ? 3 : 6;
+
+  const shareText = generateRaceShareText({
+    horseName: careerHorse.name,
+    generation: careerHorse.generation,
+    week: completedWeek,
+    raceName: completedRaceInfo.raceName,
+    placementRank,
+    score,
+    totalQuestions,
+  });
+
+  const twitterUrl = generateTwitterShareUrl(shareText);
+
+  const handleCopy = async () => {
+    const success = await copyShareTextToClipboard(shareText);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    }
+  };
   const isWinner = placement.type === '1st';
   const isSecond = placement.type === '2nd';
 
@@ -289,6 +315,40 @@ export const RaceResultScreen: FC<RaceResultScreenProps> = ({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* SNSシェア */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`flex-1 ${isWinner ? 'bg-linear-to-r from-[#9A7418] via-[#C59B27] to-[#8A6D1B] text-[#FFFDF9] font-black border border-[#E6C762]' : 'bg-black hover:bg-stone-900 text-white font-bold border border-stone-800'} py-3 px-4 rounded-xl shadow-xs flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all`}
+            aria-label="レース結果をXでシェアする"
+          >
+            <Share2 className="w-4 h-4 text-[#E6C762]" />
+            <span>Xでレース結果をシェア</span>
+          </a>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="bg-[#FFFDF9] hover:bg-stone-100 text-stone-700 border border-[#D4C9B5] p-3 rounded-xl shadow-2xs active:scale-[0.95] transition-all cursor-pointer flex items-center justify-center shrink-0"
+            title="シェア用テキストをコピー"
+            aria-label="シェア用テキストをクリップボードにコピー"
+          >
+            {isCopied ? (
+              <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+            ) : (
+              <Copy className="w-4 h-4 text-stone-600" />
+            )}
+          </button>
+        </div>
+        {isCopied && (
+          <p role="status" className="text-center text-[11px] font-bold text-emerald-800 animate-fade-in">
+            テキストをクリップボードにコピーしました！📋
+          </p>
+        )}
       </div>
 
       {/* アクションボタン */}

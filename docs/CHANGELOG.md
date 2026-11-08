@@ -5,6 +5,27 @@
 
 ---
 
+## [v0.24.0] - 2026-11-08
+
+### Added
+- **OGP画像生成とSNSシェア機能の実装 ([#19](https://github.com/meshi-z/turf-talk/issues/19)):**
+  - **公式OGP画像（1200×630px）の制作・配置およびメタタグ設定 (`public/og-image.png`, `index.html`, `vite.config.ts`):**
+    - ブリティッシュ・レーシンググリーンを基調に、サドルレザーステッチ装飾・公式ロゴ・セリフ体タイトル・英語キャッチコピー（"Master Global Horse Racing English"）をレイアウトした公式OGP画像（1200×630px）を制作・配置。
+    - `index.html` に `og:image`（1200×630px）、`og:url`、`twitter:card` (`summary_large_image`)、`twitter:image` を設定し、SNS上でのリッチなカード展開を担保。
+    - `vite.config.ts` の PWA キャッシュ（`includeAssets`）に `og-image.png` を追加。
+  - **SNSシェアユーティリティの実装 (`src/lib/share.ts`):**
+    - 調教結果シェアテキスト生成（`generateTrainingShareText`）：愛馬名、調教コース、スコアバッジ、連続調教日数、調子、ハッシュタグ（`#TurfTalk #競馬英語`）、サイトURLを120文字以内で簡潔に構成。
+    - レース結果シェアテキスト生成（`generateRaceShareText`）：出走週、レース名、世代・愛馬名、着順（1着トロフィー/2着メダル/掲示板）、正解数、ハッシュタグ、サイトURLを120文字以内で構成。
+    - X（Twitter）Web Intent URL 生成（`generateTwitterShareUrl`）およびクリップボードコピー（`copyShareTextToClipboard`、`navigator.clipboard` フォールバック対応）を実装。
+  - **調教完了画面・レース結果画面へのSNSシェアUIの組み込み (`src/components/ResultScreen.tsx`, `src/components/RaceResultScreen.tsx`):**
+    - 調教完了画面（`ResultScreen`）に「Xで調教結果をシェア」ボタンとクリップボードコピーボタン、コピー完了トーストを追加。
+    - レース結果画面（`RaceResultScreen`）に「Xでレース結果をシェア」ボタン（1着優勝時はゴールドグラデーション特別装飾）とコピーボタン、コピー完了トーストを追加。
+  - **単体テストの追加 (`tests/share.test.ts`, `tests/seo_meta_assets.test.ts`):**
+    - `public/og-image.png` の実在および PNG 解像度（1200×630px）のバイナリ検証テストを追加。
+    - シェア文面の文字数（120文字以内）、必須要素、Web Intent URL エンコード、クリップボードモック処理の単体テストを追加。
+
+---
+
 ## [v0.23.0] - 2026-11-08
 
 ### Added
