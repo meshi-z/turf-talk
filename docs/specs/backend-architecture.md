@@ -56,7 +56,15 @@ flowchart TD
 3. **X (Twitter) SSO**:
    - `TwitterAuthProvider` によるOAuth連携（競馬ファンのコミュニティ親和性に対応）。
 
-### 2.2 アカウント昇格（Link With Credential）
+### 2.2 User ID (UID) の生成仕様とセキュリティ
+- **UIDの生成**:
+  - Firebase Authentication の UID は、ユーザーの個人情報（メール、名前、パスワード等）から生成されるものではなく、**暗号学的に安全な疑似乱数生成器（CSPRNG）によって生成される28文字のランダムな英数字文字列**です。
+  - 個人情報を一切含まず、推測不可能な独立した識別子であるため、そのままFirestoreのドキュメントキーとして安全に使用できます。
+- **パスワードレス運用とハッシュ化**:
+  - 本サービスは SSO（OAuth 2.0 / OIDC）および匿名認証に特化するため、自前のパスワードを一切保持・管理しません（パスワード漏洩リスクが原理的にゼロ）。
+  - ※なお、Firebase Auth 基盤内部では Google 独自の高強度 `scrypt`（暗号学的Salt + メモリハードなストレッチング）により認証情報が保護されています。
+
+### 2.3 アカウント昇格（Link With Credential）
 - 匿名状態で利用していたユーザーが「バックアップ」「機種変更」「他端末同期」を希望した際、`linkWithPopup` を実行。
 - **既存の `uid` およびFirestoreに蓄積された調教履歴・愛馬データ・ストリークを100%維持したまま**、GoogleまたはXのアカウントと紐付けを完了する。
 
@@ -127,7 +135,18 @@ export interface UserDocument {
 }
 ```
 
-### 3.3 セキュリティルール (`firestore.rules`)
+### 3.3 セキュリティルール & 改ざん防止仕様 (`firestore.rules` & App Check)
+Issue #102 の対応方針に基づき、クライアント単体の難読化に依存せず、クラウド側のサーバーサイド検証とクライアント整合性検証でデータの健全性を担保します。
+
+1. **Firestore セキュリティルール (`firestore.rules`)**:
+   - 本人のみ読み書き許可 (`request.auth.uid == userId`)
+   - データの整合性検証（にんじん上限 `carrotCount <= 3`、不自然なスコア急増の拒否）
+2. **Firebase App Check**:
+   - Firebase Hosting と連携し、reCAPTCHA Enterprise / v3 を用いて正規の TurfTalk Web アプリ以外からの不正リクエストを遮断。
+3. **クラウド正本リコンサイル**:
+   - ローカル側（DevTools等）で値が変更されても、クラウド側データ（Firestore）を正本として同期・上書き復元。
+4. **開発環境の自由度確保**:
+   - `import.meta.env.DEV` や localhost でのデバッグメニュー操作時は、開発用ルールまたはローカルバイパスを適用。
 ```javascript
 rules_version = '2';
 service cloud.firestore {

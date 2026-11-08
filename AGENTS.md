@@ -16,6 +16,7 @@
 | **競走馬ビジュアル・イラスト素材仕様** | **`docs/specs/horse-visual-assets.md`** | 全6シーン構成、3点座標ロック、透過仕様、全8毛色カラーパレット・領域変換ルール |
 | **画面ワイヤーフレーム・UI設計** | **`docs/specs/wireframe.md`** | 画面一覧、ユーザーフロー、各画面のワイヤーフレーム |
 | **バックエンド・クラウドアーキテクチャ仕様** | **`docs/specs/backend-architecture.md`** | Firebase/GCP構成、認証仕様、Firestoreスキーマ、管理者向け分析・Looker Studioダッシュボード |
+| **Firebase初期設定・デプロイガイド** | **`docs/specs/firebase-setup-guide.md`** | 初心者向けFirebaseプロジェクト作成、Webアプリ登録、GitHub Secrets登録手順 |
 | **非機能要件・品質基準** | **`docs/non-functional-requirements.md`** | 性能指標（FCP/LCP/INP、バンドルサイズ）、レスポンシブ・オフライン動作要件 |
 | **変更履歴・開発実績** | **`docs/CHANGELOG.md`** | 各フェーズ・バージョンのリリースノートおよび変更履歴 |
 
