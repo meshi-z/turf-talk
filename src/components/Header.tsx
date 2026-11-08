@@ -23,6 +23,8 @@ export const Header: FC<HeaderProps> = ({ streakDays, onOpenHelp }) => {
           <img
             src={`${import.meta.env.BASE_URL}icon.svg`}
             alt="TurfTalk"
+            width={30}
+            height={30}
             className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-md select-none object-cover block"
           />
         </div>
