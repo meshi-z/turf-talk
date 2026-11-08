@@ -3,6 +3,7 @@ import {
   signInAnonymously,
   onAuthStateChanged,
   signOut,
+  deleteUser,
   linkWithPopup,
   signInWithPopup,
   GoogleAuthProvider,
@@ -214,6 +215,51 @@ export function useAuth() {
     }
   }, []);
 
+  /**
+   * アカウント削除・退会処理
+   */
+  const deleteAccount = useCallback(async () => {
+    setIsLoading(true);
+    setAuthError(null);
+
+    try {
+      if (rawFirebaseUser) {
+        await deleteUser(rawFirebaseUser);
+      }
+      // ローカルの全進捗・セッションデータを初期化
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(LOCAL_GUEST_UID_KEY);
+        localStorage.removeItem('turftalk_user_progress_v1');
+      }
+
+      // 退会後は自動的に新しいゲストとして再初期化
+      if (auth && isFirebaseConfigured()) {
+        const cred = await signInAnonymously(auth);
+        setRawFirebaseUser(cred.user);
+        setUser(mapFirebaseUser(cred.user));
+      } else {
+        const localUid = getOrCreateLocalGuestUid();
+        setUser({
+          uid: localUid,
+          isAnonymous: true,
+          displayName: 'ゲスト馬主',
+          email: null,
+          photoURL: null,
+          providerId: 'anonymous',
+        });
+      }
+    } catch (err: unknown) {
+      const error = err as AuthError;
+      if (error.code === 'auth/requires-recent-login') {
+        setAuthError('セキュリティ保護のため、一度ログインし直してから再度退会手続きを行ってください。');
+      } else {
+        setAuthError(error.message || 'アカウントの削除に失敗しました。');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [rawFirebaseUser]);
+
   return {
     user,
     rawFirebaseUser,
@@ -222,6 +268,7 @@ export function useAuth() {
     loginWithGoogle,
     loginWithTwitter,
     signOut: handleSignOut,
+    deleteAccount,
     clearError: () => setAuthError(null),
   };
 }

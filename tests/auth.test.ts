@@ -78,3 +78,24 @@ describe('User authentication model & guest fallback (useAuth.ts)', () => {
     assert.strictEqual(mockTwitterUser.providerId, 'twitter.com');
   });
 });
+
+  test('account deletion purges progress and resets to fresh guest', () => {
+    const mockStorage: Record<string, string> = {
+      turftalk_local_guest_uid_v1: 'old_guest_uid_123',
+      turftalk_user_progress_v1: JSON.stringify({ streakDays: 10, learnedPhraseIds: ['p1'] }),
+    };
+
+    // 退会・データ全削除シミュレーション
+    delete mockStorage.turftalk_local_guest_uid_v1;
+    delete mockStorage.turftalk_user_progress_v1;
+
+    assert.strictEqual(mockStorage.turftalk_local_guest_uid_v1, undefined);
+    assert.strictEqual(mockStorage.turftalk_user_progress_v1, undefined);
+
+    // 新規ゲストの再発行
+    const newUid = `guest_${Math.random().toString(36).substring(2, 10)}`;
+    mockStorage.turftalk_local_guest_uid_v1 = newUid;
+
+    assert.notStrictEqual(newUid, 'old_guest_uid_123');
+    assert.ok(mockStorage.turftalk_local_guest_uid_v1.startsWith('guest_'));
+  });

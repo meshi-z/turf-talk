@@ -40,6 +40,7 @@ export function App() {
     loginWithGoogle,
     loginWithTwitter,
     signOut: handleSignOut,
+    deleteAccount: handleDeleteAccount,
   } = useAuth();
 
   const handleOpenHelp = () => {
@@ -380,6 +381,7 @@ export function App() {
         onLoginGoogle={loginWithGoogle}
         onLoginTwitter={loginWithTwitter}
         onSignOut={handleSignOut}
+        onDeleteAccount={handleDeleteAccount}
       />
     </div>
   );
