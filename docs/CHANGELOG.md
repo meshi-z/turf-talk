@@ -5,6 +5,40 @@
 
 ---
 
+## [v0.25.0] - 2026-11-08
+
+### Added
+- **Phase 4 クラウドバックエンド・Firebase認証・データ同期・セキュリティ・動的配信・管理者分析基盤の実装 ([#116](https://github.com/meshi-z/turf-talk/issues/116), [#117](https://github.com/meshi-z/turf-talk/issues/117), [#118](https://github.com/meshi-z/turf-talk/issues/118), [#102](https://github.com/meshi-z/turf-talk/issues/102), [#119](https://github.com/meshi-z/turf-talk/issues/119), [#120](https://github.com/meshi-z/turf-talk/issues/120), [#121](https://github.com/meshi-z/turf-talk/issues/121)):**
+  - **Firebase Hosting & CI/CD 自動デプロイパイプラインの構築 (#116):**
+    - `firebase.json`, `.firebaserc`, `.env.example` の整備および GitHub Actions デプロイ自動化ワークフロー（`.github/workflows/firebase-deploy.yml`）を構築。
+    - 初心者向けセットアップマニュアル `docs/specs/firebase-setup-guide.md` を作成。
+  - **Firebase Authentication による匿名認証および Google / X (Twitter) SSO 連携の実装 (#117):**
+    - 初回起動時の自動ゲストUID発行（オフライン・未設定時も完全フォールバック）。
+    - ゲストから Google / X アカウントへの進捗データ保持昇格（`linkWithPopup`）。
+    - アカウント解除・論理削除連携（`deleteAccount`）およびクラシック真鍮風アカウントモーダル（`AuthModal`）を実装。
+  - **Firestore データ同期 ＆ サマリー項目・論理削除ポリシーの実装 (#118):**
+    - `users/{uid}` コレクションへの進捗・愛馬データのバックグラウンド非同期同期（オフライン・LocalStorage即時性を維持）。
+    - 管理者検索・ソート高速化のためのトップレベルサマリー項目（消化数、消化率、ストリーク、愛馬名、路線、通算勝利数、殿堂入り数）の自動算出・保存。
+    - 退会時の論理削除ポリシー（`isDeleted: true`）と誤操作時の復元機能。
+  - **改ざん防止・Firestoreセキュリティルール & App Check の実装 (#102):**
+    - 本人のみ読み書きを許可する Firestore セキュリティルール作成（にんじん数<=3、平日調教日数0-7等の整合性検証）。
+    - reCAPTCHA Enterprise / v3 を用いた Firebase App Check 基盤（ローカル開発環境での自動バイパス対応）。
+    - クライアント側改ざん検知・サニタイズ（にんじん数・ストリーク値・愛馬週数等のクランプおよびクラウド正本リコンサイル）。
+  - **フレーズマスターの動的クラウド配信（ローカル静的＋Firestoreハイブリッドマージ）の実装 (#119):**
+    - 内包静的マスター（120問）と Firestore `phrases` コレクションの最新データをID基準で安全にマージ。
+    - `turftalk_cached_cloud_phrases_v1` によるオフラインキャッシュと初回レンダリング遅延ゼロの保証。
+    - 4択・正解数バリデーションおよび非公開（`isPublished: false`）問題の除外。
+    - 調教、レース、フレーズ図鑑、進捗計算へのシームレスな統合。
+  - **Firebase Analytics × BigQuery 連携 & 分析ダッシュボードの構築 (#120):**
+    - クライアント側イベント送信モジュール実装（`training_completed`, `race_completed`, `horse_retired`, `phrase_bookmarked`）。
+    - Looker Studio 連携用 BigQuery 分析クエリ集（`docs/specs/analytics-queries.sql`）作成（コンテンツ健全性&枯渇予測、問題難易度分析、継続率、路線動向）。
+  - **サービス管理者向けユーザー一覧・競走馬成績確認機能の実装 (#121):**
+    - 管理者権限判定（`isAdminUser`）および全ユーザー進捗・愛馬データの取得・マッピング。
+    - 管理者ダッシュボード画面の実装（統計サマリー、検索、フィルター、ソート、論理削除アカウント復元操作）。
+    - ヘッダーおよびホーム画面デバッグ領域からの管理者ダッシュボード画面遷移連携。
+
+---
+
 ## [v0.24.0] - 2026-11-08
 
 ### Added
