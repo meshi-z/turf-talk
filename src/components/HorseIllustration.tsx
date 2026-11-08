@@ -117,7 +117,10 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
         src={bgImageUrl}
         alt=""
         aria-hidden="true"
+        width={STATIC_ILLUSTRATION_WIDTH}
+        height={STATIC_ILLUSTRATION_HEIGHT}
         loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
         decoding="async"
         className="absolute inset-0 w-full h-full object-cover object-center pointer-events-none"
       />
@@ -139,7 +142,10 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
         <img
           src={imageUrl}
           alt={alt ?? defaultAlt}
+          width={STATIC_ILLUSTRATION_WIDTH}
+          height={STATIC_ILLUSTRATION_HEIGHT}
           loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
           decoding="async"
           className="relative z-10 w-full h-full object-contain"
         />
@@ -155,7 +161,6 @@ export const HorseIllustration: FC<HorseIllustrationProps> = ({
           }`}
         />
       )}
-
     </div>
   );
 };

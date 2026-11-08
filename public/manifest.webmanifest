@@ -1,14 +1,21 @@
 {
-  "name": "TurfTalk | 競馬英語マイクロラーニング",
+  "name": "TurfTalk | 海外競馬英語マイクロラーニング",
   "short_name": "TurfTalk",
-  "description": "海外G1の勝利騎手・調教師の生のコメント・興奮を直感で掴むマイクロラーニングアプリ",
+  "description": "平日の坂路・ウッドチップ調教（1日3問）と週末レース出走・4週間愛馬育成サイクルで、海外G1の勝利騎手インタビュー・現地実況の生の英語を直感で掴むマイクロラーニングアプリ",
+  "lang": "ja",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#059669",
-  "theme_color": "#059669",
+  "background_color": "#ECE6D8",
+  "theme_color": "#0D3322",
   "orientation": "portrait",
+  "categories": ["education", "sports", "games"],
   "icons": [
+    {
+      "src": "./favicon.ico",
+      "sizes": "32x32 48x48",
+      "type": "image/x-icon"
+    },
     {
       "src": "./icon.svg",
       "sizes": "any",

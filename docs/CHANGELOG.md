@@ -5,6 +5,23 @@
 
 ---
 
+## [v0.22.0] - 2026-11-08
+
+### Added
+- **アプリアイコン・ファビコンおよびSEO・メタ情報の最適化 ([#20](https://github.com/meshi-z/turf-talk/issues/20)):**
+  - **マルチサイズ `favicon.ico` の生成・配置およびマニフェスト最適化 (`public/favicon.ico`, `public/manifest.webmanifest`):**
+    - 公式アイコン（32×32 / 48×48）を格納した標準マルチサイズ ICO ファイル（`public/favicon.ico`）を新規生成・配置し、未使用の初期テンプレート残骸ファイル（`public/icons.svg`）を削除。
+    - `public/manifest.webmanifest` の `theme_color`（`#0D3322`：ブリティッシュ・レーシンググリーン）および `background_color`（`#ECE6D8`：レーシングプログラム・アイボリー）を現行デザインシステムと統一し、`lang: "ja"`、`categories`、および `favicon.ico` / `192x192` / `512x512`（any / maskable）のアイコン定義を整備。
+  - **`index.html` の SEO・OGP・アクセシビリティメタ情報の最適化 (`index.html`, `src/components/Header.tsx`, `src/components/HorseIllustration.tsx`):**
+    - `description` の充実化および `keywords`（海外競馬, 競馬英語, 英語学習, マイクロラーニング, 騎手インタビュー, 競馬実況, サラブレッド, G1, JRA, TurfTalk）、`application-name`、`format-detection` メタタグを追加。
+    - SNSシェア向けの Open Graph Protocol（`og:title`, `og:description`, `og:type`, `og:site_name`, `og:locale`, `og:image`）および Twitter Card（`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`）メタタグを追加。
+    - `favicon.ico`、`favicon-48x48.png`、`apple-touch-icon.png`（`sizes="180x180"` 明示）へのリンク参照を整備。
+    - `<meta name="viewport">` からピンチズーム・200%拡大を阻害する `maximum-scale=1.0, user-scalable=no` を除去し、`Header` および `HorseIllustration` の `<img>` 要素に明示的な `width` / `height` / `fetchPriority` 属性を付与してアクセシビリティと CLS 防止を強化。
+  - **単体テストの追加 (`tests/seo_meta_assets.test.ts`):**
+    - `favicon.ico` のバイナリヘッダー・フレーム解像度検証、全 PNG / SVG アイコンのサイズ・実在検証、`manifest.webmanifest` 整合性検証、および `index.html` の SEO・OGP・アクセシブル `viewport` 検証テストを追加。
+
+---
+
 ## [v0.21.0] - 2026-11-07
 
 ### Added
