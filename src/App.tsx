@@ -81,7 +81,7 @@ export function App() {
     setDebugRaceCompleted,
     conditionTier,
     markRaceCompleted,
-  } = useTrainingProgress();
+  } = useTrainingProgress(user?.uid);
 
   const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
   const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);

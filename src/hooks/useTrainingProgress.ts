@@ -41,6 +41,10 @@ import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 import { recordNewPhrasePartners } from '../lib/phrasePartner';
+import {
+  fetchUserProgressFromFirestore,
+  saveUserProgressToFirestore,
+} from '../lib/firestoreSync.ts';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
 
@@ -79,7 +83,7 @@ const SIMULATED_WEEKDAY_DAYS_BY_DAY: Record<DayOfWeek, number> = {
   0: 5,
 };
 
-export function useTrainingProgress() {
+export function useTrainingProgress(userId?: string | null) {
   const [progress, setProgress] = useState<UserProgress>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -162,13 +166,42 @@ export function useTrainingProgress() {
   const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
   const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
 
+  // 初回マウントまたは userId 変更時の Firestore クラウドデータ同期
+  useEffect(() => {
+    if (!userId) return;
+
+    let isMounted = true;
+    (async () => {
+      try {
+        const { progress: cloudProgress, isDeleted } = await fetchUserProgressFromFirestore(userId);
+        if (isMounted && cloudProgress && !isDeleted) {
+          setProgress((prev) => ({
+            ...prev,
+            ...cloudProgress,
+          }));
+        }
+      } catch (err) {
+        console.warn('[useTrainingProgress] Initial cloud sync failed:', err);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
     } catch {
       // 保存エラーは無視
     }
-  }, [progress]);
+    if (userId) {
+      saveUserProgressToFirestore(userId, progress).catch((err) => {
+        console.warn('[useTrainingProgress] Background cloud sync failed:', err);
+      });
+    }
+  }, [progress, userId]);
 
   const actualTodayStr = getLogicalDateString();
   const currentMonday = getLogicalWeekMonday(actualTodayStr);

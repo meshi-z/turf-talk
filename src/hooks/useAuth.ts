@@ -11,7 +11,8 @@ import {
   type User,
   type AuthError,
 } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from '../lib/firebase';
+import { auth, isFirebaseConfigured } from '../lib/firebase.ts';
+import { markAccountDeletedInFirestore } from '../lib/firestoreSync.ts';
 
 export type AuthProviderType = 'anonymous' | 'google.com' | 'twitter.com' | 'offline';
 
@@ -224,6 +225,8 @@ export function useAuth() {
 
     try {
       if (rawFirebaseUser) {
+        // Firestore 側を論理削除（Soft Delete）として記録
+        await markAccountDeletedInFirestore(rawFirebaseUser.uid);
         await deleteUser(rawFirebaseUser);
       }
       // ローカルの全進捗・セッションデータを初期化

@@ -99,6 +99,8 @@ export interface UserDocument {
   createdAt: FirebaseFirestore.Timestamp;
   updatedAt: FirebaseFirestore.Timestamp;
   lastActiveAt: FirebaseFirestore.Timestamp; // 最終アクセス日時
+  isDeleted: boolean;                        // 退会・論理削除フラグ（通常: false, 退会時: true）
+  deletedAt: string | null;                  // 退会日時（復旧対応・離脱分析用）
 
   // ── 管理者用・一覧検索用サマリー項目 (集計・ソートの高速化) ──
   learnedCount: number;         // 履修済み問題数 (learnedPhraseIds.length)
@@ -165,6 +167,15 @@ service cloud.firestore {
   }
 }
 ```
+
+---
+
+### 3.4 論理削除ポリシー (Soft Delete Specification)
+ユーザーが退会手続きを行った場合でも、以下の理由から Firestore ドキュメントの物理削除（`deleteDoc`）は行わず、**論理削除（`isDeleted: true`）** としてデータを永久保持します。
+1. **誤操作・問い合わせ時のデータ復元**:
+   - ユーザーから「誤って退会してしまったため復旧したい」という問い合わせがあった際、管理者が `isDeleted: false` に戻すことで進捗と愛馬データを完全復元可能。
+2. **プラットフォーム全体の累計実績の保持**:
+   - サービス全体の総問題消化数、総レース数などの実績値が欠損せず、BigQuery での統計・チャーン分析に活用可能。
 
 ---
 
