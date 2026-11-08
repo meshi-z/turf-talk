@@ -8,9 +8,18 @@ interface HeaderProps {
   user?: AppUser | null;
   onOpenHelp: () => void;
   onOpenAuth?: () => void;
+  onOpenAdmin?: () => void;
+  isAdmin?: boolean;
 }
 
-export const Header: FC<HeaderProps> = ({ streakDays, user, onOpenHelp, onOpenAuth }) => {
+export const Header: FC<HeaderProps> = ({
+  streakDays,
+  user,
+  onOpenHelp,
+  onOpenAuth,
+  onOpenAdmin,
+  isAdmin,
+}) => {
   const [soundEnabled, setSoundEnabled] = useState(() => soundManager.isEnabled());
 
   const handleToggleSound = () => {
@@ -83,6 +92,19 @@ export const Header: FC<HeaderProps> = ({ streakDays, user, onOpenHelp, onOpenAu
             <VolumeX className="w-4 h-4 text-[#8DA597]" />
           )}
         </button>
+
+        {/* 管理者ダッシュボードボタン（管理者のみ表示） */}
+        {isAdmin && onOpenAdmin && (
+          <button
+            type="button"
+            onClick={onOpenAdmin}
+            aria-label="管理者ダッシュボードを開く"
+            title="管理者ダッシュボード"
+            className="p-1.5 rounded-md text-[#E6C762] hover:text-[#FAF8F3] hover:bg-[#184D36] border border-[#C59B27]/40 active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            <span className="text-sm leading-none">🛠️</span>
+          </button>
+        )}
 
         <button
           type="button"

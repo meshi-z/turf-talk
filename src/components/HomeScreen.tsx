@@ -75,6 +75,7 @@ interface HomeScreenProps {
   totalPhrases?: number;
   onOpenHallOfFame?: () => void;
   onAddSampleHallOfFame?: () => void;
+  onOpenAdmin?: () => void;
 }
 
 // 月曜日〜日曜日順の曜日リスト
@@ -110,6 +111,7 @@ export const HomeScreen: FC<HomeScreenProps> = ({
   onOpenPhraseBook,
   onOpenHallOfFame,
   onAddSampleHallOfFame,
+  onOpenAdmin,
   totalPhrases: customTotalPhrases,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
@@ -1135,6 +1137,20 @@ export const HomeScreen: FC<HomeScreenProps> = ({
               >
                 <BookOpen className="w-3.5 h-3.5 text-[#0D3322]" />
                 <span>問題・解答一覧を表示（全120問・校正用）</span>
+              </button>
+            </div>
+          )}
+
+          {/* 管理者ダッシュボードへの導線 */}
+          {onOpenAdmin && (
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-[#071D13] hover:bg-[#0D3322] text-[#E6C762] border border-[#C59B27]/50 shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🛠️</span>
+                <span>管理者ダッシュボードを開く（進捗・成績確認）</span>
               </button>
             </div>
           )}

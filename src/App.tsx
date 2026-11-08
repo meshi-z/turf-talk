@@ -10,6 +10,7 @@ import { RetirementScreen } from './components/RetirementScreen';
 import { DebugQuestionsScreen } from './components/DebugQuestionsScreen';
 import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { HallOfFameScreen } from './components/HallOfFameScreen';
+import { AdminDashboardScreen } from './components/AdminDashboardScreen';
 import { HelpGuideModal } from './components/HelpGuideModal';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './hooks/useAuth';
@@ -26,8 +27,9 @@ import { selectRaceQuestions } from './lib/raceMode';
 import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/careerCycle';
 import { soundManager } from './lib/sound';
 import { hasSeenHelpGuide, markHelpGuideSeen } from './lib/helpGuide';
+import { isAdminUser } from './lib/adminService';
 
-type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame';
+type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame' | 'admin';
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -252,6 +254,8 @@ export function App() {
           user={user}
           onOpenHelp={handleOpenHelp}
           onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenAdmin={() => setCurrentScreen('admin')}
+          isAdmin={isAdminUser(user)}
         />
 
         <main className="flex-1 flex flex-col">
@@ -285,6 +289,7 @@ export function App() {
               onOpenDebugQuestions={() => setCurrentScreen('debug-questions')}
               onOpenPhraseBook={() => setCurrentScreen('phrase-book')}
               onOpenHallOfFame={() => setCurrentScreen('hall-of-fame')}
+              onOpenAdmin={() => setCurrentScreen('admin')}
               onAddSampleHallOfFame={addSampleHallOfFameForDemo}
               totalPhrases={phrases.length}
             />
@@ -369,6 +374,9 @@ export function App() {
               hallOfFame={progress.hallOfFame ?? []}
               onBackToHome={handleGoHome}
             />
+          )}
+          {currentScreen === 'admin' && (
+            <AdminDashboardScreen onBackToHome={handleGoHome} />
           )}
         </main>
 
