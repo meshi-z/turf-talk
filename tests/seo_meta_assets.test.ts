@@ -52,6 +52,7 @@ test('seo_meta_assets: all app icons and favicons exist with expected dimensions
     { file: 'pwa-512x512.png', width: 512, height: 512 },
     { file: 'pwa-maskable-192x192.png', width: 192, height: 192 },
     { file: 'pwa-maskable-512x512.png', width: 512, height: 512 },
+    { file: 'og-image.png', width: 1200, height: 630 },
   ];
 
   for (const item of expectedPngs) {
@@ -111,8 +112,9 @@ test('seo_meta_assets: index.html includes optimized SEO meta tags, icon links, 
   // OGP & Twitter Card
   assert.match(html, /<meta\s+property="og:title"\s+content="TurfTalk \| 海外競馬英語マイクロラーニング"\s*\/>/);
   assert.match(html, /<meta\s+property="og:type"\s+content="website"\s*\/>/);
-  assert.match(html, /<meta\s+property="og:image"\s+content="\.\/pwa-512x512\.png"\s*\/>/);
-  assert.match(html, /<meta\s+name="twitter:card"\s+content="summary"\s*\/>/);
+  assert.match(html, /<meta\s+property="og:image"\s+content="\.\/og-image\.png"\s*\/>/);
+  assert.match(html, /<meta\s+name="twitter:card"\s+content="summary_large_image"\s*\/>/);
+  assert.match(html, /<meta\s+name="twitter:image"\s+content="\.\/og-image\.png"\s*\/>/);
 
   // Favicon & Apple Touch Icon links
   assert.match(html, /<link\s+rel="icon"\s+href="\.\/favicon\.ico"\s+sizes="48x48"\s*\/>/);

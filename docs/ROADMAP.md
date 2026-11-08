@@ -11,6 +11,7 @@
 | **Phase 1** | **v0.1.0 (Alpha)** | **MVP（最小検証版）** | 平日3問の解き心地・テンポ感・フレーズの納得感を開発者自身が確認できること |
 | **Phase 2** | **v0.5.0 (Beta)** | **Core Loop（サイクルの確立）** | 「平日調教 → 週末レース出走」の1週間サイクルが自然に回ること |
 | **Phase 3** | **v1.0.0 (Release)** | **Official Release（実用ツールの完成）** | 音声読み上げ・図鑑・PWAが揃い、日常的な観戦のお供として活用できること |
+| **Phase 4** | **v2.0.0 (Cloud & Admin)** | **Cloud Backend & Admin Platform** | Firebase基盤（Hosting/Auth/Firestore）への移行、データ永続化・SSO、管理者向け分析（BigQuery/Looker Studio）が稼働すること |
 
 ---
 
@@ -55,4 +56,18 @@
   * [機能・UI/UX] サービスの使い方・学習サイクルを5ステップで解説するヘルプガイドモーダル＆初回オンボーディングの実装（Issue #109対応完了：v0.21.0）
   * [基盤・SEO] アプリアイコン・ファビコン（`favicon.ico` 含む全サイズ）整備およびSEO・OGP・アクセシビリティメタ情報の最適化（Issue #20対応完了：v0.22.0）
   * [基盤] PWA（Progressive Web App）対応（ホーム画面追加、オフラインキャッシュ完了：v0.23.0）
+  * [機能・SNS] OGP画像生成（1200×630px）および調教・レース結果画面からのX（Twitter）シェア機能・クリップボードコピー実装（Issue #19対応完了：v0.24.0）
+
+---
+
+### Phase 4: v2.0.0 (Cloud & Admin) - Cloud Backend & Admin Platform
+* **スコープ:**
+  * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築
+  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装
+  * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）およびオフラインキャッシュ対応
+  * [データモデル] 管理者検索・集計高速化のためのサマリーフィールド（消化数、消化率、通算勝率、最終アクティブ日時）自動更新の実装
+  * [コンテンツ管理] フレーズマスターの動的配信（静的マスター＋Firestore動的マージ方式）の実装
+  * [分析・運用] Firebase Analytics × BigQuery 連携および Looker Studio 管理者ダッシュボード（消化率分布・コンテンツ枯渇予測・問題難易度分析・リテンション）の構築
+  * [管理者機能] 管理者権限によるユーザー別・競走馬別ステータス一覧の閲覧基盤
+* **非スコープ:** リアルタイムWebSocket通信、自前RDBサーバーの常時稼働
   * [UI/UX] レスポンシブ最適化、全体のデザインポリッシュ

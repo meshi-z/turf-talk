@@ -1,11 +1,16 @@
-import { useEffect, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import type { PhraseItem } from '../data/phrases';
 import type { UserProgress } from '../types';
-import { TrendingUp, Home, Sparkles } from 'lucide-react';
+import { TrendingUp, Home, Sparkles, Share2, Copy, Check } from 'lucide-react';
 import { soundManager } from '../lib/sound';
 import { getLogicalDate } from '../lib/logicalDate';
 import { HorseIllustration } from './HorseIllustration';
 import { SpeechButton } from './SpeechButton';
+import {
+  generateTrainingShareText,
+  generateTwitterShareUrl,
+  copyShareTextToClipboard,
+} from '../lib/share';
 
 interface ResultScreenProps {
   score: number;
@@ -26,6 +31,7 @@ export const ResultScreen: FC<ResultScreenProps> = ({
   answeredHistory,
   onGoHome,
 }) => {
+  const [isCopied, setIsCopied] = useState(false);
   const isPerfect = score === totalQuestions;
   const todayDateString = getLogicalDate().toLocaleDateString('ja-JP', {
     year: 'numeric',
@@ -40,6 +46,24 @@ export const ResultScreen: FC<ResultScreenProps> = ({
     }, 180);
     return () => clearTimeout(timer);
   }, []);
+
+  const shareText = generateTrainingShareText({
+    horseName: progress.horseName,
+    score,
+    totalQuestions,
+    streakDays: progress.streakDays,
+    condition: progress.condition,
+  });
+
+  const twitterUrl = generateTwitterShareUrl(shareText);
+
+  const handleCopy = async () => {
+    const success = await copyShareTextToClipboard(shareText);
+    if (success) {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col p-4 max-w-md mx-auto w-full space-y-4">
@@ -140,14 +164,50 @@ export const ResultScreen: FC<ResultScreenProps> = ({
         </div>
       </div>
 
-      {/* ホームへ戻るボタン */}
-      <button
-        onClick={onGoHome}
-        className="w-full bg-[#0D3322] hover:bg-[#164B33] active:scale-[0.98] transition-all text-[#FAF8F3] border border-[#C59B27]/50 font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer mt-auto"
-      >
-        <Home className="w-5 h-5 text-[#E6C762]" />
-        <span>厩舎（ホーム）へ戻る</span>
-      </button>
+      {/* SNSシェア & アクションボタン */}
+      <div className="space-y-2.5 mt-auto pt-1">
+        <div className="flex items-center gap-2">
+          <a
+            href={twitterUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-black hover:bg-stone-900 text-white font-bold py-3 px-4 rounded-xl shadow-xs border border-stone-800 flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all"
+            aria-label="調教結果をXでシェアする"
+          >
+            <Share2 className="w-4 h-4 text-[#E6C762]" />
+            <span>Xで調教結果をシェア</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="bg-[#FFFDF9] hover:bg-stone-100 text-stone-700 border border-[#D4C9B5] p-3 rounded-xl shadow-2xs active:scale-[0.95] transition-all cursor-pointer flex items-center justify-center shrink-0"
+            title="シェア用テキストをコピー"
+            aria-label="シェア用テキストをクリップボードにコピー"
+          >
+            {isCopied ? (
+              <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+            ) : (
+              <Copy className="w-4 h-4 text-stone-600" />
+            )}
+          </button>
+        </div>
+
+        {isCopied && (
+          <p role="status" className="text-center text-[11px] font-bold text-emerald-800 animate-fade-in">
+            テキストをクリップボードにコピーしました！📋
+          </p>
+        )}
+
+        {/* ホームへ戻るボタン */}
+        <button
+          onClick={onGoHome}
+          className="w-full bg-[#0D3322] hover:bg-[#164B33] active:scale-[0.98] transition-all text-[#FAF8F3] border border-[#C59B27]/50 font-bold py-3.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 text-base cursor-pointer"
+        >
+          <Home className="w-5 h-5 text-[#E6C762]" />
+          <span>厩舎（ホーム）へ戻る</span>
+        </button>
+      </div>
     </div>
   );
 };
