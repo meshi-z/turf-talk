@@ -5,6 +5,15 @@
 
 ---
 
+## [v0.26.1] - 2026-11-14
+
+### Fixed
+- **初回アクセス時および世代交代時の週間調教消化日数の初期値修正 ([#130](https://github.com/meshi-z/turf-talk/issues/130)):**
+  - `src/hooks/useTrainingProgress.ts` の `DEFAULT_PROGRESS`・LocalStorage復元フォールバック・世代交代時（`retireToNextGeneration`）・デモ用リセット（`resetProgressForDemo`）における `weekdayTrainingDays` の初期値を `3` から `0`（`condition: 'heavy'`, `horseWeight: 500`）に統一。
+  - `src/lib/securityValidator.ts` の `validateAndSanitizeProgress` における `weekdayTrainingDays` 欠損時のフォールバック値を `3` から `0` に変更。
+
+---
+
 ## [v0.25.0] - 2026-11-08
 
 ### Added

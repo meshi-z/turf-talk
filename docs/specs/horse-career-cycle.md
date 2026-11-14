@@ -132,7 +132,7 @@ Week 4 の海外G1または大一番レース完走後、レース結果画面�
    - 引退式画面の下部で、次世代（`generation + 1`）の新馬の **馬名・毛色同時抽選（🎲 命名・毛色抽選）**、**馬名手動編集（✏️ 手動編集）**、**キャリア路線（全8路線）の選択** を行い、「`第{N+1}世代「{馬名}」の育成を始める`」ボタンで世代交代を完了。
    - **引き継ぐデータとリセットされるデータ:**
      - 引き継ぐデータ：ユーザーの連続学習ストリーク（`streakDays`）、にんじん所持数（`carrotCount`）、全体の習得済みフレーズ（`learnedPhraseIds` / `lapCount`）、殿堂入り履歴（`hallOfFame`）、各フレーズの初習得パートナー愛馬記録（`phrasePartners`）。
-     - 新世代用に初期化されるデータ：`careerHorse`（`generation + 1`, `currentWeek: 1`, `weight: 484`, `hasTrained: false`, `raceHistory: []`, `learnedPhraseIdsInCareer: []`）、および新世代初陣に向けた出走可能状態へのリセット。
+     - 新世代用に初期化されるデータ：`careerHorse`（`generation + 1`, `currentWeek: 1`, `weight: 484`, `hasTrained: false`, `raceHistory: []`, `learnedPhraseIdsInCareer: []`）、週間調教消化日数（`weekdayTrainingDays: 0`, `condition: 'heavy'`, `horseWeight: 500`）、および新世代初陣に向けた出走可能状態へのリセット。
 
 4. **フレーズ図鑑との連携（初習得パートナー馬表示・Issue #46）:**
    - フレーズを初めて正解・習得した際、その時点の担当愛馬（世代番号・馬名・毛色）が `phrasePartners[phraseId]` として永続保存されます。

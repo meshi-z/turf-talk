@@ -71,6 +71,15 @@ describe('Data sanitization & anti-tampering (securityValidator.ts)', () => {
     assert.strictEqual(result.hasTampered, true);
     assert.strictEqual(result.sanitized.weekdayTrainingDays, 7);
     assert.strictEqual(result.sanitized.streakDays, 0);
+
+    // weekdayTrainingDays が欠損している場合は初期値 0 にフォールバック (#130)
+    const missingDays = {
+      ...dummyProgress,
+      weekdayTrainingDays: undefined as unknown as number,
+    };
+    const resultMissing = validateAndSanitizeProgress(missingDays);
+    assert.strictEqual(resultMissing.hasTampered, false);
+    assert.strictEqual(resultMissing.sanitized.weekdayTrainingDays, 0);
   });
 
   test('detects and sanitizes abnormal career horse week and weight', () => {

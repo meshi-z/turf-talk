@@ -17,7 +17,7 @@ export function validateAndSanitizeProgress(raw: UserProgress): {
   }
 
   // 今週の調教消化日数 (0〜7)
-  let weekdayTrainingDays = typeof raw.weekdayTrainingDays === 'number' ? raw.weekdayTrainingDays : 3;
+  let weekdayTrainingDays = typeof raw.weekdayTrainingDays === 'number' ? raw.weekdayTrainingDays : 0;
   if (weekdayTrainingDays < 0 || weekdayTrainingDays > 7) {
     weekdayTrainingDays = Math.max(0, Math.min(7, weekdayTrainingDays));
     hasTampered = true;
