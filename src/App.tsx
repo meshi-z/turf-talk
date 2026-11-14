@@ -42,6 +42,7 @@ export function App() {
     authError,
     loginWithGoogle,
     loginWithTwitter,
+    unlinkAccount: handleUnlinkAccount,
     signOut: handleSignOut,
     deleteAccount: handleDeleteAccount,
   } = useAuth();
@@ -392,6 +393,7 @@ export function App() {
         authError={authError}
         onLoginGoogle={loginWithGoogle}
         onLoginTwitter={loginWithTwitter}
+        onUnlinkAccount={handleUnlinkAccount}
         onSignOut={handleSignOut}
         onDeleteAccount={handleDeleteAccount}
       />

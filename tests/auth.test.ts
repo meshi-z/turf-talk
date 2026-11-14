@@ -1,6 +1,11 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { isFirebaseConfigured } from '../src/lib/firebase.ts';
+import {
+  isUnlinkedOrAnonymousUser,
+  mapFirebaseUser,
+  type FirebaseUserLike,
+} from '../src/hooks/useAuth.ts';
 
 describe('Firebase initialization & fallback (firebase.ts)', () => {
   test('isFirebaseConfigured returns boolean safely in test environment', () => {
@@ -77,7 +82,77 @@ describe('User authentication model & guest fallback (useAuth.ts)', () => {
     assert.strictEqual(mockTwitterUser.isAnonymous, false);
     assert.strictEqual(mockTwitterUser.providerId, 'twitter.com');
   });
-});
+
+  test('treats unlinked user (isAnonymous: false, providerData: []) as guest and preserves uid', () => {
+    // 1. 最初は Google 連携状態
+    const googleLinkedFirebaseUser: FirebaseUserLike = {
+      uid: 'same_horse_owner_uid_999',
+      isAnonymous: false,
+      displayName: 'Google馬主',
+      email: 'owner@gmail.com',
+      photoURL: 'https://example.com/google.png',
+      providerData: [
+        {
+          providerId: 'google.com',
+          displayName: 'Google馬主',
+          email: 'owner@gmail.com',
+          photoURL: 'https://example.com/google.png',
+        },
+      ],
+    };
+
+    assert.strictEqual(isUnlinkedOrAnonymousUser(googleLinkedFirebaseUser), false);
+    const mappedGoogle = mapFirebaseUser(googleLinkedFirebaseUser);
+    assert.strictEqual(mappedGoogle.uid, 'same_horse_owner_uid_999');
+    assert.strictEqual(mappedGoogle.isAnonymous, false);
+    assert.strictEqual(mappedGoogle.providerId, 'google.com');
+
+    // 2. Google 連携を解除（unlink）した直後の状態（Firebase Auth上は isAnonymous: false のまま providerData が空になる）
+    const unlinkedFirebaseUser: FirebaseUserLike = {
+      uid: 'same_horse_owner_uid_999',
+      isAnonymous: false,
+      displayName: 'Google馬主', // トップレベルにキャッシュが残っていても
+      email: 'owner@gmail.com',
+      photoURL: 'https://example.com/google.png',
+      providerData: [],
+    };
+
+    assert.strictEqual(
+      isUnlinkedOrAnonymousUser(unlinkedFirebaseUser),
+      true,
+      'Unlinked user with empty providerData should be treated as unlinked/anonymous for re-linking'
+    );
+    const mappedUnlinked = mapFirebaseUser(unlinkedFirebaseUser);
+    assert.strictEqual(mappedUnlinked.uid, 'same_horse_owner_uid_999', 'UID must be preserved');
+    assert.strictEqual(mappedUnlinked.isAnonymous, true, 'AppUser.isAnonymous should be true');
+    assert.strictEqual(mappedUnlinked.providerId, 'anonymous');
+    assert.strictEqual(mappedUnlinked.displayName, 'ゲスト馬主');
+    assert.strictEqual(mappedUnlinked.email, null);
+
+    // 3. その後 X (Twitter) と再連携（linkWithPopup）した状態
+    const twitterRelinkedFirebaseUser: FirebaseUserLike = {
+      uid: 'same_horse_owner_uid_999',
+      isAnonymous: false,
+      displayName: 'X馬主',
+      email: null,
+      photoURL: 'https://example.com/x.png',
+      providerData: [
+        {
+          providerId: 'twitter.com',
+          displayName: 'X馬主',
+          email: null,
+          photoURL: 'https://example.com/x.png',
+        },
+      ],
+    };
+
+    assert.strictEqual(isUnlinkedOrAnonymousUser(twitterRelinkedFirebaseUser), false);
+    const mappedTwitter = mapFirebaseUser(twitterRelinkedFirebaseUser);
+    assert.strictEqual(mappedTwitter.uid, 'same_horse_owner_uid_999', 'UID must remain identical');
+    assert.strictEqual(mappedTwitter.isAnonymous, false);
+    assert.strictEqual(mappedTwitter.providerId, 'twitter.com');
+    assert.strictEqual(mappedTwitter.displayName, 'X馬主');
+  });
 
   test('account deletion purges progress and resets to fresh guest', () => {
     const mockStorage: Record<string, string> = {
@@ -99,3 +174,4 @@ describe('User authentication model & guest fallback (useAuth.ts)', () => {
     assert.notStrictEqual(newUid, 'old_guest_uid_123');
     assert.ok(mockStorage.turftalk_local_guest_uid_v1.startsWith('guest_'));
   });
+});

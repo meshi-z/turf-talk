@@ -6,6 +6,7 @@ import {
   saveUserProgressToFirestore,
   markAccountDeletedInFirestore,
   restoreAccountInFirestore,
+  updateUserAuthMetaInFirestore,
 } from '../src/lib/firestoreSync.ts';
 import type { UserProgress } from '../src/types/index.ts';
 
@@ -128,5 +129,11 @@ describe('Firestore soft delete & offline safety (firestoreSync.ts)', () => {
 
     const restoreSuccess = await restoreAccountInFirestore('test_uid');
     assert.strictEqual(restoreSuccess, false);
+
+    const metaUpdateSuccess = await updateUserAuthMetaInFirestore('test_uid', {
+      isAnonymous: true,
+      providerId: 'anonymous',
+    });
+    assert.strictEqual(metaUpdateSuccess, false);
   });
 });
