@@ -59,16 +59,16 @@ const STORAGE_KEY = 'turftalk_user_progress_v1';
 const DEFAULT_PROGRESS: UserProgress = {
   lastTrainingDate: null,
   streakDays: 0, // 新規利用時の初期値0日
-  condition: 'up',
+  condition: 'heavy',
   horseName: 'ターフスター',
-  horseWeight: 484,
+  horseWeight: 500,
   completedToday: false,
   learnedPhraseIds: [],
   lapCount: 1,
   todayPhraseIds: [],
   todayWoodchipPhraseIds: [],
   completedCoursesToday: [],
-  weekdayTrainingDays: 3, // 初期値3日（好調）
+  weekdayTrainingDays: 0, // 新規利用時の初期値0日（太め残り）
   carrotCount: 1, // 初期所持数1個（お試し・安心設計）
   lastCarrotUsedDate: null,
   currentWeekMonday: null,
@@ -123,7 +123,7 @@ export function useTrainingProgress(userId?: string | null) {
           ? 0
           : typeof parsed.weekdayTrainingDays === 'number'
             ? Math.max(0, Math.min(MAX_WEEKLY_TRAINING_DAYS, parsed.weekdayTrainingDays))
-            : 3;
+            : 0;
 
         const lastRaceWeekMonday =
           typeof parsed.lastRaceWeekMonday === 'string' ? parsed.lastRaceWeekMonday : null;
@@ -531,9 +531,9 @@ export function useTrainingProgress(userId?: string | null) {
       return {
         ...prev,
         horseName: nextHorse.name,
-        horseWeight: nextHorse.weight,
-        condition: 'up',
-        weekdayTrainingDays: 3,
+        horseWeight: 500,
+        condition: 'heavy',
+        weekdayTrainingDays: 0,
         currentWeekMonday: todayMonday,
         lastRaceWeekMonday: prev.lastRaceWeekMonday ?? null,
         hasCompletedWeeklyRace: prev.hasCompletedWeeklyRace ?? false,
@@ -571,7 +571,8 @@ export function useTrainingProgress(userId?: string | null) {
     setProgress({
       ...DEFAULT_PROGRESS,
       horseName: freshHorse.name,
-      horseWeight: freshHorse.weight,
+      horseWeight: 500,
+      condition: 'heavy',
       lastTrainingDate: null,
       completedToday: false,
       learnedPhraseIds: [],
@@ -579,7 +580,7 @@ export function useTrainingProgress(userId?: string | null) {
       todayPhraseIds: [],
       todayWoodchipPhraseIds: [],
       completedCoursesToday: [],
-      weekdayTrainingDays: 3,
+      weekdayTrainingDays: 0,
       currentWeekMonday: getLogicalWeekMonday(today),
       lastRaceWeekMonday: null,
       hasCompletedWeeklyRace: false,
