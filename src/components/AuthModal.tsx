@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, Cloud, LogOut, Trash2, AlertTriangle } from 'lucide-react';
+import { X, ShieldCheck, Cloud, LogOut, Trash2, AlertTriangle, Unlink } from 'lucide-react';
 import type { AppUser } from '../hooks/useAuth';
 
 interface AuthModalProps {
@@ -10,6 +10,7 @@ interface AuthModalProps {
   authError: string | null;
   onLoginGoogle: () => void;
   onLoginTwitter: () => void;
+  onUnlinkAccount?: () => void;
   onSignOut: () => void;
   onDeleteAccount: () => void;
 }
@@ -22,16 +23,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   authError,
   onLoginGoogle,
   onLoginTwitter,
+  onUnlinkAccount,
   onSignOut,
   onDeleteAccount,
 }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isConfirmingUnlink, setIsConfirmingUnlink] = useState(false);
 
   if (!isOpen) return null;
 
   const isGuest = user?.isAnonymous ?? true;
+  const currentProviderLabel =
+    user?.providerId === 'google.com' ? 'Google' : 'X (Twitter)';
+
+  const handleCloseModal = () => {
+    setIsConfirmingDelete(false);
+    setIsConfirmingUnlink(false);
+    onClose();
+  };
+
+  const handleStartUnlink = () => {
+    setIsConfirmingDelete(false);
+    setIsConfirmingUnlink(true);
+  };
+
+  const handleCancelUnlink = () => {
+    setIsConfirmingUnlink(false);
+  };
+
+  const handleExecuteUnlink = () => {
+    onUnlinkAccount?.();
+    setIsConfirmingUnlink(false);
+  };
 
   const handleStartDelete = () => {
+    setIsConfirmingUnlink(false);
     setIsConfirmingDelete(true);
   };
 
@@ -54,7 +80,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       >
         {/* 閉じるボタン */}
         <button
-          onClick={onClose}
+          onClick={handleCloseModal}
           className="absolute top-4 right-4 p-1.5 text-stone-500 hover:text-stone-800 hover:bg-stone-200/50 rounded-full transition-colors cursor-pointer"
           aria-label="閉じる"
         >
@@ -81,7 +107,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         )}
 
-        {/* 退会確認画面 */}
+        {/* 退会確認画面 / 連携解除確認画面 */}
         {isConfirmingDelete ? (
           <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-left space-y-3">
             <div className="flex items-center gap-2 text-rose-700 font-bold text-sm">
@@ -107,6 +133,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 className="flex-1 py-2 px-3 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold rounded transition-colors cursor-pointer"
               >
                 退会して全消去
+              </button>
+            </div>
+          </div>
+        ) : isConfirmingUnlink ? (
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-left space-y-3">
+            <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+              <Unlink className="w-5 h-5 shrink-0" />
+              <span>{currentProviderLabel} との連携を解除しますか？</span>
+            </div>
+            <p className="text-xs text-amber-900 leading-relaxed">
+              現在の {currentProviderLabel} アカウントとの紐付けを解除し、<strong>愛馬や学習進捗データをそのまま維持してゲスト（未連携）状態</strong>に戻します。解除後は別のアカウント（Google / X）と再連携できます。
+            </p>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleCancelUnlink}
+                disabled={isLoading}
+                className="flex-1 py-2 px-3 bg-white hover:bg-stone-100 text-stone-700 text-xs font-semibold rounded border border-stone-300 transition-colors cursor-pointer"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteUnlink}
+                disabled={isLoading}
+                className="flex-1 py-2 px-3 bg-amber-700 hover:bg-amber-800 active:bg-amber-900 text-white text-xs font-semibold rounded transition-colors cursor-pointer"
+              >
+                連携を解除する
               </button>
             </div>
           </div>
@@ -195,6 +249,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     ✓ クラウド連携中です。データは安全にバックアップされています。
                   </div>
 
+                  {/* 連携解除ボタン（データを維持してゲストに戻す） */}
+                  {onUnlinkAccount && (
+                    <button
+                      type="button"
+                      onClick={handleStartUnlink}
+                      disabled={isLoading}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-medium text-xs rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Unlink className="w-4 h-4" />
+                      <span>連携を解除する（データを残して連携先変更）</span>
+                    </button>
+                  )}
+
                   {/* ログアウトボタン */}
                   <button
                     type="button"
@@ -226,7 +293,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="text-xs text-stone-500 hover:text-stone-800 underline transition-colors cursor-pointer"
           >
             閉じる

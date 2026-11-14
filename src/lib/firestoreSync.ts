@@ -183,3 +183,33 @@ export async function restoreAccountInFirestore(uid: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * ユーザーの認証連携メタデータ（isAnonymous, providerId）を Firestore に反映する
+ */
+export async function updateUserAuthMetaInFirestore(
+  uid: string,
+  meta: { isAnonymous: boolean; providerId: string }
+): Promise<boolean> {
+  if (!isFirebaseConfigured() || !db || !uid) {
+    return false;
+  }
+
+  try {
+    const userDocRef = doc(db, 'users', uid);
+    await setDoc(
+      userDocRef,
+      {
+        uid,
+        isAnonymous: meta.isAnonymous,
+        providerId: meta.providerId,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    console.warn('[firestoreSync] Failed to update user auth metadata:', error);
+    return false;
+  }
+}
