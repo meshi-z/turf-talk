@@ -25,7 +25,7 @@ function readPngDimensions(filePath: string): { width: number; height: number } 
 }
 
 test('share: APP_SITE_URL is defined and points to GitHub Pages', () => {
-  assert.equal(APP_SITE_URL, 'https://meshi-z.github.io/turf-talk/');
+  assert.equal(APP_SITE_URL, 'https://turftalk-jp.web.app/');
 });
 
 test('share: generateTrainingShareText produces concise, accurate Japanese text under 120 chars', () => {

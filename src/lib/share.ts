@@ -1,6 +1,6 @@
 import type { HorseCondition, TrainingCourse } from '../types';
 
-export const APP_SITE_URL = 'https://meshi-z.github.io/turf-talk/';
+export const APP_SITE_URL = 'https://turftalk-jp.web.app/';
 
 const CONDITION_LABEL_MAP: Record<HorseCondition, string> = {
   peak: '絶好調 ⤴',

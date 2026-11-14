@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "turftalk-jp",
     "public": "dist",
     "ignore": [
       "firebase.json",
