@@ -2,18 +2,37 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   isAdminUser,
+  DEFAULT_ADMIN_UIDS,
   formatTimestamp,
   parseUserDocumentToAdminSummary,
+  calculateAdminInsights,
+  getRouteLabel,
   fetchAllUsersForAdmin,
   restoreUserAccountByAdmin,
+  fetchAllCloudPhrasesForAdmin,
+  saveCloudPhraseByAdmin,
+  toggleCloudPhrasePublishByAdmin,
   MOCK_ADMIN_USERS,
 } from '../src/lib/adminService.ts';
+import type { PhraseItem } from '../src/data/phrases.ts';
 
 describe('Admin authentication & authorization (isAdminUser)', () => {
   test('returns true in dev/localhost environment', () => {
-    // isDevOrLocalhost() returns true in Node test environment
     assert.equal(isAdminUser({ uid: 'any-user' }), true);
     assert.equal(isAdminUser(null), true);
+  });
+
+  test('validates production admin UID when bypassDevCheck is enabled', () => {
+    assert.ok(DEFAULT_ADMIN_UIDS.includes('eU8tM4bPfUSbcY3SoRABtDkyD7n2'));
+    assert.equal(
+      isAdminUser({ uid: 'eU8tM4bPfUSbcY3SoRABtDkyD7n2' }, { bypassDevCheck: true }),
+      true
+    );
+    assert.equal(
+      isAdminUser({ uid: 'general-user-uid-999' }, { bypassDevCheck: true }),
+      false
+    );
+    assert.equal(isAdminUser(null, { bypassDevCheck: true }), false);
   });
 });
 
@@ -104,17 +123,95 @@ describe('User document parser (parseUserDocumentToAdminSummary)', () => {
   });
 });
 
-describe('Admin service data fetch and restore resilience', () => {
+describe('Admin insights aggregation (calculateAdminInsights & getRouteLabel)', () => {
+  test('computes distributions, depletion rate, and 15% alert accurately', () => {
+    const insights = calculateAdminInsights(MOCK_ADMIN_USERS, 120);
+
+    assert.equal(insights.totalUsers, 4);
+    assert.equal(insights.activeUsers, 3);
+    assert.equal(insights.deletedUsers, 1);
+    assert.equal(insights.linkedUsers, 3);
+    assert.equal(insights.ssoLinkRatePercent, 75);
+
+    // demo-user-001-admin has learnedCount = 118 (remaining 2 <= 10) -> 1 out of 3 active users = 33.3%
+    assert.equal(insights.depletedUserCount, 1);
+    assert.equal(insights.depletionRatePercent, 33.3);
+    assert.equal(insights.needsNewContentPack, true);
+
+    assert.equal(insights.progressDistribution.length, 5);
+    assert.equal(insights.weekDistribution.length, 4);
+    assert.equal(insights.providerDistribution.length, 3);
+    assert.equal(insights.streakDistribution.length, 4);
+    assert.ok(insights.routeDistribution.length >= 2);
+  });
+
+  test('handles empty user list safely without division by zero', () => {
+    const emptyInsights = calculateAdminInsights([], 120);
+    assert.equal(emptyInsights.totalUsers, 0);
+    assert.equal(emptyInsights.avgProgressPercent, 0);
+    assert.equal(emptyInsights.depletionRatePercent, 0);
+    assert.equal(emptyInsights.needsNewContentPack, false);
+  });
+
+  test('maps route IDs to readable Japanese labels', () => {
+    assert.equal(getRouteLabel('classic'), 'クラシック路線');
+    assert.equal(getRouteLabel('sprint'), '古馬短距離（スプリント）');
+    assert.equal(getRouteLabel('custom-route'), 'custom-route');
+  });
+});
+
+describe('Admin service data fetch, restore, and cloud phrase management', () => {
   test('fetchAllUsersForAdmin returns array (mock or firestore) without crashing', async () => {
     const users = await fetchAllUsersForAdmin();
     assert.ok(Array.isArray(users));
     assert.ok(users.length > 0);
-    // Verifies mock users are populated in test environment
     assert.equal(users[0].uid, MOCK_ADMIN_USERS[0].uid);
   });
 
   test('restoreUserAccountByAdmin safely handles invocation', async () => {
     const result = await restoreUserAccountByAdmin('sample-uid');
     assert.equal(typeof result, 'boolean');
+  });
+
+  test('saveCloudPhraseByAdmin validates phrase schema and rejects invalid input', async () => {
+    const invalidPhrase = {
+      id: '',
+      situation: 'test',
+      phrase: '',
+      explanation: 'test',
+      category: 'feel',
+      level: 'beginner',
+      options: [],
+    } as unknown as PhraseItem;
+
+    const failRes = await saveCloudPhraseByAdmin(invalidPhrase, true);
+    assert.equal(failRes.ok, false);
+    assert.ok(failRes.error);
+
+    const validPhrase: PhraseItem = {
+      id: 'phrase-admin-test-999',
+      situation: 'レース後の騎手インタビュー',
+      phrase: 'He quickened up smartly in the final furlong.',
+      literalTranslation: '残り1ハロンで鮮やかに加速した',
+      explanation: 'quicken up は勝負どころで鋭く脚を伸ばす定番表現です。',
+      category: 'reaction',
+      level: 'intermediate',
+      type: 'phrase',
+      options: [
+        { id: 'opt-1', text: '残り200mで鮮やかに切れ味を発揮して伸びた', isCorrect: true },
+        { id: 'opt-2', text: '残り200mで脚色が鈍り失速した', isCorrect: false },
+        { id: 'opt-3', text: '道中で掛かってしまい折り合いを欠いた', isCorrect: false },
+        { id: 'opt-4', text: 'ゲート内で立ち遅れて後方からになった', isCorrect: false },
+      ],
+    };
+
+    const okRes = await saveCloudPhraseByAdmin(validPhrase, true);
+    assert.equal(okRes.ok, true);
+
+    const list = await fetchAllCloudPhrasesForAdmin();
+    assert.ok(Array.isArray(list));
+
+    const toggleRes = await toggleCloudPhrasePublishByAdmin('', false);
+    assert.equal(toggleRes, false);
   });
 });
