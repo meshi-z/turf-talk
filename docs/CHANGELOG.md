@@ -22,6 +22,13 @@
   - **単体テストの追加 (`tests/legal_support.test.ts`):**
     - 全4タブのデータ構造、非公式・非関連免責文言、プライバシーポリシー必須項目、LocalStorage注意喚起、お問い合わせ先URLおよびテンプレート生成を検証する単体テストを追加。
 
+### Changed
+- **v1.0.0 正式リリースに向けた最終点検・設定整合性向上 (`src/lib/hallOfFame.ts`, `index.html`, `README.md`, `firestore.rules`, `.github/workflows/firebase-deploy.yml`, `.env.example`):**
+  - 殿堂入りシェア文面のサイトURLを公式本番URL（`https://turftalk-jp.web.app/`）に統一。
+  - `index.html` の `og:image` / `twitter:image` を絶対URL（`https://turftalk-jp.web.app/og-image.png`）に変更し、SNSカード展開時の互換性を強化。
+  - リポジトリトップの `README.md` を TurfTalk 正式仕様・技術スタック・開発コマンド一覧へ刷新。
+  - `firestore.rules` の習得フレーズ数上限（`learnedCount <= 1000`）の拡張および GitHub Actions / `.env.example` のオプション環境変数定義を整備。
+
 ---
 
 ## [v0.26.1] - 2026-11-14

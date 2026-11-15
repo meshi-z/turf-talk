@@ -14,7 +14,7 @@ service cloud.firestore {
     function isValidProgressData(data) {
       return data.carrotCount is number && data.carrotCount >= 0 && data.carrotCount <= 3
         && data.streakDays is number && data.streakDays >= 0
-        && data.learnedCount is number && data.learnedCount >= 0 && data.learnedCount <= 120
+        && data.learnedCount is number && data.learnedCount >= 0 && data.learnedCount <= 1000
         && data.currentHorseWeek is number && data.currentHorseWeek >= 1 && data.currentHorseWeek <= 4
         && (data.progressPercent is number || data.progressPercent is float) && data.progressPercent >= 0.0 && data.progressPercent <= 100.0;
     }

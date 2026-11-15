@@ -120,7 +120,7 @@ describe('Hall of Fame statistics & logic (hallOfFame.ts)', () => {
       assert.ok(text.includes('12問'));
       assert.ok(text.includes('#TurfTalk'));
       assert.ok(text.includes('#競馬英語'));
-      assert.ok(text.includes('https://meshi-z.github.io/turf-talk/'));
+      assert.ok(text.includes('https://turftalk-jp.web.app/'));
       assert.ok(text.length <= 120, `Text length must be <= 120, but was ${text.length}`);
     });
 
@@ -168,7 +168,7 @@ describe('Hall of Fame statistics & logic (hallOfFame.ts)', () => {
       assert.ok(text.length <= 120, `Max EN name length must be <= 120, but was ${text.length}`);
       assert.ok(text.includes('CRYSTAL CROWN WING'));
       assert.ok(text.includes('#TurfTalk #競馬英語'));
-      assert.ok(text.includes('https://meshi-z.github.io/turf-talk/'));
+      assert.ok(text.includes('https://turftalk-jp.web.app/'));
     });
 
     it('generates valid encoded Twitter Web Intent URL', () => {
