@@ -19,7 +19,6 @@ import {
 } from './phraseSync.ts';
 import { INITIAL_PHRASES } from '../data/phrases.ts';
 
-export const DEFAULT_ADMIN_UIDS: readonly string[] = ['eU8tM4bPfUSbcY3SoRABtDkyD7n2'];
 export const CONTENT_DEPLETION_THRESHOLD_REMAINING = 10;
 export const CONTENT_DEPLETION_ALERT_PERCENT = 15.0;
 const ADMIN_LOCAL_PHRASES_KEY = 'turftalk_admin_cloud_phrases_v1';
@@ -194,10 +193,11 @@ export function isDevOrTestEnvironment(): boolean {
 
 /**
  * ユーザーが管理者権限を有しているかを判定する
+ * （ソースコード上へのUIDハードコードを排除し、ビルド時環境変数 VITE_ADMIN_UIDS のみを参照）
  */
 export function isAdminUser(
   user: { uid?: string } | null,
-  options?: { bypassDevCheck?: boolean }
+  options?: { bypassDevCheck?: boolean; adminUidsEnv?: string }
 ): boolean {
   // 開発環境または localhost では管理画面へのアクセスを許可
   if (!options?.bypassDevCheck && isDevOrTestEnvironment()) {
@@ -208,14 +208,13 @@ export function isAdminUser(
     return false;
   }
 
-  const rawAdminUids = import.meta.env?.VITE_ADMIN_UIDS ?? '';
+  const rawAdminUids = options?.adminUidsEnv ?? import.meta.env?.VITE_ADMIN_UIDS ?? '';
   const envAdminUids = rawAdminUids
     .split(',')
     .map((s: string) => s.trim())
     .filter(Boolean);
 
-  const allowedUids = new Set<string>([...DEFAULT_ADMIN_UIDS, ...envAdminUids]);
-  return allowedUids.has(user.uid);
+  return envAdminUids.includes(user.uid);
 }
 
 /**

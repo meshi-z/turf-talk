@@ -2,12 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // ヘルパー関数: 管理者権限判定
+    // ヘルパー関数: 管理者権限判定（Custom Claims または admins コレクション登録有無で判定し、個人識別子のハードコードを排除）
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.admin == true ||
-        request.auth.uid in ['eU8tM4bPfUSbcY3SoRABtDkyD7n2'] ||
-        request.auth.token.email in ['meshi0403@gmail.com', 'admin@turftalk.example.com']
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
 
@@ -18,6 +17,12 @@ service cloud.firestore {
         && data.learnedCount is number && data.learnedCount >= 0 && data.learnedCount <= 1000
         && data.currentHorseWeek is number && data.currentHorseWeek >= 1 && data.currentHorseWeek <= 4
         && (data.progressPercent is number || data.progressPercent is float) && data.progressPercent >= 0.0 && data.progressPercent <= 100.0;
+    }
+
+    // 管理者マスター: 本人のみ自身の登録有無を参照可能、クライアントからの書き込みは完全禁止（コンソール・管理SDKのみ）
+    match /admins/{adminId} {
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      allow write: if false;
     }
 
     // ユーザー進捗ドキュメント: 本人のみ読み書き可能（管理者は全件読み取り可能）
