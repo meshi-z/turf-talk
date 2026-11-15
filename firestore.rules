@@ -6,7 +6,8 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.admin == true ||
-        request.auth.token.email in ['admin@turftalk.example.com']
+        request.auth.uid in ['eU8tM4bPfUSbcY3SoRABtDkyD7n2'] ||
+        request.auth.token.email in ['meshi0403@gmail.com', 'admin@turftalk.example.com']
       );
     }
 

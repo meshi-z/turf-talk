@@ -95,7 +95,7 @@ export function App() {
     conditionTier,
     markRaceCompleted,
   } = useTrainingProgress(user?.uid);
-  const { phrases } = usePhrases();
+  const { phrases, refreshPhrases } = usePhrases();
 
   const [raceRemainingReserves, setRaceRemainingReserves] = useState<number>(0);
   const [raceCarrotReward, setRaceCarrotReward] = useState<number>(0);
@@ -386,7 +386,11 @@ export function App() {
             />
           )}
           {currentScreen === 'admin' && (
-            <AdminDashboardScreen onBackToHome={handleGoHome} />
+            <AdminDashboardScreen
+              onBackToHome={handleGoHome}
+              totalMasterPhrases={phrases.length}
+              onPhrasesUpdated={() => void refreshPhrases()}
+            />
           )}
         </main>
 
