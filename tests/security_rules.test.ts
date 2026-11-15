@@ -117,6 +117,8 @@ describe('Firestore rules syntax and App Check (firestore.rules & appCheck.ts)',
     assert.ok(content.includes('rules_version = \'2\';'), 'rules_version 2 required');
     assert.ok(content.includes('carrotCount <= 3'), 'carrot validation required');
     assert.ok(content.includes('isAdmin()'), 'admin validation function required');
+    assert.ok(content.includes('match /admins/{adminId}'), 'admins collection rule required');
+    assert.ok(!content.includes('@gmail.com'), 'no personal email addresses in firestore.rules');
     assert.ok(content.includes('match /users/{userId}'), 'users collection rule required');
     assert.ok(content.includes('match /phrases/{phraseId}'), 'phrases collection rule required');
   });

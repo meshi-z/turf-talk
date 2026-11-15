@@ -81,6 +81,9 @@ flowchart TD
 
 ```text
 firestore
+├── admins/ (管理者権限マスター: ソースコードへのUID/メールハードコード排除用)
+│   └── {uid}/
+│       └── (ドキュメント: role="admin" 等、Firebase Console からのみ登録)
 ├── users/ (ユーザー進捗 & プロフィール)
 │   └── {uid}/
 │       └── (ドキュメント: 進捗、愛馬、サマリー値)
@@ -158,16 +161,27 @@ Issue #102 の対応方針に基づき、クライアント単体の難読化に
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ユーザー進捗: 本人のみ読み書き可能。管理者は読み取り可能
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.admin == true ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    match /admins/{adminId} {
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      allow write: if false;
+    }
+
+    // ユーザー進捗: 本人のみ読み書き可能。管理者は読み書き可能
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth.token.admin == true;
+      allow read, write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
     }
     
     // フレーズマスター: 全員読み取り可能。管理者のみ書き込み可能
     match /phrases/{phraseId} {
       allow read: if true;
-      allow write: if request.auth.token.admin == true;
+      allow write: if isAdmin();
     }
   }
 }

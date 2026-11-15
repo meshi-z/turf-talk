@@ -2,7 +2,6 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   isAdminUser,
-  DEFAULT_ADMIN_UIDS,
   formatTimestamp,
   parseUserDocumentToAdminSummary,
   calculateAdminInsights,
@@ -22,14 +21,24 @@ describe('Admin authentication & authorization (isAdminUser)', () => {
     assert.equal(isAdminUser(null), true);
   });
 
-  test('validates production admin UID when bypassDevCheck is enabled', () => {
-    assert.ok(DEFAULT_ADMIN_UIDS.includes('eU8tM4bPfUSbcY3SoRABtDkyD7n2'));
+  test('validates admin UID only via environment variable (no hardcoded UIDs)', () => {
     assert.equal(
-      isAdminUser({ uid: 'eU8tM4bPfUSbcY3SoRABtDkyD7n2' }, { bypassDevCheck: true }),
+      isAdminUser(
+        { uid: 'env-configured-admin-01' },
+        { bypassDevCheck: true, adminUidsEnv: 'env-configured-admin-01, env-configured-admin-02' }
+      ),
       true
     );
     assert.equal(
-      isAdminUser({ uid: 'general-user-uid-999' }, { bypassDevCheck: true }),
+      isAdminUser(
+        { uid: 'general-user-uid-999' },
+        { bypassDevCheck: true, adminUidsEnv: 'env-configured-admin-01' }
+      ),
+      false
+    );
+    // Without VITE_ADMIN_UIDS configured, returns false in production
+    assert.equal(
+      isAdminUser({ uid: 'any-uid' }, { bypassDevCheck: true, adminUidsEnv: '' }),
       false
     );
     assert.equal(isAdminUser(null, { bypassDevCheck: true }), false);
