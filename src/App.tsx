@@ -12,12 +12,14 @@ import { PhraseBookScreen } from './components/PhraseBookScreen';
 import { HallOfFameScreen } from './components/HallOfFameScreen';
 import { AdminDashboardScreen } from './components/AdminDashboardScreen';
 import { HelpGuideModal } from './components/HelpGuideModal';
+import { LegalSupportModal } from './components/LegalSupportModal';
 import { AuthModal } from './components/AuthModal';
 import { useAuth } from './hooks/useAuth';
 import { usePhrases } from './hooks/usePhrases';
 import { useTrainingProgress } from './hooks/useTrainingProgress';
 import type { PhraseItem } from './data/phrases';
 import type { TrainingCourse } from './types';
+import type { LegalTabId } from './lib/legalContent';
 import {
   selectDailyPhrases,
   selectExtraTrainingPhrases,
@@ -36,6 +38,13 @@ export function App() {
   const [activeCourse, setActiveCourse] = useState<TrainingCourse>('uphill');
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(() => !hasSeenHelpGuide());
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [isLegalOpen, setIsLegalOpen] = useState<boolean>(false);
+  const [legalInitialTab, setLegalInitialTab] = useState<LegalTabId>('terms');
+
+  const handleOpenLegal = (tab: LegalTabId) => {
+    setLegalInitialTab(tab);
+    setIsLegalOpen(true);
+  };
   const {
     user,
     isLoading: isAuthLoading,
@@ -381,10 +390,17 @@ export function App() {
           )}
         </main>
 
-        <Footer onOpenHelp={handleOpenHelp} />
+        <Footer onOpenHelp={handleOpenHelp} onOpenLegal={handleOpenLegal} />
       </div>
 
       <HelpGuideModal isOpen={isHelpOpen} onClose={handleCloseHelp} />
+      <LegalSupportModal
+        isOpen={isLegalOpen}
+        initialTab={legalInitialTab}
+        isCloudLinked={Boolean(user && !user.isAnonymous)}
+        onClose={() => setIsLegalOpen(false)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+      />
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}

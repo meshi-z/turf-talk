@@ -5,6 +5,32 @@
 
 ---
 
+## [v1.0.0] - 2026-11-15
+
+### Added
+- **利用規約・免責事項・プライバシーポリシー・データ保存注意喚起およびお問い合わせ導線の設置 ([#21](https://github.com/meshi-z/turf-talk/issues/21)):**
+  - **法務・サポート項目データおよびテンプレート生成機能の実装 (`src/lib/legalContent.ts`):**
+    - 利用規約・免責事項（JRA・NAR・海外競馬統括機関等の公式団体との非関連明記、馬券購入・賭博非勧誘、コンテンツ免責、禁止事項）を整備。
+    - プライバシーポリシー（LocalStorage・Cloud Firestore・Firebase Authentication・Firebase Analytics における取得情報、利用目的、第三者非提供、退会手続き）を整備。
+    - データ保存（LocalStorage）に関する注意事項（未連携ゲスト利用時のキャッシュ/Cookie消去・シークレットモード・アプリ内ブラウザによるデータ消失リスク、機種変更時の移行制限免責、Google / X クラウド連携バックアップ案内）を整備。
+    - 開発者X（`@meshi__z` / `https://x.com/meshi__z`）へのお問い合わせ・不具合報告窓口と、アプリバージョン・連携状態を含む報告用環境テンプレート生成関数（`generateFeedbackTemplate`）を実装。
+  - **法務・サポートモーダルおよびフッター導線の実装 (`src/components/LegalSupportModal.tsx`, `src/components/Footer.tsx`, `src/App.tsx`):**
+    - クラブハウス公式プログラム風デザインの4タブ切り替えモーダル（`LegalSupportModal`）を実装（キーボード `Escape`・左右矢印キー操作・ARIA属性対応）。
+    - 「データ保存」タブに現在のクラウド連携ステータス表示と、未連携時に直接クラウド連携モーダル（`AuthModal`）を開けるショートカット導線を設置。
+    - 「お問合せ」タブに開発者X（`@meshi__z`）を開く外部リンクボタンと、報告用テンプレートのワンタップコピー機能を実装。
+    - 全画面共通フッター（`Footer`）に「利用規約・免責」「プライバシーポリシー」「データ保存について」「お問い合わせ」の4リンクを設置。
+  - **単体テストの追加 (`tests/legal_support.test.ts`):**
+    - 全4タブのデータ構造、非公式・非関連免責文言、プライバシーポリシー必須項目、LocalStorage注意喚起、お問い合わせ先URLおよびテンプレート生成を検証する単体テストを追加。
+
+### Changed
+- **v1.0.0 正式リリースに向けた最終点検・設定整合性向上 (`src/lib/hallOfFame.ts`, `index.html`, `README.md`, `firestore.rules`, `.github/workflows/firebase-deploy.yml`, `.env.example`):**
+  - 殿堂入りシェア文面のサイトURLを公式本番URL（`https://turftalk-jp.web.app/`）に統一。
+  - `index.html` の `og:image` / `twitter:image` を絶対URL（`https://turftalk-jp.web.app/og-image.png`）に変更し、SNSカード展開時の互換性を強化。
+  - リポジトリトップの `README.md` を TurfTalk 正式仕様・技術スタック・開発コマンド一覧へ刷新。
+  - `firestore.rules` の習得フレーズ数上限（`learnedCount <= 1000`）の拡張および GitHub Actions / `.env.example` のオプション環境変数定義を整備。
+
+---
+
 ## [v0.26.1] - 2026-11-14
 
 ### Fixed

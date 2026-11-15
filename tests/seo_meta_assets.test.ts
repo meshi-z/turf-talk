@@ -112,9 +112,9 @@ test('seo_meta_assets: index.html includes optimized SEO meta tags, icon links, 
   // OGP & Twitter Card
   assert.match(html, /<meta\s+property="og:title"\s+content="TurfTalk \| 海外競馬英語マイクロラーニング"\s*\/>/);
   assert.match(html, /<meta\s+property="og:type"\s+content="website"\s*\/>/);
-  assert.match(html, /<meta\s+property="og:image"\s+content="\.\/og-image\.png"\s*\/>/);
+  assert.match(html, /<meta\s+property="og:image"\s+content="https:\/\/turftalk-jp\.web\.app\/og-image\.png"\s*\/>/);
   assert.match(html, /<meta\s+name="twitter:card"\s+content="summary_large_image"\s*\/>/);
-  assert.match(html, /<meta\s+name="twitter:image"\s+content="\.\/og-image\.png"\s*\/>/);
+  assert.match(html, /<meta\s+name="twitter:image"\s+content="https:\/\/turftalk-jp\.web\.app\/og-image\.png"\s*\/>/);
 
   // Favicon & Apple Touch Icon links
   assert.match(html, /<link\s+rel="icon"\s+href="\.\/favicon\.ico"\s+sizes="48x48"\s*\/>/);

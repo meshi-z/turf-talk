@@ -1,4 +1,5 @@
 import type { HallOfFameHorse, HorseCoatColor } from '../types';
+import { APP_SITE_URL } from './share.ts';
 
 /**
  * 毛色ごとの視覚的カラーパレット（Tailwind クラス & Canvas用 HEX）
@@ -151,7 +152,7 @@ export function generateHallOfFameShareText(horse: HallOfFameHorse): string {
   const line2 = `第${horse.generation}世代「${horse.name}」【${horse.titleName}】`;
   const line3 = `戦績: ${horse.totalRaces}戦${horse.wins}勝 / 習得: ${horse.learnedCount}問`;
   const line4 = '#TurfTalk #競馬英語';
-  const line5 = 'https://meshi-z.github.io/turf-talk/';
+  const line5 = APP_SITE_URL;
 
   let text = `${line1}\n${line2}\n${line3}\n${line4}\n${line5}`;
 
