@@ -5,6 +5,16 @@
 
 ---
 
+## [v1.1.2] - 2026-11-21
+
+### Changed
+- **スプライトアニメーション左上のコース情報バッジの削除 ([#139](https://github.com/meshi-z/turf-talk/issues/139)):**
+  - `src/components/HorseSpriteAnimation.tsx` 内のコース情報バッジ表示（`courseLabel`）を削除し、背景・馬体アニメーションへの視覚的没入感を向上。
+- **調教完了スタンプからの実在施設名表記の削除 ([#140](https://github.com/meshi-z/turf-talk/issues/140)):**
+  - `src/components/ResultScreen.tsx` の調教済ハンコ風スタンプから「美浦・栗東 トレセン」の表記を削除し、「調教済」と日付の2段構成に変更。
+
+---
+
 ## [v1.0.0] - 2026-11-15
 
 ### Added
