@@ -150,14 +150,6 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
   const isDirtRace = isRace && raceSurface === 'dirt';
   const isWoodchip = courseType === 'woodchip';
 
-  const courseLabel = isRace
-    ? isDirtRace
-      ? '本馬場ダート'
-      : '本馬場ターフ'
-    : isWoodchip
-    ? 'ウッドチップコース'
-    : '栗東・美浦坂路';
-
   return (
     <div
       className={`relative w-full rounded-2xl overflow-hidden shadow-sm border select-none ${
@@ -206,13 +198,6 @@ export const HorseSpriteAnimation: FC<HorseSpriteAnimationProps> = ({
           }`}
           aria-label={`${color}の愛馬疾走アニメーション`}
         />
-      </div>
-
-      {/* コース情報バッジ */}
-      <div className="absolute top-2 left-2 z-20 pointer-events-none">
-        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-sm bg-black/55 text-amber-100/95 backdrop-blur-2xs border border-amber-300/30 shadow-2xs tracking-wide">
-          {courseLabel}
-        </span>
       </div>
     </div>
   );
