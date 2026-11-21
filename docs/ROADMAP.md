@@ -1,17 +1,17 @@
-# 競馬英語学習アプリ ロードマップ & イテレーション計画
+# TurfTalk ロードマップ & イテレーション計画
 
-本プロジェクトは AI-DLC（AI-Driven Lifecycle）に基づき、段階的なプロトタイピングと価値検証を行いながら進めます。Version 1.0.0 を正式版（一般公開・実用ツール）のゴールと定義します。
+本プロジェクトは AI-DLC（AI-Driven Lifecycle）に基づき、段階的なプロトタイピングと価値検証を行いながら進めます。Phase 1〜Phase 4 のコア機能は `v1.0.0` で正式リリース済み（現行バージョン: `v1.1.4`）です。
 
 ---
 
 ## マイルストーン概要
 
-| フェーズ | 対象バージョン | テーマ | 判定基準（Exit Criteria） |
-| :--- | :--- | :--- | :--- |
-| **Phase 1** | **v0.1.0 (Alpha)** | **MVP（最小検証版）** | 平日3問の解き心地・テンポ感・フレーズの納得感を開発者自身が確認できること |
-| **Phase 2** | **v0.5.0 (Beta)** | **Core Loop（サイクルの確立）** | 「平日調教 → 週末レース出走」の1週間サイクルが自然に回ること |
-| **Phase 3** | **v1.0.0 (Release)** | **Official Release（実用ツールの完成）** | 音声読み上げ・図鑑・PWAが揃い、日常的な観戦のお供として活用できること |
-| **Phase 4** | **v2.0.0 (Cloud & Admin)** | **Cloud Backend & Admin Platform** | Firebase基盤（Hosting/Auth/Firestore）への移行、データ永続化・SSO、管理者向け分析（BigQuery/Looker Studio）が稼働すること |
+| フェーズ | 対象バージョン | テーマ | 状態 | 判定基準（Exit Criteria） |
+| :--- | :--- | :--- | :---: | :--- |
+| **Phase 1** | **v0.1.0 (Alpha)** | **MVP（最小検証版）** | 完了 | 平日3問の解き心地・テンポ感・フレーズの納得感を開発者自身が確認できること |
+| **Phase 2** | **v0.5.0 (Beta)** | **Core Loop（サイクルの確立）** | 完了 | 「平日調教 → 週末レース出走」の1週間サイクルが自然に回ること |
+| **Phase 3** | **v1.0.0 (Release)** | **Official Release（実用ツールの完成）** | 完了 | 音声読み上げ・図鑑・PWA・法務/サポートが揃い、日常的な観戦のお供として活用できること |
+| **Phase 4** | **v0.25.0〜v1.0.0 (Cloud & Admin)** | **Cloud Backend & Admin Platform** | 完了 | Firebase基盤（Hosting/Auth/Firestore）への移行、データ永続化・SSO、管理者向け分析（BigQuery/Looker Studio・アプリ内管理画面）が稼働すること |
 
 ---
 
@@ -61,15 +61,15 @@
 
 ---
 
-### Phase 4: v2.0.0 (Cloud & Admin) - Cloud Backend & Admin Platform
+### Phase 4: v0.25.0〜v1.0.0 (Cloud & Admin) - Cloud Backend & Admin Platform（完了）
 * **スコープ:**
   * [基盤/インフラ] Firebase Hosting 移行と GitHub Actions によるデプロイ自動化パイプラインの構築（Issue #116 完了）
-  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格機能の実装（Issue #117 完了）
-  * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）およびオフラインキャッシュ対応（Issue #118 完了）
+  * [認証] 匿名認証（自動ゲスト発行）および Google / X (Twitter) SSO 連携・データ保持昇格・連携解除/切り替え機能の実装（Issue #117, #129, #148 完了）
+  * [ストレージ・同期] `useTrainingProgress` の Firestore 同期（`users/{uid}`）、オフラインキャッシュ、および複数端末間リアルタイム同期の実装（Issue #118, #137 完了）
   * [データモデル] 管理者検索・集計高速化のためのサマリーフィールド（消化数、消化率、通算勝率、最終アクティブ日時）自動更新の実装（Issue #118 完了）
   * [コンテンツ管理] フレーズマスターの動的配信（静的マスター＋Firestore動的マージ方式）の実装（Issue #119 完了）
   * [分析・運用] Firebase Analytics × BigQuery 連携および Looker Studio 管理者ダッシュボード（消化率分布・コンテンツ枯渇予測・問題難易度分析・リテンション）の構築（Issue #120 完了）
-  * [管理者機能] 管理者権限によるユーザー別・競走馬別ステータス一覧の閲覧基盤（Issue #121 完了）
-  * [セキュリティ] Firebase App Check と Firestore セキュリティルールによるデータ改ざん防止・健全性担保（Issue #102 完了）
+  * [管理者機能] 管理者権限によるユーザー別・競走馬別ステータス一覧の閲覧、分析インサイト、動的フレーズ配信管理の実装（Issue #121, #134 完了）
+  * [セキュリティ] Firebase App Check と Firestore セキュリティルールによるデータ改ざん防止・健全性担保、管理者識別子ハードコード排除（Issue #102, #134 完了）
+  * [UI/UX] レスポンシブ最適化、画面遷移・問題切り替え時スクロールリセット、全体のデザインポリッシュ（Issue #139, #140, #146 完了）
 * **非スコープ:** リアルタイムWebSocket通信、自前RDBサーバーの常時稼働
-  * [UI/UX] レスポンシブ最適化、全体のデザインポリッシュ

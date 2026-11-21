@@ -3,7 +3,7 @@
 一般的な英語学習サービスでは学べない、海外G1の勝利騎手・調教師インタビューや現地公式中継の「生きた英語表現・スラング（`in the tank`, `on the bridle`, `dug deep` など）」を、愛馬の育成サイクルとともに1日3問から直感的に身につける競馬英語マイクロラーニングアプリです。
 
 - **公開URL**: https://turftalk-jp.web.app/
-- **現在のバージョン**: `v1.0.0`
+- **現在のバージョン**: `v1.1.4`
 
 ---
 
@@ -58,6 +58,7 @@ npm run build
 
 - [`docs/VISION_AND_REQUIREMENTS.md`](./docs/VISION_AND_REQUIREMENTS.md): プロダクトビジョン・要求定義
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md): ロードマップ・フェーズ計画
+- [`docs/non-functional-requirements.md`](./docs/non-functional-requirements.md): 非機能要件・品質基準
 - [`docs/specs/phrase-schema.md`](./docs/specs/phrase-schema.md): フレーズマスタースキーマ・データ作成原則
 - [`docs/specs/horse-career-cycle.md`](./docs/specs/horse-career-cycle.md): 競走馬4週間キャリア・世代継承仕様
 - [`docs/specs/horse-visual-assets.md`](./docs/specs/horse-visual-assets.md): 全8毛色・全6シーンイラスト仕様
