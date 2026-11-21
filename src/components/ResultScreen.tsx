@@ -89,13 +89,10 @@ export const ResultScreen: FC<ResultScreenProps> = ({
           <div className="absolute inset-0 m-auto w-28 h-28 rounded-full border-2 border-red-600/40 pointer-events-none animate-stamp-ripple" />
 
           <div className="relative w-32 h-32 rounded-full border-4 border-double border-red-700 flex flex-col items-center justify-center p-2 text-red-700 select-none shadow-md animate-stamp-drop bg-[#FFFDF9]/75 backdrop-blur-2xs">
-            <div className="text-[10px] font-black tracking-widest border-b-2 border-red-600/80 pb-0.5 px-2">
-              美浦・栗東 トレセン
-            </div>
-            <div className="text-2xl font-black font-racing-serif my-0.5 tracking-widest drop-shadow-2xs">
+            <div className="text-2xl font-black font-racing-serif mb-1 tracking-widest drop-shadow-2xs">
               調教済
             </div>
-            <div className="text-[10px] font-bold border-t-2 border-red-600/80 pt-0.5 px-1 font-mono font-racing-num">
+            <div className="text-[11px] font-bold border-t-2 border-red-600/80 pt-1 px-2 font-mono font-racing-num">
               {todayDateString}
             </div>
           </div>
