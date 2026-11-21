@@ -5,6 +5,17 @@
 
 ---
 
+## [v1.1.4] - 2026-11-21
+
+### Fixed
+- **ログイン連携解除後の再連携時に `auth/popup-blocked` エラーが発生する不具合の修正 ([#148](https://github.com/meshi-z/turf-talk/issues/148)):**
+  - `src/hooks/useAuth.ts` の `unlinkAccount` にて `unlink()` 完了後に `reload()` および `getIdToken(true)` を実行し、クライアント側のプロバイダ状態・IDトークンを即時リフレッシュするよう修正。
+  - Google 認証プロバイダ生成時（`createGoogleAuthProvider`）に `prompt: 'select_account'` を設定し、連携解除直後のキャッシュセッション自動再利用による競合を防止。
+  - `auth/credential-already-in-use` 発生時のフォールバックで2回目の `signInWithPopup` を自動実行していた処理を廃止し、1回目のポップアップで取得済みの `OAuthCredential` を用いて `signInWithCredential` で認証を完了するよう変更。
+  - `auth/popup-blocked` 等の認証エラー発生時に、日本語の分かりやすいエラーメッセージを返す `formatAuthErrorMessage` を実装。
+
+---
+
 ## [v1.1.3] - 2026-11-21
 
 ### Fixed

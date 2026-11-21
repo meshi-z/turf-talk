@@ -1,9 +1,15 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import type { AuthError, OAuthCredential } from 'firebase/auth';
 import { isFirebaseConfigured } from '../src/lib/firebase.ts';
 import {
   isUnlinkedOrAnonymousUser,
   mapFirebaseUser,
+  createGoogleAuthProvider,
+  extractCredentialFromAuthError,
+  formatAuthErrorMessage,
+  refreshUnlinkedUserState,
   type FirebaseUserLike,
 } from '../src/hooks/useAuth.ts';
 
@@ -173,5 +179,105 @@ describe('User authentication model & guest fallback (useAuth.ts)', () => {
 
     assert.notStrictEqual(newUid, 'old_guest_uid_123');
     assert.ok(mockStorage.turftalk_local_guest_uid_v1.startsWith('guest_'));
+  });
+
+  test('createGoogleAuthProvider configures prompt: select_account to prevent stale session collision (#148)', () => {
+    const provider = createGoogleAuthProvider();
+    assert.strictEqual(provider.providerId, 'google.com');
+    const customParams = provider.getCustomParameters() as Record<string, string>;
+    assert.strictEqual(
+      customParams.prompt,
+      'select_account',
+      'Google provider should always prompt account selection after unlink'
+    );
+  });
+
+  test('refreshUnlinkedUserState calls reload and getIdToken(true) safely (#148)', async () => {
+    const callOrder: string[] = [];
+    const mockUser = {
+      reload: async () => {
+        callOrder.push('reload');
+      },
+      getIdToken: async (forceRefresh?: boolean) => {
+        callOrder.push(`getIdToken:${Boolean(forceRefresh)}`);
+        return 'refreshed_token';
+      },
+    };
+
+    await refreshUnlinkedUserState(mockUser);
+    assert.deepStrictEqual(callOrder, ['reload', 'getIdToken:true']);
+
+    // エラーが発生しても例外を投げず安全に完了すること
+    await assert.doesNotReject(async () => {
+      await refreshUnlinkedUserState({
+        reload: async () => {
+          throw new Error('network error');
+        },
+      });
+    });
+  });
+
+  test('extractCredentialFromAuthError extracts credential without opening a second popup (#148)', () => {
+    const mockCred = {
+      providerId: 'google.com',
+      signInMethod: 'google.com',
+      toJSON: () => ({}),
+    } as unknown as OAuthCredential;
+
+    const mockErrorWithCredential = {
+      code: 'auth/credential-already-in-use',
+      message: 'Firebase: Error (auth/credential-already-in-use).',
+      credential: mockCred,
+    } as unknown as AuthError;
+
+    const extracted = extractCredentialFromAuthError(mockErrorWithCredential, 'google.com');
+    assert.strictEqual(extracted, mockCred);
+
+    const mockErrorWithoutCredential = {
+      code: 'auth/credential-already-in-use',
+      message: 'Firebase: Error (auth/credential-already-in-use).',
+    } as unknown as AuthError;
+
+    const extractedNull = extractCredentialFromAuthError(mockErrorWithoutCredential, 'twitter.com');
+    assert.strictEqual(extractedNull, null);
+  });
+
+  test('formatAuthErrorMessage returns user-friendly Japanese messages and suppresses user cancellation (#148)', () => {
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/popup-closed-by-user' }, '失敗'),
+      null
+    );
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/cancelled-popup-request' }, '失敗'),
+      null
+    );
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/popup-blocked' }, '失敗'),
+      'ブラウザにより認証ポップアップがブロックされました。ポップアップブロックを解除してから再度お試しください。'
+    );
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/credential-already-in-use' }, '失敗'),
+      'このアカウントは既に別の馬主データと連携されています。再度ボタンを押してログインしてください。'
+    );
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/network-request-failed' }, '失敗'),
+      '通信エラーが発生しました。ネットワーク接続を確認してから再度お試しください。'
+    );
+    assert.strictEqual(
+      formatAuthErrorMessage({ code: 'auth/unknown-error', message: '' }, 'デフォルトエラー'),
+      'デフォルトエラー'
+    );
+  });
+
+  test('useAuth.ts uses signInWithCredential instead of secondary signInWithPopup on credential-already-in-use (#148)', () => {
+    const source = fs.readFileSync(new URL('../src/hooks/useAuth.ts', import.meta.url), 'utf-8');
+    assert.ok(
+      source.includes('signInWithCredential(auth, credential)'),
+      'Should recover from auth/credential-already-in-use via signInWithCredential without opening a second popup'
+    );
+    assert.ok(
+      source.includes('await refreshUnlinkedUserState(updatedUser)'),
+      'unlinkAccount should refresh user state and token after unlink'
+    );
   });
 });

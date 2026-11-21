@@ -67,10 +67,12 @@ flowchart TD
 ### 2.3 アカウント昇格（Link With Credential）
 - 匿名状態で利用していたユーザーが「バックアップ」「機種変更」「他端末同期」を希望した際、`linkWithPopup` を実行。
 - **既存の `uid` およびFirestoreに蓄積された調教履歴・愛馬データ・ストリークを100%維持したまま**、GoogleまたはXのアカウントと紐付けを完了する。
+- 万一 `auth/credential-already-in-use` が返された場合は、ユーザージェスチャー失効による `auth/popup-blocked` を防ぐため2回目のポップアップ（`signInWithPopup`）を起動せず、エラーから抽出した `OAuthCredential` を用いて `signInWithCredential` で認証を完了させる。
 
 ### 2.4 アカウント連携解除・連携先切り替え（Unlink）
 - 連携済みユーザーが別の認証プロバイダ（例: Google から X、またはその逆）への切り替えや連携解除を希望した際、Firebase Auth の `unlink` を実行。
 - **既存の `uid` および育成中の愛馬・学習進捗データを維持したまま**、プロバイダの紐付けのみを解除して未連携（ゲスト相当: `isAnonymous: true`, `providerId: 'anonymous'`）状態に戻す。
+- `unlink` 完了直後に `reload()` および `getIdToken(true)` を実行してクライアント側のプロバイダ状態とトークンを最新化し、Google プロバイダには `prompt: 'select_account'` を指定することで、解除直後に同一アカウントで再連携した際のセッション競合を防止する。
 - 解除後は再度任意のタイミング・任意のプロバイダ（Google / X）を選択して `linkWithPopup` による再連携が可能。
 
 ---
