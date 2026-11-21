@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { CareerRouteId, CareerWeek, HorseCoatColor, TrainingCourse, UserProgress } from '../types';
 import { calculateNextProgressAfterCompletion } from '../lib/dailyRotation';
 import {
@@ -22,12 +22,10 @@ import {
   getDateStringForDayOfWeek,
 } from '../lib/logicalDate';
 import {
-  evaluateStreakWithCarrotRescue,
   calculateCarrotsFromRemainingReserves,
 } from '../lib/carrotBonus';
 import {
   createDefaultCareerHorse,
-  migrateToCareerHorse,
   updateCareerHorseAfterTraining,
   advanceCareerHorseAfterRace,
   generateRandomHorseName,
@@ -42,7 +40,6 @@ import { calculateRacePlacement } from '../lib/raceMode';
 import { INITIAL_PHRASES } from '../data/phrases';
 import { createSampleHallOfFameHorses } from '../lib/hallOfFame';
 import { recordNewPhrasePartners } from '../lib/phrasePartner';
-import { validateAndSanitizeProgress } from '../lib/securityValidator.ts';
 import {
   logTrainingCompleted,
   logRaceCompleted,
@@ -52,6 +49,10 @@ import {
 import {
   fetchUserProgressFromFirestore,
   saveUserProgressToFirestore,
+  subscribeUserProgressFromFirestore,
+  normalizeUserProgress,
+  shouldSkipCloudSave,
+  type CloudProgressResult,
 } from '../lib/firestoreSync.ts';
 
 const STORAGE_KEY = 'turftalk_user_progress_v1';
@@ -97,67 +98,7 @@ export function useTrainingProgress(userId?: string | null) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const today = getLogicalDateString();
-        const todayMonday = getLogicalWeekMonday(today);
-        const isSameDay = parsed.lastTrainingDate === today;
-        const savedStreak = typeof parsed.streakDays === 'number' ? parsed.streakDays : 0;
-        const savedCarrots = typeof parsed.carrotCount === 'number' ? parsed.carrotCount : 1;
-
-        // にんじんストリーク救済ロジックを実行
-        const evalResult = evaluateStreakWithCarrotRescue(
-          savedStreak,
-          parsed.lastTrainingDate ?? null,
-          today,
-          savedCarrots
-        );
-
-        // 既存データから安全に CareerHorse をマイグレーション・復元
-        const migratedHorse = migrateToCareerHorse(parsed);
-
-        // 週替わり判定（月曜午前4時で新しい週に入った場合は週間調教日数および週末レース出走済フラグをリセット）
-        const savedWeekMonday =
-          typeof parsed.currentWeekMonday === 'string' ? parsed.currentWeekMonday : null;
-        const isNewWeek = savedWeekMonday !== null && savedWeekMonday !== todayMonday;
-
-        const restoredWeeklyDays = isNewWeek
-          ? 0
-          : typeof parsed.weekdayTrainingDays === 'number'
-            ? Math.max(0, Math.min(MAX_WEEKLY_TRAINING_DAYS, parsed.weekdayTrainingDays))
-            : 0;
-
-        const lastRaceWeekMonday =
-          typeof parsed.lastRaceWeekMonday === 'string' ? parsed.lastRaceWeekMonday : null;
-        const completedWeeklyRace = isWeeklyRaceCompletedForWeek(lastRaceWeekMonday, today);
-
-        return validateAndSanitizeProgress({
-          ...DEFAULT_PROGRESS,
-          ...parsed,
-          horseName: migratedHorse.name,
-          horseWeight: migratedHorse.weight,
-          streakDays: evalResult.streakDays,
-          carrotCount: evalResult.carrotCount,
-          lastCarrotUsedDate: evalResult.rescuedByCarrot ? today : parsed.lastCarrotUsedDate ?? null,
-          learnedPhraseIds: Array.isArray(parsed.learnedPhraseIds) ? parsed.learnedPhraseIds : [],
-          lapCount: typeof parsed.lapCount === 'number' ? parsed.lapCount : 1,
-          todayPhraseIds: isSameDay && Array.isArray(parsed.todayPhraseIds) ? parsed.todayPhraseIds : [],
-          todayWoodchipPhraseIds:
-            isSameDay && Array.isArray(parsed.todayWoodchipPhraseIds)
-              ? parsed.todayWoodchipPhraseIds
-              : [],
-          completedCoursesToday:
-            isSameDay && Array.isArray(parsed.completedCoursesToday)
-              ? parsed.completedCoursesToday
-              : [],
-          completedToday: isSameDay,
-          weekdayTrainingDays: restoredWeeklyDays,
-          currentWeekMonday: todayMonday,
-          lastRaceWeekMonday,
-          hasCompletedWeeklyRace: completedWeeklyRace,
-          careerHorse: migratedHorse,
-          hallOfFame: Array.isArray(parsed.hallOfFame) ? parsed.hallOfFame : [],
-          bookmarkedPhraseIds: Array.isArray(parsed.bookmarkedPhraseIds) ? parsed.bookmarkedPhraseIds : [],
-          phrasePartners: parsed.phrasePartners && typeof parsed.phrasePartners === 'object' ? parsed.phrasePartners : {},
-        }).sanitized;
+        return normalizeUserProgress(parsed, DEFAULT_PROGRESS);
       }
     } catch {
       // LocalStorage読み取り失敗時のフォールバック
@@ -174,41 +115,135 @@ export function useTrainingProgress(userId?: string | null) {
   const [debugCareerWeek, setDebugCareerWeek] = useState<CareerWeek | null>(null);
   const [debugRaceCompleted, setDebugRaceCompleted] = useState<boolean | null>(null);
 
-  // 初回マウントまたは userId 変更時の Firestore クラウドデータ同期
+  const syncedUserIdRef = useRef<string | null>(null);
+  const lastSyncedSerializedRef = useRef<string | null>(null);
+  const latestProgressRef = useRef<UserProgress>(progress);
+
+  // Firestore クラウドデータ同期（onSnapshot リアルタイム購読 + visibilitychange / focus 時の再同期）
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      syncedUserIdRef.current = null;
+      lastSyncedSerializedRef.current = null;
+      return;
+    }
 
     let isMounted = true;
-    (async () => {
-      try {
-        const { progress: cloudProgress, isDeleted } = await fetchUserProgressFromFirestore(userId);
-        if (isMounted && cloudProgress && !isDeleted) {
-          setProgress((prev) => ({
-            ...prev,
-            ...validateAndSanitizeProgress(cloudProgress).sanitized,
-          }));
-        }
-      } catch (err) {
-        console.warn('[useTrainingProgress] Initial cloud sync failed:', err);
+    let unsubscribeSnapshot: (() => void) | null = null;
+
+    const applyCloudResult = (result: CloudProgressResult) => {
+      if (!isMounted) return;
+
+      if (result.isDeleted) {
+        syncedUserIdRef.current = userId;
+        lastSyncedSerializedRef.current = JSON.stringify(latestProgressRef.current);
+        return;
       }
-    })();
+
+      if (result.progress) {
+        const normalizedCloud = normalizeUserProgress(result.progress, DEFAULT_PROGRESS);
+        const serializedCloud = JSON.stringify(normalizedCloud);
+        lastSyncedSerializedRef.current = serializedCloud;
+        syncedUserIdRef.current = userId;
+        setProgress((prev) => (JSON.stringify(prev) === serializedCloud ? prev : normalizedCloud));
+        return;
+      }
+
+      if (result.exists === false) {
+        // クラウド上にまだドキュメントが存在しない新規ユーザー／初連携時は、現在のローカル状態を初期保存する
+        syncedUserIdRef.current = userId;
+        const currentProgress = latestProgressRef.current;
+        const serializedCurrent = JSON.stringify(currentProgress);
+        lastSyncedSerializedRef.current = serializedCurrent;
+        saveUserProgressToFirestore(userId, currentProgress).catch((err) => {
+          console.warn('[useTrainingProgress] Initial cloud document creation failed:', err);
+        });
+      }
+    };
+
+    const syncFromCloudOnce = async () => {
+      try {
+        const result = await fetchUserProgressFromFirestore(userId);
+        applyCloudResult(result);
+      } catch (err) {
+        console.warn('[useTrainingProgress] Cloud fetch failed:', err);
+      }
+    };
+
+    const startSubscription = () => {
+      if (unsubscribeSnapshot) return;
+      unsubscribeSnapshot = subscribeUserProgressFromFirestore(userId, applyCloudResult);
+    };
+
+    const stopSubscription = () => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+    };
+
+    if (typeof document === 'undefined' || document.visibilityState !== 'hidden') {
+      startSubscription();
+    }
+    void syncFromCloudOnce();
+
+    const handleVisibilityChange = () => {
+      if (typeof document === 'undefined') return;
+      if (document.visibilityState === 'hidden') {
+        stopSubscription();
+      } else if (document.visibilityState === 'visible') {
+        startSubscription();
+        void syncFromCloudOnce();
+      }
+    };
+
+    const handleWindowFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      startSubscription();
+      void syncFromCloudOnce();
+    };
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', handleWindowFocus);
+    }
 
     return () => {
       isMounted = false;
+      stopSubscription();
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', handleWindowFocus);
+      }
     };
   }, [userId]);
 
   useEffect(() => {
+    latestProgressRef.current = progress;
+    const serialized = JSON.stringify(progress);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      localStorage.setItem(STORAGE_KEY, serialized);
     } catch {
       // 保存エラーは無視
     }
-    if (userId) {
-      saveUserProgressToFirestore(userId, progress).catch((err) => {
-        console.warn('[useTrainingProgress] Background cloud sync failed:', err);
-      });
+    if (
+      !userId ||
+      shouldSkipCloudSave({
+        userId,
+        syncedUserId: syncedUserIdRef.current,
+        currentSerialized: serialized,
+        lastSyncedSerialized: lastSyncedSerializedRef.current,
+      })
+    ) {
+      return;
     }
+    lastSyncedSerializedRef.current = serialized;
+    saveUserProgressToFirestore(userId, progress).catch((err) => {
+      console.warn('[useTrainingProgress] Background cloud sync failed:', err);
+    });
   }, [progress, userId]);
 
   const actualTodayStr = getLogicalDateString();

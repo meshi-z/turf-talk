@@ -153,8 +153,11 @@ Issue #102 の対応方針に基づき、クライアント単体の難読化に
    - データの整合性検証（にんじん上限 `carrotCount <= 3`、不自然なスコア急増の拒否）
 2. **Firebase App Check**:
    - Firebase Hosting と連携し、reCAPTCHA Enterprise / v3 を用いて正規の TurfTalk Web アプリ以外からの不正リクエストを遮断。
-3. **クラウド正本リコンサイル**:
+3. **クラウド正本リコンサイル & マルチデバイス同期（Issue #137）**:
    - ローカル側（DevTools等）で値が変更されても、クラウド側データ（Firestore）を正本として同期・上書き復元。
+   - 同一アカウントでログイン連携している複数端末間で、常にバックエンド（Firestore）の最新データを正として同期するため、**`onSnapshot`（リアルタイム購読）と `visibilitychange` / `focus`（タブ・アプリ復帰時の再購読・再取得）を併用**する。
+   - バックグラウンド移行時（`visibilityState === 'hidden'`）は `onSnapshot` リスナーを一時停止し、フォアグラウンド復帰時（`visibilityState === 'visible'`）に再購読および最新データの再取得を行う。
+   - 初回クラウド同期が完了する前の古いローカルデータによる上書きや、クラウドデータ反映直後の不要な書き戻しループを防止する保存ガード（`shouldSkipCloudSave`）を適用する。
 4. **開発環境の自由度確保**:
    - `import.meta.env.DEV` や localhost でのデバッグメニュー操作時は、開発用ルールまたはローカルバイパスを適用。
 ```javascript
