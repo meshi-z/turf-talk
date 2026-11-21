@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { HomeScreen } from './components/HomeScreen';
@@ -30,6 +30,7 @@ import { getCurrentWeekRaceInfo, type CareerRaceAdvanceResult } from './lib/care
 import { soundManager } from './lib/sound';
 import { hasSeenHelpGuide, markHelpGuideSeen } from './lib/helpGuide';
 import { isAdminUser } from './lib/adminService';
+import { scrollToTop } from './lib/utils';
 
 type Screen = 'home' | 'quiz' | 'result' | 'race' | 'race-result' | 'retirement' | 'debug-questions' | 'phrase-book' | 'hall-of-fame' | 'admin';
 
@@ -255,6 +256,11 @@ export function App() {
   const handleGoHome = () => {
     setCurrentScreen('home');
   };
+
+  // 画面遷移時およびクイズ・レースの問題切り替え時にページ最上部へスクロールをリセット (Issue #146)
+  useEffect(() => {
+    scrollToTop();
+  }, [currentScreen, currentQuestionIndex, raceCurrentIndex]);
 
   return (
     <div className="min-h-screen bg-[#ECE6D8] flex flex-col justify-start items-center text-stone-900 selection:bg-amber-200">

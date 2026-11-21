@@ -5,6 +5,15 @@
 
 ---
 
+## [v1.1.3] - 2026-11-21
+
+### Fixed
+- **画面遷移およびクイズ・レース問題切り替え時のスクロール位置リセット対応 ([#146](https://github.com/meshi-z/turf-talk/issues/146)):**
+  - `src/lib/utils.ts` にページ最上部へ即座にスクロール位置を戻す `scrollToTop` ユーティリティ関数を追加。
+  - `src/App.tsx` にて画面切り替え（`currentScreen`）および調教クイズ・週末レースの問題進行（`currentQuestionIndex` / `raceCurrentIndex`）時にスクロール位置を最上部（`0, 0`）へリセットするよう修正。
+
+---
+
 ## [v1.1.2] - 2026-11-21
 
 ### Changed
