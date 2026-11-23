@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TurfTalk プロダクト要求・システム仕様書 (PRD v1.1.4)</title>
+  <style>
+    :root {
+      --bg-ivory: #FAF6EE;
+      --bg-card: #FFFFFF;
+      --bg-cream: #F3ECE0;
+      --bg-subtle: #F7F2E8;
+      --racing-green: #133A2B;
+      --racing-green-dark: #0B251B;
+      --racing-green-light: #1D533E;
+      --racing-green-tint: #E8F0EC;
+      --classic-gold: #C89D46;
+      --classic-gold-dark: #9D7629;
+      --classic-gold-light: #F7EFE0;
+      --saddle-brown: #3D2B1F;
+      --saddle-brown-light: #6E5443;
+      --crimson-red: #9E2A2B;
+      --crimson-tint: #FDF2F2;
+      --navy-blue: #1B365D;
+      --navy-tint: #EEF3F8;
+      --text-main: #1F1B18;
+      --text-secondary: #524840;
+      --text-muted: #7A6F66;
+      --border-warm: #DFD5C5;
+      --border-gold: #D5B87A;
+      --shadow-sm: 0 2px 6px rgba(19, 58, 43, 0.06);
+      --shadow-md: 0 6px 18px rgba(19, 58, 43, 0.09);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --font-sans: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Meiryo", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-serif: "Hiragino Mincho ProN", "Yu Mincho", "BIZ UDPMincho", Georgia, serif;
+      --font-mono: "JetBrains Mono", "Cascadia Code", "Consolas", ui-monospace, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg-ivory);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Official Banner */
+    .top-header {
+      background: linear-gradient(135deg, var(--racing-green-dark) 0%, var(--racing-green) 60%, var(--racing-green-light) 100%);
+      color: #FFFFFF;
+      border-bottom: 4px solid var(--classic-gold);
+      padding: 2.25rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-header::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border: 1px dashed rgba(200, 157, 70, 0.35);
+      pointer-events: none;
+      border-radius: 4px;
+    }
+
+    .header-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1.5rem;
+    }
+
+    .brand-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--classic-gold);
+      background: rgba(11, 37, 27, 0.65);
+      border: 1px solid rgba(200, 157, 70, 0.5);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+
+    .header-title {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-subtitle {
+      color: #E2ECE7;
+      font-size: 0.98rem;
+      max-width: 780px;
+    }
+
+    .header-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .meta-pill {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(200, 157, 70, 0.45);
+      color: #FFFFFF;
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+    }
+
+    .meta-pill strong {
+      color: var(--classic-gold);
+    }
+
+    .meta-pill a {
+      color: #FFE49E;
+      text-decoration: underline;
+    }
+
+    /* Layout Container */
+    .layout-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+      padding: 2rem 1.5rem 4rem;
+      align-items: start;
+    }
+
+    /* Sidebar TOC */
+    .sidebar {
+      position: sticky;
+      top: 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-top: 4px solid var(--racing-green);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 1.25rem 1rem;
+      max-height: calc(100vh - 2.5rem);
+      overflow-y: auto;
+    }
+
+    .toc-title {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--racing-green);
+      padding-bottom: 0.65rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-warm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .toc-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      padding: 0.42rem 0.6rem;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
+      font-weight: 500;
+    }
+
+    .toc-list a:hover,
+    .toc-list a:focus {
+      background-color: var(--racing-green-tint);
+      color: var(--racing-green);
+    }
+
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      background: var(--racing-green);
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .toc-sublist {
+      list-style: none;
+      padding-left: 1.8rem;
+      margin-top: 0.15rem;
+      margin-bottom: 0.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .toc-sublist a {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.5rem;
+      color: var(--text-muted);
+    }
+
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2.25rem;
+      min-width: 0;
+    }
+
+    /* KPI / Quick Specs Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-left: 4px solid var(--classic-gold);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-label {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-value {
+      font-family: var(--font-mono);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--racing-green);
+      margin: 0.2rem 0;
+    }
+
+    .kpi-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    /* Section Card */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 1.85rem 2rem;
+      scroll-margin-top: 1.25rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding-bottom: 0.9rem;
+      margin-bottom: 1.35rem;
+      border-bottom: 2px solid var(--racing-green);
+    }
+
+    .cloth-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 0.55rem;
+      background: var(--racing-green);
+      color: var(--classic-gold);
+      border: 2px solid var(--classic-gold);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--racing-green-dark);
+      line-height: 1.3;
+    }
+
+    .section-en {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: block;
+    }
+
+    h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      color: var(--saddle-brown);
+      margin: 1.6rem 0 0.75rem;
+      padding-left: 0.75rem;
+      border-left: 4px solid var(--classic-gold);
+      line-height: 1.4;
+    }
+
+    h3:first-of-type {
+      margin-top: 0.25rem;
+    }
+
+    h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--racing-green);
+      margin: 1.1rem 0 0.45rem;
+    }
+
+    p {
+      margin-bottom: 0.85rem;
+      color: var(--text-main);
+      font-size: 0.94rem;
+    }
+
+    ul, ol {
+      padding-left: 1.35rem;
+      margin-bottom: 0.9rem;
+      font-size: 0.92rem;
+    }
+
+    li {
+      margin-bottom: 0.35rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.84em;
+      background: var(--bg-cream);
+      color: var(--saddle-brown);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-warm);
+    }
+
+    pre {
+      background: #161F1B;
+      color: #E7F0EC;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      padding: 1.1rem 1.25rem;
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      margin: 0.85rem 0 1.1rem;
+      border: 1px solid #2A3F36;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      border: none;
+      font-size: inherit;
+    }
+
+    /* Callouts & Boxes */
+    .callout {
+      background: var(--classic-gold-light);
+      border: 1px solid var(--border-gold);
+      border-left: 4px solid var(--classic-gold-dark);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: var(--saddle-brown);
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Two-column / Grid Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 1.1rem;
+      margin: 0.9rem 0;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 0.9rem 0;
+    }
+
+    .sub-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-md);
+      padding: 1.15rem 1.25rem;
+    }
+
+    .sub-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed var(--border-warm);
+    }
+
+    .sub-card-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--racing-green-dark);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .badge-green {
+      background: var(--racing-green-tint);
+      color: var(--racing-green);
+      border: 1px solid rgba(19, 58, 43, 0.25);
+    }
+
+    .badge-gold {
+      background: var(--classic-gold-light);
+      color: var(--saddle-brown);
+      border: 1px solid var(--border-gold);
+    }
+
+    .badge-crimson {
+      background: var(--crimson-tint);
+      color: var(--crimson-red);
+      border: 1px solid rgba(158, 42, 43, 0.25);
+    }
+
+    .badge-navy {
+      background: var(--navy-tint);
+      color: var(--navy-blue);
+      border: 1px solid rgba(27, 54, 93, 0.25);
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0.85rem 0 1.2rem;
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+      background: var(--bg-card);
+    }
+
+    th {
+      background: var(--racing-green);
+      color: #FFFFFF;
+      font-weight: 700;
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 2px solid var(--classic-gold);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.62rem 0.85rem;
+      border-bottom: 1px solid var(--border-warm);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) td {
+      background: #FCF9F4;
+    }
+
+    /* Visual Color Swatches */
+    .swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      vertical-align: middle;
+      margin-right: 0.35rem;
+    }
+
+    /* Flow & Architecture Diagrams (Pure HTML/CSS) */
+    .diagram-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .flow-step {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-top: 3px solid var(--racing-green);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1rem;
+      position: relative;
+    }
+
+    .flow-step-num {
+      font-family: var(--font-mono);
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: var(--classic-gold-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .flow-step-title {
+      font-weight: 700;
+      font-size: 0.94rem;
+      color: var(--racing-green-dark);
+      margin-bottom: 0.35rem;
+    }
+
+    .flow-step-body {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .arch-layers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+    }
+
+    .arch-layer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+
+    .arch-layer-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #FFFFFF;
+      background: var(--racing-green);
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .arch-node {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-sm);
+      padding: 0.55rem 0.7rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    .arch-node:last-child {
+      margin-bottom: 0;
+    }
+
+    .arch-node strong {
+      display: block;
+      color: var(--racing-green-dark);
+      font-size: 0.85rem;
+    }
+
+    /* Footer */
+    .doc-footer {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 3rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--border-warm);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px) {
+      .layout-container {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        max-height: none;
+      }
+      .section-card {
+        padding: 1.35rem 1.25rem;
+      }
+      .header-title {
+        font-size: 1.65rem;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: #FFFFFF;
+        font-size: 11pt;
+      }
+      .top-header {
+        background: #133A2B !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        padding: 1.25rem;
+      }
+      .layout-container {
+        grid-template-columns: 1fr;
+        padding: 1rem 0;
+      }
+      .sidebar {
+        display: none;
+      }
+      .section-card {
+        box-shadow: none;
+        border: 1px solid #CCCCCC;
+        break-inside: avoid;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Official Racing Program Header -->
+  <header class="top-header">
+    <div class="header-inner">
+      <div>
+        <div class="brand-eyebrow">OFFICIAL PRODUCT REQUIREMENTS &amp; SYSTEM SPECIFICATION</div>
+        <h1 class="header-title">TurfTalk プロダクト要求・システム仕様書</h1>
+        <p class="header-subtitle">
+          一般的な英語学習アプリでは絶対に教えてくれない、海外競馬の勝利騎手・調教師の「生のつぶやき・興奮」を直感で掴むマイクロラーニング＆4週間愛馬育成Webアプリケーション
+        </p>
+      </div>
+      <div class="header-meta">
+        <span class="meta-pill">Version: <strong>v1.1.4</strong></span>
+        <span class="meta-pill">Status: <strong>Phase 1–4 完了 / 正式稼働中</strong></span>
+        <span class="meta-pill">Production: <a href="https://turftalk-jp.web.app/" target="_blank" rel="noopener noreferrer">turftalk-jp.web.app</a></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout-container">
+    <!-- Left Sticky Table of Contents -->
+    <aside class="sidebar" aria-label="目次">
+      <div class="toc-title">
+        <span>📑 RACING PROGRAM TOC</span>
+        <span class="badge badge-gold">v1.1.4</span>
+      </div>
+      <ul class="toc-list">
+        <li>
+          <a href="#sec-1"><span class="toc-num">1</span>エグゼクティブサマリー</a>
+        </li>
+        <li>
+          <a href="#sec-2"><span class="toc-num">2</span>ペルソナ &amp; ストーリー</a>
+        </li>
+        <li>
+          <a href="#sec-3"><span class="toc-num">3</span>コア機能 &amp; ゲームサイクル</a>
+          <ul class="toc-sublist">
+            <li><a href="#sec-3-1">3.1 2コース選択型調教 (120問)</a></li>
+            <li><a href="#sec-3-2">3.2 7日制調教・週末レース・にんじん</a></li>
+            <li><a href="#sec-3-3">3.3 4週間キャリア・8毛色・8大路線</a></li>
+            <li><a href="#sec-3-4">3.4 引退式・二つ名・殿堂入り</a></li>
+            <li><a href="#sec-3-5">3.5 ビジュアル素材・スプライト仕様</a></li>
+            <li><a href="#sec-3-6">3.6 フレーズ図鑑 &amp; 3カ国TTS</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#sec-4"><span class="toc-num">4</span>画面構成 &amp; ユーザーフロー</a>
+        </li>
+        <li>
+          <a href="#sec-5"><span class="toc-num">5</span>システム・クラウドアーキテクチャ</a>
+          <ul class="toc-sublist">
+            <li><a href="#sec-5-1">5.1 技術スタック &amp; 全体構成図</a></li>
+            <li><a href="#sec-5-2">5.2 2段階認証モデル (ゲスト/SSO)</a></li>
+            <li><a href="#sec-5-3">5.3 Firestore スキーマ &amp; 同期</a></li>
+            <li><a href="#sec-5-4">5.4 動的フレーズ配信 &amp; 管理基盤</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#sec-6"><span class="toc-num">6</span>非機能要件 &amp; 品質基準</a>
+        </li>
+        <li>
+          <a href="#sec-7"><span class="toc-num">7</span>ロードマップ &amp; 正本資料索引</a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Specification Body -->
+    <main class="main-content">
+
+      <!-- Quick KPI / System Highlights -->
+      <section aria-label="主要仕様サマリー" class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">収録マスター問題数</div>
+          <div class="kpi-value">120問 + 動的配信</div>
+          <div class="kpi-desc">🌿坂路（実戦フレーズ60問）＋🪵ウッドチップ（基礎語彙60問）</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">学習・出走リズム</div>
+          <div class="kpi-value">毎日3問 × 週末5問</div>
+          <div class="kpi-desc">7日制調教（午前4時切替）＆土日限定ハイブリッド模擬レース</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">愛馬キャリアサイクル</div>
+          <div class="kpi-value">4週間 × 8大路線</div>
+          <div class="kpi-desc">JRA基準全8毛色×6シーン・引退式称号授与・殿堂入り継承</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">英語音声 (Web Speech)</div>
+          <div class="kpi-value">US / UK / AU 3カ国</div>
+          <div class="kpi-desc">米・英・豪アクセント切替＆速度変更（1.0x / 0.8x）</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">インフラ &amp; オフライン</div>
+          <div class="kpi-value">PWA + Firebase</div>
+          <div class="kpi-desc">Service Worker完全オフライン対応＆Google / X SSO同期</div>
+        </div>
+      </section>
+
+      <!-- 1. Executive Summary & Vision -->
+      <section id="sec-1" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">01</span>
+          <div>
+            <span class="section-en">Executive Summary &amp; Product Vision</span>
+            <h2 class="section-title">エグゼクティブサマリー &amp; ビジョン</h2>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-title">🏇 プロダクトタグライン</div>
+          一般的な英語学習アプリでは絶対に教えてくれない、海外競馬の勝利騎手・調教師の「生のつぶやき・興奮」を直感で掴むマイクロラーニング
+        </div>
+
+        <div class="grid-2">
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">背景・コアプロブレム（現状の課題）</span>
+              <span class="badge badge-crimson">PROBLEM</span>
+            </div>
+            <ul>
+              <li>海外G1の勝利騎手インタビューや現地公式中継は、日常英会話ができる人でも競馬特有のスラング・比喩表現（<code>in the tank</code>, <code>on the bridle</code>, <code>dug deep</code> 等）や早口の定型句によって聞き取れない。</li>
+              <li>一般的な英語学習サービスには競馬の文脈が一切なく、一方で競馬英語の専門書はお勉強感が強すぎて日々の習慣として継続しづらい。</li>
+            </ul>
+          </div>
+
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">解決アプローチ（TurfTalk の提供価値）</span>
+              <span class="badge badge-green">SOLUTION</span>
+            </div>
+            <ul>
+              <li><strong>「毎日の調教（1日3問の直感4択）× 週末のレース出走（全5問）」</strong>という競馬ファンの生活リズムに合わせたゲーミフィケーションサイクルを提供。</li>
+              <li>文法解説を排除し、「競馬ファンならパドックやレース映像で直感的に腑に落ちる1〜2行のワンポイント解説」と<strong>4週間の愛馬育成キャリアサイクル</strong>を組み合わせ、スキマ時間（1〜2分）で楽しく継続できる体験を実現。</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>仕様・定義内容</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>プロダクト名</strong></td>
+                <td><strong>TurfTalk</strong>（ターフトーク｜海外競馬英語マイクロラーニング）</td>
+              </tr>
+              <tr>
+                <td><strong>本番公開URL</strong></td>
+                <td><a href="https://turftalk-jp.web.app/" target="_blank" rel="noopener noreferrer">https://turftalk-jp.web.app/</a>（Firebase Hosting / グローバルCDN配信）</td>
+              </tr>
+              <tr>
+                <td><strong>現行バージョン</strong></td>
+                <td><code>v1.1.4</code>（Phase 1 MVP 〜 Phase 4 クラウド・管理者基盤まで全マイルストーン実装完了）</td>
+              </tr>
+              <tr>
+                <td><strong>一次ソース準拠原則</strong></td>
+                <td>海外競馬公式中継、主要G1勝利騎手・調教師インタビュー、海外競馬メディア（Racing Post, Sporting Life, BloodHorse等）、およびJRA「海外競馬英和辞典」で実際に使われる表現のみを収録（AIによる架空造語や推測補完は厳禁）。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 2. Target Personas & User Stories -->
+      <section id="sec-2" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">02</span>
+          <div>
+            <span class="section-en">Target Personas &amp; User Stories</span>
+            <h2 class="section-title">ターゲットペルソナ &amp; ユーザーストーリー</h2>
+          </div>
+        </div>
+
+        <h3>2.1 ターゲットペルソナ定義</h3>
+        <div class="grid-2">
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">Primary Persona：競馬玄人・英語中級</span>
+              <span class="badge badge-green">CORE TARGET</span>
+            </div>
+            <ul>
+              <li><strong>人物像:</strong> 30〜40代男性、IT・オフィスワーク。競馬歴15年以上。海外主要G1（凱旋門賞、BC、ドバイ、香港等）も中継やYouTubeでリアルタイム観戦する層。</li>
+              <li><strong>英語力:</strong> 日常会話・基礎英語は理解できる（TOEIC等のスコアあり、平易な英文は読める）。しかし現地の早口インタビューや競馬特有の比喩・イディオムは聞き取れない。</li>
+              <li><strong>課題:</strong> 海外中継をリアタイで見ても、日本語の翻訳記事が出るまで騎手の生の声・手応えが正確にわからない。</li>
+              <li><strong>利用シーン:</strong> 平日の通勤・スキマ時間（1〜2分）、週末の開催前後のリラックスタイム。</li>
+            </ul>
+          </div>
+
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">Secondary Persona：ライト〜中級・英語初級</span>
+              <span class="badge badge-gold">EXPANSION TARGET</span>
+            </div>
+            <ul>
+              <li><strong>人物像:</strong> 20〜30代。ウマ娘や日本馬の海外挑戦ブームを機に競馬に本格参入（競馬歴2〜4年程度）。</li>
+              <li><strong>英語力:</strong> 高校基礎英語レベル。英語に苦手意識があり、文法解説や長文読解は挫折する。</li>
+              <li><strong>課題:</strong> 海外競馬の中継を見ても、現地の空気が全くわからない（騎手が喜んでいるのか、馬場や展開の言い訳をしているのかすら掴めない）。</li>
+              <li><strong>利用シーン:</strong> 移動中や就寝前、SNSを見る合間の「ながら利用」。</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>2.2 ユーザーストーリー一覧 (User Stories)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>フェーズ</th>
+                <th>対象</th>
+                <th>ユーザーストーリー（As a ... / I want to ... / So that ...）</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>US-01</code></td>
+                <td>平日：調教</td>
+                <td>共通</td>
+                <td>ユーザーとして、平日に1日1〜2分（3問）の4択クイズを解きたい。なぜなら、負担なくスキマ時間で競馬英語の習慣を継続できるからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-02</code></td>
+                <td>平日：調教</td>
+                <td>Secondary</td>
+                <td>英語初級ファンとして、文法を気にせず「褒めているか／言い訳しているか」の空気感を直感で当てたい。なぜなら、雰囲気だけでも海外競馬の感情を掴みたいからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-03</code></td>
+                <td>平日：調教</td>
+                <td>共通</td>
+                <td>ユーザーとして、クイズ完了後に「調教済スタンプ」や「調子矢印」が記録される演出を見たい。なぜなら、愛馬を仕上げているような育成の達成感が得られるからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-04</code></td>
+                <td>週末：レース</td>
+                <td>共通</td>
+                <td>ユーザーとして、平日にインプットした知識を使って週末限定のレース（5問）に挑みたい。なぜなら、週末の競馬本番と連動したワクワク感を得られるからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-05</code></td>
+                <td>週末：レース</td>
+                <td>Primary</td>
+                <td>競馬玄人として、実際の勝利騎手インタビューやレース展開を模した短文を解読したい。なぜなら、海外G1中継を字幕なしで楽しむための実力を試したいからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-06</code></td>
+                <td>アーカイブ</td>
+                <td>共通</td>
+                <td>ユーザーとして、一度解いたフレーズをカテゴリ別に一覧で振り返りたい。なぜなら、海外競馬の観戦中に手元で辞書代わりに確認したいからだ。</td>
+              </tr>
+              <tr>
+                <td><code>US-07</code></td>
+                <td>殿堂入り</td>
+                <td>共通</td>
+                <td>ユーザーとして、愛馬と4週間のデビューから海外G1ラストラン・引退までを駆け抜け、殿堂入りカードとして記録を残したい。なぜなら、1頭を仕上げて引退させる達成感と次世代へバトンを繋ぐロマンを楽しめるからだ。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Core Functional Specifications -->
+      <section id="sec-3" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">03</span>
+          <div>
+            <span class="section-en">Core Features &amp; Gamification Mechanics</span>
+            <h2 class="section-title">コア機能要件 &amp; ゲームサイクル仕様</h2>
+          </div>
+        </div>
+
+        <!-- 3.1 Training Courses & Phrase Master -->
+        <h3 id="sec-3-1">3.1 4択クイズエンジン &amp; 2コース選択型調教（全120問マスター＋動的配信）</h3>
+        <p>
+          実戦フレーズを学ぶ<strong>「🌿 坂路調教（60問）」</strong>と、JRA海外競馬英和辞典準拠の基礎単語・用語を学ぶ<strong>「🪵 ウッドチップ調教（60問）」</strong>の2コース・計120問の静的マスターに加え、Cloud Firestore からの動的配信フレーズを統合して出題します。
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>コース区分</th>
+                <th>カテゴリ名</th>
+                <th>キー</th>
+                <th>収録数</th>
+                <th>代表的な収録フレーズ・用語例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan="4"><strong>🌿 坂路調教</strong><br><span class="badge badge-green">type: phrase</span><br>実戦フレーズ 60問</td>
+                <td>手応え・感触</td>
+                <td><code>feel</code></td>
+                <td>15問</td>
+                <td><code>plenty in the tank</code>（余力十分）、<code>on the bridle</code>（ハミ受け良好）、<code>travelling sweetly</code>（リズム抜群）、<code>run green</code>（若さを見せる）</td>
+              </tr>
+              <tr>
+                <td>仕掛け・展開</td>
+                <td><code>tactics</code></td>
+                <td>16問</td>
+                <td><code>pushed the button</code>（ゴーサイン）、<code>boxed in</code>（前が壁）、<code>sat chilly</code>（じっくり我慢）、<code>wire-to-wire</code>（完全逃げ切り）</td>
+              </tr>
+              <tr>
+                <td>勝負根性・反応</td>
+                <td><code>reaction</code></td>
+                <td>15問</td>
+                <td><code>dug deep</code>（勝負根性を発揮）、<code>put the race to bed</code>（勝負を決める）、<code>hit the front too soon</code>（ソラを使う）、<code>headed on the line</code>（ハナ差惜敗）</td>
+              </tr>
+              <tr>
+                <td>コメント・総括</td>
+                <td><code>comment</code></td>
+                <td>14問</td>
+                <td><code>didn't handle the ground</code>（馬場不向き）、<code>needed the run</code>（叩き一変）、<code>stayed every yard</code>（距離克服）、<code>one for the notebook</code>（次走特注馬）</td>
+              </tr>
+              <tr>
+                <td rowspan="4"><strong>🪵 ウッドチップ調教</strong><br><span class="badge badge-gold">type: vocabulary</span><br>基礎単語・用語 60問</td>
+                <td>馬場状態・コース条件</td>
+                <td><code>feel</code></td>
+                <td>15問</td>
+                <td><code>Going / Ground</code>（馬場状態）、<code>Yielding</code>（稍重）、<code>Undulating</code>（起伏コース）、<code>GoingStick</code>（馬場硬度測定器）、<code>False Straight</code>（偽の直線）</td>
+              </tr>
+              <tr>
+                <td>レース展開・馬具</td>
+                <td><code>tactics</code></td>
+                <td>15問</td>
+                <td><code>Pacesetter</code>（逃げ馬）、<code>Closer</code>（追い込み馬）、<code>Blinkers</code>（ブリンカー）、<code>Tongue-tie</code>（舌縛り）、<code>Furlong</code>（1ハロン/約201m）</td>
+              </tr>
+              <tr>
+                <td>競走馬の挙動・状態</td>
+                <td><code>reaction</code></td>
+                <td>15問</td>
+                <td><code>Turn of foot</code>（瞬発力・キレ味）、<code>Greenness</code>（若さ）、<code>Tenacity</code>（勝負根性）、<code>Sweating up</code>（パドック発汗）、<code>Refusal</code>（飛越拒否）</td>
+              </tr>
+              <tr>
+                <td>着差・裁決・斤量</td>
+                <td><code>comment</code></td>
+                <td>15問</td>
+                <td><code>Short Head</code>（短頭差）、<code>Dead-heat</code>（同着）、<code>Stewards' Inquiry</code>（審議）、<code>Objection</code>（異議申立）、<code>Weight-for-Age</code>（定量戦）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-3">
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">決定論的デイリー選出</span>
+              <span class="badge badge-green">PRNG</span>
+            </div>
+            <p>論理日付（<code>YYYY-MM-DD</code>）から32bitハッシュを生成し、Mulberry32 PRNGで未履修優先の3問を選出。同日中はリロードしても同じ3問が出題され、4択の並び順は毎回動的シャッフル。</p>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">1コース完了でデイリー達成</span>
+              <span class="badge badge-gold">DAILY RULE</span>
+            </div>
+            <p>坂路またはウッドチップのいずれか1コースを完了した時点で当日達成（ストリーク+1、週間調教日数+1、レース解放）。同日に両コース受講しても日数は重複加算されず、正答問題のみ習得記録。</p>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">復習 &amp; 追加トレーニング</span>
+              <span class="badge badge-navy">EXTRA</span>
+            </div>
+            <p>当日調教完了後も「本日の3問復習」および「追加トレーニング（未習得2問＋既習1問をランダム選出）」を何度でも受講可能。ゲームバランス保護のためストリークや調教日数は不変。</p>
+          </div>
+        </div>
+
+        <!-- 3.2 Training, Race & Carrot Logic -->
+        <h3 id="sec-3-2">3.2 7日制調教・午前4時リセット・週末レース &amp; にんじん救済システム</h3>
+        <div class="diagram-box">
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step-num">LOGIC 01 / 28:00 RESET</div>
+              <div class="flow-step-title">午前4時（28時）論理日付更新</div>
+              <div class="flow-step-body">深夜0:00〜3:59の学習も前日分として継続できるよう実時刻から4時間減算した論理日付（<code>getLogicalDate</code>）を採用。週の境界は月曜午前4時。</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-num">LOGIC 02 / 7-DAY TRAINING</div>
+              <div class="flow-step-title">7日制調教 &amp; 余力ヒント付与</div>
+              <div class="flow-step-body">平日・土日問わず週最大7日まで調教日数をカウント。消化日数に応じ愛馬の調子と週末レースの<strong>「愛馬の余力（誤答1肢除外ヒント）」</strong>を付与（0〜2日: 0回 / 3〜4日: 1回 / 5〜7日: 2回）。</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-num">LOGIC 03 / HYBRID RACE</div>
+              <div class="flow-step-title">週末レース（土日限定・週1回）</div>
+              <div class="flow-step-body">初回調教完了で解放。<strong>「第1〜2問: 基礎単語 ➡ 第3〜5問: 実戦フレーズ」</strong>のハイブリッド5問構成。出走距離連動の残り距離バッジと実況テキストで臨場感を演出。</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step-num">LOGIC 04 / CARROT RESCUE</div>
+              <div class="flow-step-title">にんじん温存還元 &amp; ストリーク救済</div>
+              <div class="flow-step-body">レースで「愛馬の余力」を温存して完走すると未使用分の<strong>「にんじん 🥕」</strong>を獲得（最大3個所持）。未受講日が発生した際に1日1個自動消費し連続学習記録を救済。</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.3 4-Week Horse Career Cycle -->
+        <h3 id="sec-3-3">3.3 競走馬4週間キャリアサイクル（全8毛色・馬名バリデーション・全8大路線）</h3>
+        <p>
+          1頭の愛馬を永遠に担当するのではなく、<strong>「4週間（Week 1 初陣 ➡ Week 2 前哨戦 ➡ Week 3 国内頂点 ➡ Week 4 世界挑戦・引退戦）」</strong>で1頭のキャリアを完走させるマイルストーン設計により、学習継続率とコレクション性を高めます。
+        </p>
+
+        <h4>① 馬名自動生成・手動編集とJRA/IFHA準拠セキュリティバリデーション</h4>
+        <ul>
+          <li><strong>自動生成（🎲 命名・毛色同時抽選）:</strong> 品格ある前半ワード20語×後半ワード20語から2〜9文字のカタカナ馬名を自動生成すると同時に、JRA基準8毛色を重み付き抽選。</li>
+          <li><strong>初回調教完了ロック:</strong> 馬名編集・再抽選・路線変更は初回調教完了前（<code>hasTrained === false</code>）まで可能。1回でも調教を完了すると引退まで確定ロック。</li>
+          <li><strong>言語別ハイブリッド検証 &amp; XSS対策:</strong> 日本語馬名は<strong>2〜9文字</strong>（JRA基準）、英字馬名は<strong>2〜18文字</strong>（IFHA基準）。1文字入力および日本語と英字の混在は禁止。NFKC正規化・制御文字除去・ホワイトリスト検証によりHTMLタグ等の不正入力を完全拒否。</li>
+        </ul>
+
+        <h4>② 全8大路線（キャリアローテーション）&amp; 週別出題テーマ連動</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>路線名</th>
+                <th>Week 1 (初陣)<br><span class="badge badge-green">feel: 手応え</span></th>
+                <th>Week 2 (前哨戦)<br><span class="badge badge-gold">tactics: 仕掛け</span></th>
+                <th>Week 3 (国内頂点)<br><span class="badge badge-crimson">reaction: 勝負根性</span></th>
+                <th>Week 4 (世界挑戦・引退戦)<br><span class="badge badge-navy">comment: 総括</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1</strong></td>
+                <td><strong>3歳牡馬クラシック路線</strong><br><small>王道の中長距離芝</small></td>
+                <td>メイクデビュー<br><small>(芝1800m)</small></td>
+                <td>弥生賞<br><small>(G2・芝2000m)</small></td>
+                <td>日本ダービー<br><small>(G1・芝2400m)</small></td>
+                <td>凱旋門賞<br><small>(世界G1・芝2400m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>2</strong></td>
+                <td><strong>3歳牝馬クラシック路線</strong><br><small>華やかな牝馬三冠</small></td>
+                <td>メイクデビュー<br><small>(芝1600m)</small></td>
+                <td>チューリップ賞<br><small>(G2・芝1600m)</small></td>
+                <td>優駿牝馬 / オークス<br><small>(G1・芝2400m)</small></td>
+                <td>オペラ賞<br><small>(世界牝馬G1・芝2000m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>3</strong></td>
+                <td><strong>古馬短距離（スプリント）路線</strong><br><small>電撃の6ハロン戦</small></td>
+                <td>オープン特別<br><small>(芝1200m)</small></td>
+                <td>セントウルS<br><small>(G2・芝1200m)</small></td>
+                <td>スプリンターズS<br><small>(G1・芝1200m)</small></td>
+                <td>香港スプリント<br><small>(世界G1・芝1200m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>4</strong></td>
+                <td><strong>古馬マイル・中距離路線</strong><br><small>スピードと底力の頂点</small></td>
+                <td>都大路S<br><small>(芝1800m)</small></td>
+                <td>毎日王冠<br><small>(G2・芝1800m)</small></td>
+                <td>天皇賞（秋）<br><small>(G1・芝2000m)</small></td>
+                <td>ドバイターフ<br><small>(世界G1・芝1800m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>5</strong></td>
+                <td><strong>古馬長距離（ステイヤー）路線</strong><br><small>息詰まるスタミナ勝負</small></td>
+                <td>迎春S<br><small>(芝2500m)</small></td>
+                <td>阪神大賞典<br><small>(G2・芝3000m)</small></td>
+                <td>天皇賞（春）<br><small>(G1・芝3200m)</small></td>
+                <td>アスコットゴールドC<br><small>(英G1・芝4000m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>6</strong></td>
+                <td><strong>ダート短中距離（マイル）路線</strong><br><small>砂のスピード＆パワー</small></td>
+                <td>プラタナス賞<br><small>(ダ1600m)</small></td>
+                <td>武蔵野S<br><small>(G3・ダ1600m)</small></td>
+                <td>フェブラリーS<br><small>(G1・ダ1600m)</small></td>
+                <td>BCダートマイル<br><small>(米G1・ダ1600m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>7</strong></td>
+                <td><strong>ダート王道中距離路線</strong><br><small>世界ダート最高峰</small></td>
+                <td>もちの木賞<br><small>(ダ1800m)</small></td>
+                <td>みやこS<br><small>(G3・ダ1800m)</small></td>
+                <td>チャンピオンズC<br><small>(G1・ダ1800m)</small></td>
+                <td>BCクラシック<br><small>(米G1・ダ2000m)</small></td>
+              </tr>
+              <tr>
+                <td><strong>8</strong></td>
+                <td><strong>障害（ジャンプ）路線</strong><br><small>飛越と不屈のドラマ</small></td>
+                <td>障害未勝利<br><small>(障2800m)</small></td>
+                <td>東京ハイジャンプ<br><small>(JG2・障3110m)</small></td>
+                <td>中山大障害<br><small>(JG1・障4100m)</small></td>
+                <td>グランドナショナル<br><small>(英G3・障7200m)</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3.4 Retirement & Hall of Fame -->
+        <h3 id="sec-3-4">3.4 引退式セレモニー・二つ名（称号）授与・殿堂入りギャラリー &amp; 世代継承</h3>
+        <div class="grid-2">
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">二つ名（称号）の自動授与ルール</span>
+              <span class="badge badge-gold">EPITHET</span>
+            </div>
+            <ol>
+              <li><strong>4戦全勝（4勝）:</strong> <code>不敗の世界覇者</code></li>
+              <li><strong>Week 3 + Week 4 連覇:</strong> 路線別最高称号（<code>世界を翔ける至高の王者</code> / <code>華麗なる世界の女帝</code> / <code>電光石火の世界快速王</code> / <code>威風堂々たる中距離の皇帝</code> / <code>無尽蔵のワールドステイヤー</code> / <code>砂塵を切り裂く剛脚王</code> / <code>砂塵を統べる世界覇王</code> / <code>伝説のグランドジャンパー</code>）</li>
+              <li><strong>Week 4 制覇:</strong> <code>世界の頂に立つ名馬</code></li>
+              <li><strong>Week 3 制覇:</strong> 路線別国内王者称号（<code>栄光のクラシック覇者</code> 等全8種）</li>
+              <li><strong>1勝以上:</strong> <code>ターフを沸かせた実力馬</code></li>
+              <li><strong>未勝利・累計12点以上:</strong> <code>堅実無比の名バイプレイヤー</code></li>
+              <li><strong>その他完走:</strong> <code>ひたむきな挑戦者</code></li>
+            </ol>
+          </div>
+
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">世代交代時のデータ引き継ぎ・初期化ルール</span>
+              <span class="badge badge-green">INHERITANCE</span>
+            </div>
+            <ul>
+              <li><strong>次世代へ引き継ぐデータ:</strong> 連続学習ストリーク（<code>streakDays</code>）、にんじん所持数（<code>carrotCount</code>）、通算習得フレーズ（<code>learnedPhraseIds</code> / <code>lapCount</code>）、殿堂入り履歴（<code>hallOfFame</code>）、各フレーズの初習得パートナー馬記録（<code>phrasePartners</code>）。</li>
+              <li><strong>新世代で初期化されるデータ:</strong> <code>careerHorse</code>（<code>generation + 1</code>, <code>currentWeek: 1</code>, <code>weight: 484</code>, <code>hasTrained: false</code>）、週間調教消化日数（<code>weekdayTrainingDays: 0</code>, <code>condition: 'heavy'</code>, <code>horseWeight: 500</code>）。</li>
+              <li><strong>同週末の連続出走防止ガード:</strong> 土日にWeek 4を完走して世代交代した場合、誕生した新馬は当該週末中は「🌿 新馬入厩・来週末デビュー」となり、翌週月曜午前4時の週替わり後にWeek 1出走が解放される。</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3.5 Horse Visual Assets -->
+        <h3 id="sec-3-5">3.5 競走馬ビジュアル・アニメーション素材仕様（JRA全8毛色×全6シーン＋背景8種）</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>毛色</th>
+                <th>キー</th>
+                <th>出現率</th>
+                <th>ベース被毛</th>
+                <th>シャドウ被毛</th>
+                <th>たてがみ・尾</th>
+                <th>下肢ソックス</th>
+                <th>特徴・ボカシ表現</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><strong>鹿毛</strong>（かげ）</td>
+                <td><code>bay</code></td>
+                <td><strong>40%</strong></td>
+                <td><span class="swatch" style="background:#9A4325"></span><code>#9A4325</code></td>
+                <td><span class="swatch" style="background:#762D1A"></span><code>#762D1A</code></td>
+                <td><span class="swatch" style="background:#201F1B"></span><code>#201F1B</code></td>
+                <td>あり（黒）</td>
+                <td>最も一般的な基本毛色（マスター原画）</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><strong>栗毛</strong>（くりげ）</td>
+                <td><code>chestnut</code></td>
+                <td><strong>22%</strong></td>
+                <td><span class="swatch" style="background:#CA662A"></span><code>#CA662A</code></td>
+                <td><span class="swatch" style="background:#A24A1A"></span><code>#A24A1A</code></td>
+                <td><span class="swatch" style="background:#D88038"></span><code>#D88038</code></td>
+                <td>なし（被毛同色）</td>
+                <td>華やかな黄金〜赤褐色の毛色</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><strong>黒鹿毛</strong>（くろかげ）</td>
+                <td><code>dark_bay</code></td>
+                <td><strong>16%</strong></td>
+                <td><span class="swatch" style="background:#482618"></span><code>#482618</code></td>
+                <td><span class="swatch" style="background:#30180F"></span><code>#30180F</code></td>
+                <td><span class="swatch" style="background:#1A1916"></span><code>#1A1916</code></td>
+                <td>あり（黒）</td>
+                <td>鼻先・目元・トモ内側に赤褐色ボカシ（<code>#843E20</code>）</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td><strong>芦毛</strong>（あしげ）</td>
+                <td><code>grey</code></td>
+                <td><strong>8%</strong></td>
+                <td><span class="swatch" style="background:#C6CCD4"></span><code>#C6CCD4</code></td>
+                <td><span class="swatch" style="background:#9AA2AC"></span><code>#9AA2AC</code></td>
+                <td><span class="swatch" style="background:#606872"></span><code>#606872</code></td>
+                <td>あり（濃灰）</td>
+                <td>人気・個性ともに高いシルバーグレー</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><strong>青鹿毛</strong>（あおかげ）</td>
+                <td><code>seal_brown</code></td>
+                <td><strong>6%</strong></td>
+                <td><span class="swatch" style="background:#2A201C"></span><code>#2A201C</code></td>
+                <td><span class="swatch" style="background:#1C1412"></span><code>#1C1412</code></td>
+                <td><span class="swatch" style="background:#141312"></span><code>#141312</code></td>
+                <td>あり（黒）</td>
+                <td>全身黒系で鼻先・目元のみ微かな褐色（<code>#69321A</code>）</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td><strong>青毛</strong>（あおげ）</td>
+                <td><code>black</code></td>
+                <td><strong>4%</strong></td>
+                <td><span class="swatch" style="background:#2C2F35"></span><code>#2C2F35</code></td>
+                <td><span class="swatch" style="background:#1B1D22"></span><code>#1B1D22</code></td>
+                <td><span class="swatch" style="background:#141518"></span><code>#141518</code></td>
+                <td>あり（黒）</td>
+                <td>褐色ボカシなしの純粋な漆黒</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td><strong>栃栗毛</strong>（とちくりげ）</td>
+                <td><code>liver_chestnut</code></td>
+                <td><strong>3%</strong></td>
+                <td><span class="swatch" style="background:#74341E"></span><code>#74341E</code></td>
+                <td><span class="swatch" style="background:#542212"></span><code>#542212</code></td>
+                <td><span class="swatch" style="background:#602A16"></span><code>#602A16</code></td>
+                <td>なし（被毛同色）</td>
+                <td>深みのある黒みがかった栗毛</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td><strong>白毛</strong>（しろげ）</td>
+                <td><code>white</code></td>
+                <td><strong>1%</strong></td>
+                <td><span class="swatch" style="background:#F7F9FC"></span><code>#F7F9FC</code></td>
+                <td><span class="swatch" style="background:#DAE1EA"></span><code>#DAE1EA</code></td>
+                <td><span class="swatch" style="background:#F2F5FA"></span><code>#F2F5FA</code></td>
+                <td>なし（純白）</td>
+                <td>最少1%レア毛色。鼻先に桜色肌（<code>#EEB6B0</code>）・飴色蹄</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul>
+          <li><strong>全6シーン×全8背景の透過合成:</strong> ①ホーム公式立ち絵（左向き・牧場背景）、②平日調教6コマ疾走（右向き・白ゼッケン・坂路/ウッドチップ背景）、③調教完了立ち絵（右向き・厩舎背景）、④週末レース6コマ疾走（右向き・濃紺1番ゼッケン・ヘッドボブ回転付・芝/ダート本馬場背景）、⑤-A 1着勝利（ウィナーズサークル背景）、⑤-B 惜敗労い（厩舎背景）、および殿堂入り専用クラブハウス記念額装背景（<code>bg_hall_of_fame.jpg</code>）。</li>
+          <li><strong>3点座標ロックと閉領域ピンポイント透過:</strong> 6コマ疾走スプライト（<code>500×360px</code>×6）は背中（<code>Y=100.0px</code>）・肩（<code>X=300.4px</code>）・胸（<code>X=370.0px</code>）を厳密固定して上下ブレを防止。手綱間や交差後肢間の閉領域はフレーム別ピンポイントシードによるCanvasフラッドフィルで白毛の馬体を侵食せず背景のみを完全透過。</li>
+        </ul>
+
+        <!-- 3.6 Phrase Book & TTS -->
+        <h3 id="sec-3-6">3.6 フレーズ図鑑 &amp; Web Speech API 英語音声読み上げ（TTS）</h3>
+        <ul>
+          <li><strong>フレーズ図鑑（<code>PhraseBookScreen</code>）:</strong> 収録全問を一覧表示し、学習状況別（すべて / 習得済 / 未習得 / 要復習★）、コース別（坂路 / ウッドチップ）、カテゴリ別（4種）フィルターおよびインクリメンタル検索を提供。各カードには初めてその問題を正解した際の<strong>「🐴 初習得パートナー: 第N世代 馬名（毛色）」</strong>をイミュータブルに表示。</li>
+          <li><strong>3カ国競馬アクセント音声読み上げ:</strong> Web Speech API を活用し、米国（<code>en-US</code>）・英国（<code>en-GB</code>）・豪州（<code>en-AU</code>）の3カ国アクセント切替と再生速度切替（<code>1.0x</code> 標準 / <code>0.8x</code> ゆっくり）を出題カード・結果振り返り・図鑑に搭載。</li>
+        </ul>
+      </section>
+
+      <!-- 4. Screen Wireframes & User Flow -->
+      <section id="sec-4" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">04</span>
+          <div>
+            <span class="section-en">Screens, UI Design &amp; User Flow</span>
+            <h2 class="section-title">画面構成 &amp; ユーザーフロー</h2>
+          </div>
+        </div>
+
+        <p>
+          スマートフォン縦持ち（片手・親指タップ）に最適化した <code>max-w-md</code> 中央コンテナ構成を採用。画面切り替えや問題進行時には自動でページ最上部（<code>0, 0</code>）へスクロール位置をリセットし、快適な操作テンポを維持します。
+        </p>
+
+        <h3>4.1 全体画面遷移フロー</h3>
+        <pre><code>[ホーム / デイリーハブ (HomeScreen)]
+  │
+  ├─▶ (毎日・2コース選択) 「🌿 坂路調教（実戦フレーズ）」または「🪵 ウッドチップ調教（基礎単語）」開始
+  │     ▼
+  │   [調教クイズ出題・解答画面 (QuizScreen)] (全3問・3カ国TTS音声・即時解説フィードバック)
+  │     ▼
+  │   [調教完了演出画面 (ResultScreen)] (💮調教済スタンプ押印アニメ・本日3問の振り返り・Xシェア)
+  │     ▼
+  │   [ホームに戻る]（完了後は「本日の3問復習」「追加トレーニング（新3問）」も選択可能）
+  │
+  ├─▶ (土日限定・初回調教完了後・1週末1回) 「🏆 週末G1レースに出走する（5問）」タップ
+  │     ▼
+  │   [週末レース展開画面 (RaceScreen)] (第1〜2問:基礎単語 ➡ 第3〜5問:実戦フレーズ・愛馬の余力ヒント・実況演出)
+  │     ▼
+  │   [レース結果・着順確定画面 (RaceResultScreen)] (ファンファーレ・着順掲示板・にんじん獲得還元・Xシェア)
+  │     ├─▶ (Week 1〜3) [ホームに戻る（翌週ステージへ進行）]
+  │     └─▶ (Week 4 完走) 「🌸 引退式セレモニーへ進む」
+  │           ▼
+  │         [引退式セレモニー・次世代継承画面 (RetirementScreen)] (二つ名授与・4週戦績・新馬命名＆路線選択)
+  │           ▼
+  │         [ホームに戻る（第 N+1 世代・Week 1 スタート）]
+  │
+  ├─▶ 「📖 フレーズ図鑑 (PhraseBookScreen)」（全問検索・フィルター・要復習ブックマーク・初習得パートナー馬表示）
+  ├─▶ 「🏆 殿堂入りギャラリー (HallOfFameScreen)」（歴代顕彰馬額装ポートレート・Canvas記念カード画像保存・Xシェア）
+  ├─▶ (ヘッダー / フッター常設モーダル)
+  │     ├─ [使い方・育成ガイドモーダル (HelpGuideModal)]（初回自動表示＋いつでも再確認可能な5ステップ解説）
+  │     ├─ [アカウント連携モーダル (AuthModal)]（Google / X SSO連携・連携解除・退会手続き）
+  │     └─ [規約・プライバシー・データ保存・お問合せモーダル (LegalSupportModal)]（4タブ構成・環境テンプレコピー）
+  └─▶ (管理者権限のみ) 「🛠️ 管理者ダッシュボード (AdminDashboardScreen)」（分析インサイト・ユーザー管理・動的フレーズ配信）</code></pre>
+
+        <h3>4.2 主要画面・モーダル一覧</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>画面 / コンポーネント</th>
+                <th>主な役割・UI仕様</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>ホーム / デイリーハブ</strong><br><code>HomeScreen</code></td>
+                <td>愛馬ステータスカード（馬名・毛色立ち絵・世代・路線・調子・馬体重・命名/路線変更UI）、坂路/ウッドチップ2コース選択カード、週末レース出走バナー（平日はカウントダウン、土日は出走CTA）、図鑑・殿堂入りナビゲーションを表示。</td>
+              </tr>
+              <tr>
+                <td><strong>調教クイズ画面</strong><br><code>QuizScreen</code></td>
+                <td>上部固定（sticky）プログレスバー、6コマ疾走スプライトアニメ、シチュエーションバッジ、英文フレーズ＋3カ国TTS再生ボタン、4択ボタン（縦幅58px以上）、解答後のワンポイント解説＆次問進行CTA。</td>
+              </tr>
+              <tr>
+                <td><strong>調教完了画面</strong><br><code>ResultScreen</code></td>
+                <td>達成立ち絵、「調教済＋日付」ハンコ押印アニメーション、スコア表示、当日出題3問のアコーディオン/一覧振り返り、X（旧Twitter）シェア＆テキストコピー、復習・追加トレーニング導線。</td>
+              </tr>
+              <tr>
+                <td><strong>週末レース &amp; 結果画面</strong><br><code>RaceScreen</code> / <code>RaceResultScreen</code></td>
+                <td>レース距離連動の残り距離バッジ、実況中継ボックス、愛馬の余力（誤答1肢除外）ボタン。結果画面では確定着順（1着〜入着）・タイム差・総評コメント・余力温存ボーナス（🥕にんじん獲得）を表示。</td>
+              </tr>
+              <tr>
+                <td><strong>引退式セレモニー画面</strong><br><code>RetirementScreen</code></td>
+                <td>Week 4完走後に開催。授与された二つ名（称号）と記念プレート、Week 1〜4の全戦績、共に習得したフレーズ数を讃え、下部で次世代馬の命名・毛色抽選・路線選択を行って世代交代を完了。</td>
+              </tr>
+              <tr>
+                <td><strong>フレーズ図鑑 &amp; 殿堂入り</strong><br><code>PhraseBookScreen</code> / <code>HallOfFameScreen</code></td>
+                <td>図鑑は全問の検索・フィルタ・ブックマーク・音声再生・初習得パートナー馬表示に対応。殿堂入りギャラリーは歴代愛馬の額装ポートレート表示、世代/勝利数ソート、Canvas記念カード画像（PNG）保存に対応。</td>
+              </tr>
+              <tr>
+                <td><strong>常設モーダル群</strong><br><code>HelpGuideModal</code> / <code>AuthModal</code> / <code>LegalSupportModal</code></td>
+                <td>5ステップ使い方ガイド、Google / X SSO連携＆解除モーダル、および法務・サポート4タブモーダル（利用規約・免責事項 / プライバシーポリシー / データ保存注意喚起 / 開発者X <code>@meshi__z</code> お問合せ）。</td>
+              </tr>
+              <tr>
+                <td><strong>管理者ダッシュボード</strong><br><code>AdminDashboardScreen</code></td>
+                <td>管理者アカウントのみアクセス可能。「📊 分析・インサイト（枯渇モニター・消化率分布・路線人気）」「👥 ユーザー管理・退会アカウント復元」「📝 フレーズ動的配信管理」の3タブを提供。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. System & Cloud Architecture -->
+      <section id="sec-5" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">05</span>
+          <div>
+            <span class="section-en">System &amp; Cloud Backend Architecture</span>
+            <h2 class="section-title">システム・クラウドアーキテクチャ仕様</h2>
+          </div>
+        </div>
+
+        <h3 id="sec-5-1">5.1 技術スタック &amp; 全体アーキテクチャ構成図</h3>
+        <p>
+          サーバー常時稼働コストをゼロに抑えつつ、オフライン完全動作・高速表示・複数端末リアルタイム同期・管理者向け高度分析を両立するため、<strong>Google Cloud / Firebase のマネージドサーバーレスアーキテクチャ</strong>を採用しています。
+        </p>
+
+        <div class="diagram-box">
+          <div class="arch-layers">
+            <div class="arch-layer">
+              <div class="arch-layer-title"><span>1. Client (SPA / PWA)</span><span>Vite + React 19</span></div>
+              <div class="arch-node">
+                <strong>TurfTalk Web App</strong>
+                React 19, TypeScript, Tailwind CSS v4, Lucide Icons, Canvas透過合成エンジン
+              </div>
+              <div class="arch-node">
+                <strong>Workbox Service Worker</strong>
+                <code>vite-plugin-pwa</code> による全静的アセット・馬イラスト・背景のオフラインキャッシュ
+              </div>
+              <div class="arch-node">
+                <strong>Browser APIs &amp; Local Cache</strong>
+                LocalStorage即時永続化、Web Speech API (TTS)、Web Audio API (効果音SE)
+              </div>
+            </div>
+
+            <div class="arch-layer">
+              <div class="arch-layer-title"><span>2. Delivery &amp; Security</span><span>Firebase Edge</span></div>
+              <div class="arch-node">
+                <strong>Firebase Hosting</strong>
+                グローバルCDN配信・SSL終端（<code>turftalk-jp.web.app</code>）
+              </div>
+              <div class="arch-node">
+                <strong>Firebase App Check</strong>
+                reCAPTCHA Enterprise / v3 による不正クライアントアクセス遮断
+              </div>
+              <div class="arch-node">
+                <strong>GitHub Actions CI/CD</strong>
+                <code>master</code> マージ時の自動Lint・テスト・ビルド・Hostingデプロイ
+              </div>
+            </div>
+
+            <div class="arch-layer">
+              <div class="arch-layer-title"><span>3. Auth &amp; Database</span><span>Firebase Core</span></div>
+              <div class="arch-node">
+                <strong>Firebase Authentication</strong>
+                初回自動匿名認証（CSPRNG 28文字UID）＋ Google / X (Twitter) OAuth SSO
+              </div>
+              <div class="arch-node">
+                <strong>Cloud Firestore</strong>
+                <code>users/{uid}</code>（進捗・愛馬）、<code>phrases/{id}</code>（動的配信）、<code>admins/{uid}</code>
+              </div>
+              <div class="arch-node">
+                <strong>Firestore Security Rules</strong>
+                本人/管理者権限制御＋サーバー側整合性検証（にんじん上限<code>&lt;=3</code>等）
+              </div>
+            </div>
+
+            <div class="arch-layer">
+              <div class="arch-layer-title"><span>4. Admin &amp; Analytics</span><span>BI Pipeline</span></div>
+              <div class="arch-node">
+                <strong>Firebase Analytics</strong>
+                <code>training_completed</code>, <code>race_completed</code>, <code>horse_retired</code> 等のイベント計測
+              </div>
+              <div class="arch-node">
+                <strong>Google BigQuery</strong>
+                Analyticsイベント＆Firestore変更ログのDWH蓄積（<code>analytics-queries.sql</code>）
+              </div>
+              <div class="arch-node">
+                <strong>Looker Studio &amp; App Admin</strong>
+                消化率・枯渇予測BIダッシュボード＋アプリ内3タブ管理画面
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 id="sec-5-2">5.2 2段階ユーザー認証モデル（匿名ゲスト利用 ➡ SSO昇格・連携解除）</h3>
+        <div class="grid-3">
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">① 初回匿名認証（登録不要）</span>
+              <span class="badge badge-green">GUEST</span>
+            </div>
+            <p>初回アクセス時に会員登録画面を出さず、LocalStorageとFirebase匿名認証を自動開始。パスワードレス運用のためパスワード漏洩リスクは原理的にゼロ。</p>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">② アカウント昇格（データ保持）</span>
+              <span class="badge badge-gold">LINK SSO</span>
+            </div>
+            <p>任意タイミングで Google または X と <code>linkWithPopup</code> で連携。既存の調教履歴・愛馬・殿堂入りを100%維持したまま昇格。既存連携済アカウント検出時は <code>signInWithCredential</code> でポップアップブロックを回避。</p>
+          </div>
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <span class="sub-card-title">③ 連携解除 &amp; 論理削除退会</span>
+              <span class="badge badge-navy">UNLINK / SOFT DELETE</span>
+            </div>
+            <p><code>unlink</code> によるプロバイダ切り替え（<code>reload</code> + <code>getIdToken(true)</code> で即時リフレッシュ）に対応。退会時は物理削除せず <code>isDeleted: true</code> の論理削除とし、誤操作時の管理者復元と統計保全を両立。</p>
+          </div>
+        </div>
+
+        <h3 id="sec-5-3">5.3 Cloud Firestore データベース設計 &amp; マルチデバイス同期</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>コレクションパス</th>
+                <th>アクセス権限（<code>firestore.rules</code>）</th>
+                <th>主な格納データ・用途</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>users/{uid}</code></td>
+                <td>本人（<code>request.auth.uid == uid</code>）または管理者のみ読み書き可（<code>carrotCount &lt;= 3</code>, <code>learnedCount &lt;= 1000</code> 等の検証付）</td>
+                <td>基本認証属性、退会フラグ（<code>isDeleted</code>）、管理者集計用トップレベルサマリー項目（<code>learnedCount</code>, <code>progressPercent</code>, <code>streakDays</code>, <code>currentHorseName</code>, <code>totalRaceWins</code> 等）、および完全復元ペイロード <code>progressData</code>。</td>
+              </tr>
+              <tr>
+                <td><code>phrases/{phraseId}</code></td>
+                <td>全員読み取り可（<code>allow read: if true</code>）<br>管理者のみ書き込み可（<code>allow write: if isAdmin()</code>）</td>
+                <td>動的配信用の新設・改訂フレーズマスター（<code>situation</code>, <code>phrase</code>, <code>type</code>, <code>options[4]</code>, <code>explanation</code>, <code>category</code>, <code>isPublished</code>）。</td>
+              </tr>
+              <tr>
+                <td><code>admins/{adminId}</code></td>
+                <td>本人のみ読み取り可、クライアントからの書き込み全面禁止（Firebase Consoleからのみ登録）</td>
+                <td>管理者権限マスター。ソースコードやルールへのUID・メールアドレスのハードコードを排除。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ul>
+          <li><strong>リアルタイム複数端末同期（Issue #137）:</strong> ログイン連携済み端末間では Firestore の <code>onSnapshot</code> リアルタイム購読と、タブ・アプリ復帰時（<code>visibilitychange</code> / <code>focus</code>）の再購読・最新データ再取得を併用。初回クラウド同期完了前の古いローカルデータによる上書きを防止する保存ガード（<code>shouldSkipCloudSave</code>）を備えます。</li>
+        </ul>
+
+        <h3 id="sec-5-4">5.4 動的フレーズ配信（3層ハイブリッドマージ）&amp; 管理者分析基盤</h3>
+        <ul>
+          <li><strong>3層ハイブリッドフレーズ配信:</strong> 「第1層: バンドル内包静的マスター（120問・初回描画待ちゼロ）➡ 第2層: LocalStorageキャッシュ（<code>turftalk_cached_cloud_phrases_v1</code>）➡ 第3層: Firestore <code>phrases</code> 非同期フェッチ」の多層構成により、アプリ再ビルドなしで新問追加や解説改訂を即時配信。</li>
+          <li><strong>コンテンツ枯渇予測 &amp; BI分析:</strong> 未消化問題数が10問以下の「コンテンツ枯渇ユーザー」がアクティブ全体の15%を超えた際にアラートを表示し、新問題パック投入の意思決定を支援。</li>
+        </ul>
+      </section>
+
+      <!-- 6. Non-Functional Requirements -->
+      <section id="sec-6" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">06</span>
+          <div>
+            <span class="section-en">Non-Functional Requirements &amp; Quality Standards</span>
+            <h2 class="section-title">非機能要件 &amp; 品質基準サマリー</h2>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>領域</th>
+                <th>要件・目標基準</th>
+                <th>具体的な実装・担保メカニズム</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. 性能要件</strong><br><small>Performance / CWV</small></td>
+                <td>FCP / LCP ネットワーク待ちゼロ<br>INP タップ即時応答<br>CLS レイアウトシフト極小化</td>
+                <td>静的マスター120問のバンドル内包による即時描画、Firestoreのバックグラウンド非同期同期、Web Audio API効果音のローカル即時再生、ヘッダー・プログレスバーの <code>sticky</code> 固定と画像アスペクト比確保。</td>
+              </tr>
+              <tr>
+                <td><strong>2. オフライン &amp; PWA</strong><br><small>Offline-First</small></td>
+                <td>混雑した競馬場や地下鉄等のオフライン環境でも全機能が完全動作すること</td>
+                <td>Workbox Service Worker による全静的ファイル・馬イラスト・背景・フォントのプリキャッシュ。Apple Touch Icon、フルブリード maskable PWAアイコン（192/512px）、Android追加バナー＆iOS Safari手順案内モーダルを搭載。</td>
+              </tr>
+              <tr>
+                <td><strong>3. モバイルUX</strong><br><small>Responsive UX</small></td>
+                <td>375px〜412px幅の片手操作で横スクロールや押し間違えが発生しないこと</td>
+                <td><code>max-w-md</code> モバイルファースト設計、4択ボタン縦幅58px以上確保、画面遷移・問題進行時の自動最上部スクロールリセット（<code>scrollToTop</code>）、ヘッダーからのワンタップ消音（ミュート）切替。</td>
+              </tr>
+              <tr>
+                <td><strong>4. アクセシビリティ</strong><br><small>Accessibility (a11y)</small></td>
+                <td>200%拡大ズーム対応、キーボード操作対応、色覚多様性・モーション配慮</td>
+                <td><code>user-scalable=no</code> 禁止、正誤や状態のアイコン（⭕/❌）＋テキスト併用、全モーダルの <code>Escape</code> キー閉じる操作・ARIA属性整備、<code>prefers-reduced-motion</code> 環境でのアニメーション抑制。</td>
+              </tr>
+              <tr>
+                <td><strong>5. セキュリティ</strong><br><small>Security &amp; Integrity</small></td>
+                <td>XSS防止、クライアント改ざん抑止、秘密情報保護、公式団体との非関連明記</td>
+                <td>愛馬名入力のNFKC正規化・ホワイトリスト検証、<code>dangerouslySetInnerHTML</code> 禁止、Firestoreルール＋App Check＋クラウド正本リコンサイル、非公式ファンサービス免責・非賭博明記。</td>
+              </tr>
+              <tr>
+                <td><strong>6. 運用コスト &amp; CI/CD</strong><br><small>Cost &amp; Operations</small></td>
+                <td>MAU 5,000人規模まで月額0円〜極小コスト（無料枠内）での安定運用</td>
+                <td>1問ごとではなく「調教完了時」「レース完了時」に集約してFirestoreへ書き込む最適化。変更時は <code>npm run lint</code> (oxlint)、<code>npm test</code>、<code>npm run build</code> の全パスを必須化。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 7. Roadmap & Document Index -->
+      <section id="sec-7" class="section-card">
+        <div class="section-header">
+          <span class="cloth-badge">07</span>
+          <div>
+            <span class="section-en">Roadmap &amp; Single Source of Truth Index</span>
+            <h2 class="section-title">ロードマップ達成状況 &amp; 正本ドキュメント索引</h2>
+          </div>
+        </div>
+
+        <h3>7.1 フェーズ別マイルストーン達成状況</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>フェーズ</th>
+                <th>対象バージョン</th>
+                <th>テーマ</th>
+                <th>状態</th>
+                <th>主要達成スコープ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Phase 1</strong></td>
+                <td><code>v0.1.0</code> (Alpha)</td>
+                <td>MVP（最小検証版）</td>
+                <td><span class="badge badge-green">完了</span></td>
+                <td>平日調教モード（1日3問・4択シャッフル）、初期30問マスター、正誤演出・Web Audio SE・調教済スタンプ、LocalStorage永続化、午前4時論理日付更新。</td>
+              </tr>
+              <tr>
+                <td><strong>Phase 2</strong></td>
+                <td><code>v0.5.0</code> (Beta)</td>
+                <td>Core Loop（サイクルの確立）</td>
+                <td><span class="badge badge-green">完了</span></td>
+                <td>週末レース（土日限定5問）、7日制調教＆余力ヒント、にんじんストリーク救済、追加トレーニング、4週間キャリアサイクル（8毛色・8大路線・引退式）、ウッドチップ調教＆全120問化、ハイブリッドレース出題、馬イラスト＆背景透過合成、競馬プログラム風UI刷新。</td>
+              </tr>
+              <tr>
+                <td><strong>Phase 3</strong></td>
+                <td><code>v1.0.0</code> (Release)</td>
+                <td>Official Release（実用ツール完成）</td>
+                <td><span class="badge badge-green">完了</span></td>
+                <td>殿堂入りギャラリー（額装ポートレート・Canvas記念カード保存）、3カ国アクセント英語音声読み上げ（TTS）、フレーズ図鑑、5ステップヘルプガイド＆初回オンボーディング、PWAオフライン対応、OGP＆Xシェア機能、利用規約・プライバシーポリシー・お問合せモーダル。</td>
+              </tr>
+              <tr>
+                <td><strong>Phase 4</strong></td>
+                <td><code>v0.25.0</code>〜<code>v1.1.4</code></td>
+                <td>Cloud Backend &amp; Admin Platform</td>
+                <td><span class="badge badge-green">完了</span></td>
+                <td>Firebase Hosting &amp; GitHub Actions自動デプロイ、匿名認証＆Google/X SSO昇格・連携解除、Firestoreリアルタイム複数端末同期、フレーズ動的クラウド配信、BigQuery×Looker Studio分析基盤、アプリ内管理者ダッシュボード、Firestore Rules &amp; App Check。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.2 リポジトリ内 正本ドキュメント（Single Source of Truth）一覧</h3>
+        <p>
+          詳細なデータスキーマ定義、SQLクエリ、カラーパレット座標等の実装仕様は、以下の各 Markdown 正本ドキュメントを参照してください。
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ドキュメントパス</th>
+                <th>役割・収録内容</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="./VISION_AND_REQUIREMENTS.md"><code>docs/VISION_AND_REQUIREMENTS.md</code></a></td>
+                <td>プロダクトビジョン・要求定義書（ペルソナ、ユーザーストーリー、11大コア機能要件の正本）</td>
+              </tr>
+              <tr>
+                <td><a href="./ROADMAP.md"><code>docs/ROADMAP.md</code></a></td>
+                <td>ロードマップ＆イテレーション計画（Phase 1〜Phase 4 のスコープおよび完了判定基準）</td>
+              </tr>
+              <tr>
+                <td><a href="./non-functional-requirements.md"><code>docs/non-functional-requirements.md</code></a></td>
+                <td>非機能要件・品質基準（性能指標、PWAオフライン、モバイルUX、アクセシビリティ、セキュリティ、運用）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/phrase-schema.md"><code>docs/specs/phrase-schema.md</code></a></td>
+                <td>フレーズデータ仕様書（TypeScript型定義、全120問カテゴリ内訳、出題ローテーション、3層動的マージ仕様）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/horse-career-cycle.md"><code>docs/specs/horse-career-cycle.md</code></a></td>
+                <td>競走馬キャリアサイクル仕様書（馬名生成・検証、8毛色抽選、8大路線定義、引退式二つ名、世代継承モデル）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/horse-visual-assets.md"><code>docs/specs/horse-visual-assets.md</code></a></td>
+                <td>競走馬ビジュアル・イラスト素材仕様書（全6シーン構成、3点座標ロック、閉領域透過シード、全8毛色RGBパレット）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/wireframe.md"><code>docs/specs/wireframe.md</code></a></td>
+                <td>画面ワイヤーフレーム＆UI設計書（全画面一覧、ユーザーフロー、ASCIIワイヤーフレーム）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/backend-architecture.md"><code>docs/specs/backend-architecture.md</code></a></td>
+                <td>バックエンド・クラウドアーキテクチャ仕様書（Firebase Auth/Firestore/Rules/App Check、BigQuery/Looker Studio）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/analytics-queries.sql"><code>docs/specs/analytics-queries.sql</code></a></td>
+                <td>Looker Studio 連携用 BigQuery 標準分析 SQL クエリ集（消化率分布、枯渇予測、正答率分析、リテンション）</td>
+              </tr>
+              <tr>
+                <td><a href="./specs/firebase-setup-guide.md"><code>docs/specs/firebase-setup-guide.md</code></a></td>
+                <td>Firebase 初期設定・デプロイガイド（プロジェクト作成、Auth/Firestore設定、GitHub Secrets登録手順）</td>
+              </tr>
+              <tr>
+                <td><a href="./CHANGELOG.md"><code>docs/CHANGELOG.md</code></a></td>
+                <td>変更履歴・リリースノート（v0.1.0 〜 v1.1.4 までの全機能追加・改善・不具合修正履歴）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p><strong>TurfTalk Product Requirements &amp; System Specification Document (HTML Edition)</strong> — Version <code>v1.1.4</code></p>
+    <p>本サービスは個人で開発・運営している非公式の英語学習ファンサービスであり、JRA・NAR・海外競馬統括機関等の公式団体とは一切関係ありません。</p>
+  </footer>
+
+</body>
+</html>
