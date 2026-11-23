@@ -57,6 +57,7 @@ npm run build
 詳細な仕様・設計書は `docs/` 配下で管理されています（詳細は [`AGENTS.md`](./AGENTS.md) を参照）：
 
 - [`docs/VISION_AND_REQUIREMENTS.md`](./docs/VISION_AND_REQUIREMENTS.md): プロダクトビジョン・要求定義
+- [`docs/PRD.html`](./docs/PRD.html): プロダクト要求・システム仕様書（人間向け統合HTML版）
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md): ロードマップ・フェーズ計画
 - [`docs/non-functional-requirements.md`](./docs/non-functional-requirements.md): 非機能要件・品質基準
 - [`docs/specs/phrase-schema.md`](./docs/specs/phrase-schema.md): フレーズマスタースキーマ・データ作成原則
